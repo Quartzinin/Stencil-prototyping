@@ -27,37 +27,46 @@ void sevenPointStencil_single_iter(
 
     // in this algorithm we do not write to the edges of the matrix
 
-    TILE[0][threadIdx.y][threadIdx.x] = A[lidz+lidy*nz+0*total];
+    if (lidz < nz && lidy < ny)
+    {
+        TILE[0][threadIdx.y][threadIdx.x] = A[lidz+lidy*nz+0*total];
+    }
 
     __syncthreads();
 
     // for small y and z we should tune the schedule to utilize the parallelism of the x-axis
     for (int i = 0; i < nx; ++i)
     {
-        TILE[(i+1) % 3][threadIdx.y][threadIdx.x] = A[lidz+lidy*nz+(i+1)*total];
-        __syncthreads();
-    
-        const float mid = TILE[i % 3][threadIdx.y][threadIdx.x];
-        float res;
-        if (i == 0 || i == nx-1 || lidy == 0 || lidy == ny-1 || lidz == 0 || lidz == nz-1)
+        if (lidz < nz && lidy < ny)
         {
-            res = mid;
+            TILE[(i+1) % 3][threadIdx.y][threadIdx.x] = A[lidz+lidy*nz+(i+1)*total];
         }
-        else {
-            const float left_z  = (threadIdx.x == 0) ? A[(lidz-1) + lidy*nz+i*total]
-                			            : TILE[i % 3][threadIdx.y][threadIdx.x-1];
-            const float right_z = (threadIdx.x == T-1) ? A[(lidz+1) + lidy*nz+i*total]
-                			               : TILE[i % 3][threadIdx.y][threadIdx.x+1];
-            const float left_y  = (threadIdx.y == 0) ? A[lidz + (lidy-1)*nz+i*total]
-                			             : TILE[i % 3][threadIdx.y-1][threadIdx.x];
-            const float right_y = (threadIdx.y == T-1) ? A[lidz + (lidy+1)*nz+i*total]
-                			               : TILE[i % 3][threadIdx.y+1][threadIdx.x];
-            const float left_x  = TILE[(i-1) % 3][threadIdx.y][threadIdx.x];
-            const float right_x = TILE[(i+1) % 3][threadIdx.y][threadIdx.x];
+        __syncthreads();
+        
+        if (lidz < nz && lidy < ny)
+        {
+            const float mid = TILE[i % 3][threadIdx.y][threadIdx.x];
+            float res;
+            if (i == 0 || i == nx-1 || lidy == 0 || lidy == ny-1 || lidz == 0 || lidz == nz-1)
+            {
+                res = mid;
+            }
+            else {
+                const float left_z  = (threadIdx.x == 0) ? A[(lidz-1) + lidy*nz+i*total]
+                    			            : TILE[i % 3][threadIdx.y][threadIdx.x-1];
+                const float right_z = (threadIdx.x == T-1) ? A[(lidz+1) + lidy*nz+i*total]
+                    			               : TILE[i % 3][threadIdx.y][threadIdx.x+1];
+                const float left_y  = (threadIdx.y == 0) ? A[lidz + (lidy-1)*nz+i*total]
+                    			             : TILE[i % 3][threadIdx.y-1][threadIdx.x];
+                const float right_y = (threadIdx.y == T-1) ? A[lidz + (lidy+1)*nz+i*total]
+                    			               : TILE[i % 3][threadIdx.y+1][threadIdx.x];
+                const float left_x  = TILE[(i-1) % 3][threadIdx.y][threadIdx.x];
+                const float right_x = TILE[(i+1) % 3][threadIdx.y][threadIdx.x];
 
-            res = left_z + right_z + left_y + right_y + left_x + right_x * c1 + mid * c0;
+                res = left_z + right_z + left_y + right_y + left_x + right_x * c1 + mid * c0;
+            }
+            out[lidz+lidy*nz+i*total] = res;
         }
-        out[lidz+lidy*nz+i*total] = res;
     }
 
 }

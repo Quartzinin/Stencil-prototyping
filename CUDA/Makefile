@@ -1,34 +1,25 @@
-CXX        = nvcc -arch=compute_35
-LIB        = -L$(OPENCL_LIBDIR) -lOpenCL
-CXXFLAGS   = -O3 -DWITH_FLOATS=0 -D_FORCE_INLINES -Xcompiler -fopenmp
+CXX        = nvcc -O3 -arch=compute_35 -D_FORCE_INLINES -Wno-deprecated-gpu-targets
 
-INCLUDES    += -I ../include
-GPU_OPTS   = -D lgWARP=5
-
-SOURCES_CPP =stencil.cpp
-HELPERS     =/include/Constants.h /include/ParseInput.h /include/ParserC.h /include/OpenmpUtil.h kernels.h
+SRC = stencil.cu
+SOURCES_CPP =stencil.cu
+HELPERS     =kernels.h
 OBJECTS     =stencil.o kernels.o
 EXECUTABLE  =runproject
-SOURCES_CU  =kernels.h
 
-default: cpu
+default: compile run
 
-kernels.o: $(SOURCES_CU)
-	$(CXX) -c $(CXXFLAGS) $(INCLUDES) kernels.h
+.o: $(SOURCES_CPP) $(HELPERS)
+	$(CXX) -c $@ $<
 
-
-.cpp.o: $(SOURCES_CPP) $(HELPERS)
-	$(CXX) $(CXXFLAGS) $(GPU_OPTS) $(INCLUDES) -c -o $@ $<
+compile: $(EXECUTABLE)
 
 
-cpu: $(EXECUTABLE)
-$(EXECUTABLE): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(EXECUTABLE) $(OBJECTS)
+$(EXECUTABLE): $(SRC) $(HELPERS)
+	$(CXX) -o $(EXECUTABLE) $(SRC)
 
 
-run_small: $(EXECUTABLE)
-	cat ../Data/Small/input.data ../Data/Small/output.data | ./$(EXECUTABLE) 2> Debug.txt
-
+run: $(EXECUTABLE) 
+	./$(EXECUTABLE)
 
 clean:
 	rm -f Debug.txt $(EXECUTABLE) $(OBJECTS)

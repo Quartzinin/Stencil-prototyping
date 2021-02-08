@@ -44,8 +44,8 @@ void sevenPointStencil(
         )
 {
     const int T = 32;
-    const int dimx = (nz + T-1)/T;
-    const int dimy = (ny + T-1)/T;
+    const int dimx = (nz + (T-1))/T;
+    const int dimy = (ny + (T-1))/T;
     dim3 block(T,T,1);
     dim3 grid(dimx, dimy, nx);
 
@@ -67,8 +67,8 @@ int main()
     struct timeval t_startpar, t_endpar, t_diffpar;
     int RUNS = 10;
 
-    const unsigned nx = 1000;
-    const unsigned ny = 1000;
+    const unsigned nx = 100;
+    const unsigned ny = 100;
     const unsigned nz = 1000;
     const unsigned iterations = 5;
 
@@ -101,6 +101,7 @@ int main()
         for(unsigned x = 0; x < RUNS; x++){
             sevenPointStencil(gpu_array3d, gpu_array3d_2, nx, ny, nz, iterations);
         }
+        CUDASSERT(cudaDeviceSynchronize());
 
         gettimeofday(&t_endpar, NULL);
         timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
