@@ -1,4 +1,4 @@
-CXX        = nvcc -O3 -arch=compute_35 -D_FORCE_INLINES -Wno-deprecated-gpu-targets
+CXX        = nvcc -O3 
 
 SRC = stencil.cu
 SOURCES_CPP =stencil.cu
