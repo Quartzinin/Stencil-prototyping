@@ -5,7 +5,7 @@
 
 template <int T>
 __global__
-void sevenPointStencil_single_iter(
+void sevenPointStencil_single_iter_tiled_sliding(
         const float* A,
         float * out,
         const unsigned nx,
@@ -37,7 +37,7 @@ void sevenPointStencil_single_iter(
     // for small y and z we should tune the schedule to utilize the parallelism of the x-axis
     for (int i = 0; i < nx; ++i)
     {
-        if (lidz < nz && lidy < ny)
+        if (lidz < nz && lidy < ny && i + 1 < nx)
         {
             TILE[(i+1) % 3][threadIdx.y][threadIdx.x] = A[lidz+lidy*nz+(i+1)*total];
         }
@@ -72,11 +72,53 @@ void sevenPointStencil_single_iter(
 }
 
 
-//z yyyy z
-//y xxxx y
-//y xxxx y
-//y xxxx y
-//y xxxx y
-//z yyyy z
+template <int T>
+__global__
+void sevenPointStencil_single_iter(
+        const float* A,
+        float * out,
+        const unsigned nx,
+        const unsigned ny,
+        const unsigned nz
+        )
+{
+    const float c0 = 1.0/6.0;
+    const float c1 = 1.0/6.0/6.0;
+
+    const unsigned lidz = blockIdx.x*blockDim.x + threadIdx.x;
+    const unsigned lidy = blockIdx.y*blockDim.y + threadIdx.y;
+    const unsigned total = ny*nz;
+
+    //should current tile read from something 32 x 32, or write to something 32 x 32
+    //write something 32x32 by adding extra reads.!!!
+
+    // in this algorithm we do not write to the edges of the matrix
+
+    // for small y and z we should tune the schedule to utilize the parallelism of the x-axis
+    for (int i = 0; i < nx; ++i)
+    {   
+        if (lidz < nz && lidy < ny)
+        {
+            const float mid = A[lidz+lidy*nz+i*total];
+            float res;
+            if (i == 0 || i == nx-1 || lidy == 0 || lidy == ny-1 || lidz == 0 || lidz == nz-1)
+            {
+                res = mid;
+            }
+            else {
+                const float left_z  = A[(lidz-1) + lidy*nz+i*total];
+                const float right_z = A[(lidz+1) + lidy*nz+i*total];
+                const float left_y  = A[lidz + (lidy-1)*nz+i*total];
+                const float right_y = A[lidz + (lidy+1)*nz+i*total];
+                const float left_x  = A[lidz + lidy*nz+(i-1)*total];
+                const float right_x = A[lidz + lidy*nz+(i+1)*total];
+
+                res = left_z + right_z + left_y + right_y + left_x + right_x * c1 + mid * c0;
+            }
+            out[lidz+lidy*nz+i*total] = res;
+        }
+    }
+
+}
 
 #endif
