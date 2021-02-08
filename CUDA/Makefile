@@ -6,15 +6,15 @@ INCLUDES    += -I ../include
 GPU_OPTS   = -D lgWARP=5
 
 SOURCES_CPP =stencil.cpp
-HELPERS     =/include/Constants.h /include/ParseInput.h /include/ParserC.h /include/OpenmpUtil.h
+HELPERS     =/include/Constants.h /include/ParseInput.h /include/ParserC.h /include/OpenmpUtil.h kernels.h
 OBJECTS     =stencil.o kernels.o
 EXECUTABLE  =runproject
-SOURCES_CU  =kernels.cu
+SOURCES_CU  =kernels.h
 
 default: cpu
 
 kernels.o: $(SOURCES_CU)
-	nvcc -c $(CXXFLAGS) -arch=compute_35 $(INCLUDES) kernels.cu
+	$(CXX) -c $(CXXFLAGS) $(INCLUDES) kernels.h
 
 
 .cpp.o: $(SOURCES_CPP) $(HELPERS)
