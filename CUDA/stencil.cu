@@ -136,26 +136,26 @@ int main()
     struct timeval t_startpar, t_endpar, t_diffpar;
     int RUNS = 100;
 
-    const unsigned nx = 1000;
-    const unsigned ny = 1000;
-    const unsigned nz = 3;
-    const unsigned iterations = 30; // must be an even number
-
-    const unsigned total_size = nx*ny*nz;
-
-    float* array3d_s = (float*)malloc(total_size*sizeof(float));
-    float* array3d_ts = (float*)malloc(total_size*sizeof(float));
-    float* array3d_tsr = (float*)malloc(total_size*sizeof(float));
-
-    float* gpu_array3d;
-    float* gpu_array3d_2;
-
-    CUDASSERT(cudaMalloc((void **) &gpu_array3d, 2*nx*ny*nz*sizeof(float)));
-    gpu_array3d_2 = &(gpu_array3d[nx*ny*nz]);
-    const float et_godt_primtal = 7.0;
-
-    CUDASSERT(cudaMemset(gpu_array3d, et_godt_primtal, nx*ny*nz*sizeof(float)));
-    CUDASSERT(cudaMemset(gpu_array3d_2, et_godt_primtal, nx*ny*nz*sizeof(float)));
+//    const unsigned nx = 1000;
+//    const unsigned ny = 1000;
+//    const unsigned nz = 3;
+//    const unsigned iterations = 30; // must be an even number
+//
+//    const unsigned total_size = nx*ny*nz;
+//
+//    float* array3d_s = (float*)malloc(total_size*sizeof(float));
+//    float* array3d_ts = (float*)malloc(total_size*sizeof(float));
+//    float* array3d_tsr = (float*)malloc(total_size*sizeof(float));
+//
+//    float* gpu_array3d;
+//    float* gpu_array3d_2;
+//
+//    CUDASSERT(cudaMalloc((void **) &gpu_array3d, 2*nx*ny*nz*sizeof(float)));
+//    gpu_array3d_2 = &(gpu_array3d[nx*ny*nz]);
+//    const float et_godt_primtal = 7.0;
+//
+//    CUDASSERT(cudaMemset(gpu_array3d, et_godt_primtal, nx*ny*nz*sizeof(float)));
+//    CUDASSERT(cudaMemset(gpu_array3d_2, et_godt_primtal, nx*ny*nz*sizeof(float)));
 
 /*
     {
@@ -225,24 +225,20 @@ int main()
 */
     CUDASSERT(cudaDeviceSynchronize());
     {
-        const int len = 100;
-        //int* arr_in  = (int*)malloc(len*sizeof(int));
-        int* arr_out = (int*)malloc(len*sizeof(int));
-        const int a_number = 7;
+        const int len = 1000000;
+        const int mem_size = len*sizeof(int);
+        int* arr_in  = (int*)malloc(mem_size);
+        int* arr_out = (int*)malloc(mem_size);
+        for(int i=0; i<len; i++){ arr_in[i] = 7; }
 
         int* gpu_array_in;
         int* gpu_array_out;
         CUDASSERT(cudaMalloc((void **) &gpu_array_in, len*sizeof(int)));
         CUDASSERT(cudaMalloc((void **) &gpu_array_out, len*sizeof(int)));
-        
-        CUDASSERT(cudaMemset(gpu_array_in, 7, len*sizeof(int)));
 
+        CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));
         CUDASSERT(cudaDeviceSynchronize());
         cout << "## Benchmark GPU 1d global-mem ##" << endl;
-
-        CUDASSERT(cudaMemcpy(arr_out, gpu_array_in, len*sizeof(int), cudaMemcpyDeviceToHost));
-        CUDASSERT(cudaDeviceSynchronize());
-        printf("%d\n", arr_out[10]);
 
         gettimeofday(&t_startpar, NULL);
 
@@ -258,21 +254,21 @@ int main()
         unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
         elapsed /= RUNS;
         printf("    mean elapsed time was: %lu microseconds\n", elapsed);
+        printf("%d %d %d\n", arr_out[0], arr_out[10], arr_out[len-1]);
 
-        printf("%d\n", arr_out[10]);
-
+        free(arr_in);
         free(arr_out);
         cudaFree(gpu_array_in);
         cudaFree(gpu_array_out);
     }
 
 
-    free(array3d_s);
-    free(array3d_ts);
-    free(array3d_tsr);
-
-    cudaFree(gpu_array3d);
-    cudaFree(gpu_array3d_2);
+//    free(array3d_s);
+//    free(array3d_ts);
+//    free(array3d_tsr);
+//
+//    cudaFree(gpu_array3d);
+//    cudaFree(gpu_array3d_2);
 
     return 0;
 }

@@ -43,8 +43,12 @@ void breathFirst(
     if (gid < nx)
     {
         const unsigned li = (gid <= W) ? 0 : gid - W;
+        const unsigned lli = (gid <= 2*W) ? 0 : gid - 2*W;
+        const unsigned llli = (gid <= 3*W) ? 0 : gid - 3*W;
         const unsigned hi = ((nx - W) <= gid) ? nx - 1 : gid + W;
-        out[gid] = A[li] + A[gid] + A[hi];
+        const unsigned hhi = ((nx - 2*W) <= gid) ? nx - 1 : gid + 2*W;
+        const unsigned hhhi = ((nx - 3*W) <= gid) ? nx - 1 : gid + 3*W;
+        out[gid] = A[llli] + A[lli] + A[li] + A[gid] + A[hi] + A[hhi] + A[hhhi];
     }
 }
 
