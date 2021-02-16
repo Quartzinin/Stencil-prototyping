@@ -225,19 +225,24 @@ int main()
 */
     CUDASSERT(cudaDeviceSynchronize());
     {
-        const int len = 10000000;
+        const int len = 100;
         //int* arr_in  = (int*)malloc(len*sizeof(int));
         int* arr_out = (int*)malloc(len*sizeof(int));
         const int a_number = 7;
 
         int* gpu_array_in;
         int* gpu_array_out;
-        CUDASSERT(cudaMalloc((void **) &gpu_array_in, 2*len*sizeof(int)));
-        gpu_array_out = &(gpu_array_in[len]);
-        CUDASSERT(cudaMemset(gpu_array_in, a_number, 2*len*sizeof(float)));
+        CUDASSERT(cudaMalloc((void **) &gpu_array_in, len*sizeof(int)));
+        CUDASSERT(cudaMalloc((void **) &gpu_array_out, len*sizeof(int)));
+        
+        CUDASSERT(cudaMemset(gpu_array_in, 7, len*sizeof(int)));
 
         CUDASSERT(cudaDeviceSynchronize());
         cout << "## Benchmark GPU 1d global-mem ##" << endl;
+
+        CUDASSERT(cudaMemcpy(arr_out, gpu_array_in, len*sizeof(int), cudaMemcpyDeviceToHost));
+        CUDASSERT(cudaDeviceSynchronize());
+        printf("%d\n", arr_out[10]);
 
         gettimeofday(&t_startpar, NULL);
 
@@ -247,12 +252,14 @@ int main()
 
         CUDASSERT(cudaDeviceSynchronize());
         gettimeofday(&t_endpar, NULL);
-	CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, len*sizeof(float), cudaMemcpyDeviceToHost))
-
+		CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, len*sizeof(int), cudaMemcpyDeviceToHost));
+        CUDASSERT(cudaDeviceSynchronize());
         timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
         unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
         elapsed /= RUNS;
         printf("    mean elapsed time was: %lu microseconds\n", elapsed);
+
+        printf("%d\n", arr_out[10]);
 
         free(arr_out);
         cudaFree(gpu_array_in);
