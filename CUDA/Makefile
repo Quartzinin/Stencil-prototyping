@@ -1,20 +1,18 @@
 CXX        = nvcc -O3 
 
-SRC = stencil.cu
-SOURCES_CPP =stencil.cu
-HELPERS     =kernels.h
+SRC = stencil.cu kernels.cu
 OBJECTS     =stencil.o kernels.o
 EXECUTABLE  =runproject
 
 default: compile run
 
-.o: $(SOURCES_CPP) $(HELPERS)
+.o: $(SRC)
 	$(CXX) -c $@ $<
 
 compile: $(EXECUTABLE)
 
 
-$(EXECUTABLE): $(SRC) $(HELPERS)
+$(EXECUTABLE): $(SRC) 
 	$(CXX) -o $(EXECUTABLE) $(SRC)
 
 
