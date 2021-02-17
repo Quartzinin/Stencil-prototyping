@@ -1,5 +1,6 @@
 #include <cuda_runtime.h>
 
+/*
 __global__
 void sevenPointStencil_single_iter_tiled_sliding(
         const float* A,
@@ -172,4 +173,5 @@ void sevenPointStencil_single_iter(
     }
 
 }
+*/
 

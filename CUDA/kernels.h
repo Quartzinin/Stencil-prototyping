@@ -3,6 +3,7 @@
 
 #include <cuda_runtime.h>
 
+/*
 __global__
 void sevenPointStencil_single_iter_tiled_sliding(
         const float* A,
@@ -29,7 +30,9 @@ void sevenPointStencil_single_iter(
         const unsigned ny,
         const unsigned nz
         );
+*/
 
+/*
 template<int W>
 __global__
 void breathFirst(
@@ -51,6 +54,7 @@ void breathFirst(
         out[gid] = A[llli] + A[lli] + A[li] + A[gid] + A[hi] + A[hhi] + A[hhhi];
     }
 }
+*/
 
 
 template<int W>
@@ -88,21 +92,22 @@ void breathFirst_generic1d(
 //sacrifice potential parallelism, to ensure that all threads are doing work
 template<int W, int T>
 __global__
-void tiled_generic1d(
+void big_tiled_generic1d(
     const int* A,
     int* out,
     const unsigned nx
     )
 {
     const int gid = blockIdx.x*blockDim.x + threadIdx.x;
-    __shared__ int sum[2*W + T];
+    const int shared_size = 2*W+T;
+    __shared__ int sum[shared_size];
 
     int varIdx = threadIdx.x;
     const int end = nx - 1;
 
-    for (int i = gid-W; i < nx; i+=blockDim.x)
+    for (int i = gid-W; i < gid+W; i+=blockDim.x)
     {
-        if (varIdx < 2*W + T)
+        if (varIdx < shared_size)
         {
             if (i < 0)
             {
@@ -112,25 +117,26 @@ void tiled_generic1d(
             {
                 sum[varIdx] = A[end];
             }
-            else 
+            else
             {
                sum[varIdx] = A[i];
             }
             varIdx += blockDim.x;
         }
     }
-
-    int* pointer = &(sum[threadIdx.x]);
     __syncthreads();
+
+    const int* pointer = &(sum[threadIdx.x]);
+    const int w2 = 2*W;
     if (gid < nx)
     {
         int sum_acc = 0;
         //function
-        for (int i = 0; i < 2*W; ++i)
+        for (int i = 0; i < w2; ++i)
         {
             sum_acc += pointer[i];
         }
-        int lambda_res = sum_acc/(2*W);
+        int lambda_res = sum_acc/w2;
         //lambda_res
         out[gid] = lambda_res;
     }
@@ -184,7 +190,7 @@ void outOfSharedtiled_generic1d(
     if (gid < nx)
     {
         int sum_acc = 0;
-        
+
         for (int i = 0; i < 2*W; ++i)
         {
             int val;
@@ -218,34 +224,28 @@ void inSharedtiled_generic1d(
     const unsigned nx
     )
 {
-    const int gid = blockIdx.x*blockDim.x + threadIdx.x;
-    const int offset = blockDim.x*blockIdx.x;
+    const int w2 = 2*W;
+    const int offset = (blockDim.x-w2)*blockIdx.x;
+    const int gid = offset + threadIdx.x - W;
+    const int max_ix = nx - 1;
 
-    const int start = gid - W;
     __shared__ int tile[T];
-    if (gid < nx)
+    //if (0 <= gid && gid < nx)
     {
-        tile[threadIdx.x] = A[gid];
+        tile[threadIdx.x] = A[max(0,min(max_ix,gid))];
     }
     __syncthreads();
 
-    if (gid < nx && threadIdx.x >= W && threadIdx.x < T-W)
+    const int* tile_p = &(tile[threadIdx.x - W]);
+    if ((0 <= gid && gid < nx) && (W <= threadIdx.x && threadIdx.x < T-W))
     {
         int sum_acc = 0;
-        
-        for (int i = 0; i < 2*W; ++i)
+
+        for (int i = 0; i < w2; ++i)
         {
-            int val;
-            int Idx = start + i;
-            Idx = Idx < 0 ? 0 : Idx;
-            Idx = Idx > nx - 1 ? nx - 1 : Idx;
-
-            int temp = Idx - offset;
-            val = tile[temp];
-
-            sum_acc += val;
+            sum_acc += tile_p[i];
         }
-        int lambda_res = sum_acc/(2*W);
+        int lambda_res = sum_acc/w2;
         //lambda_res
         out[gid] = lambda_res;
     }
