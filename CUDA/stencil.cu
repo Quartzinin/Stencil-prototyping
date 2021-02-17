@@ -12,6 +12,37 @@ using std::cout;
 using std::endl;
 
 
+#define GPU_RUN(call,benchmark_name) {\
+    const int mem_size = len*sizeof(int); \
+    int* arr_in  = (int*)malloc(mem_size); \
+    int* arr_out = (int*)malloc(mem_size); \
+    for(int i=0; i<len; i++){ arr_in[i] = i+1; } \
+    int* gpu_array_in; \
+    int* gpu_array_out; \
+    CUDASSERT(cudaMalloc((void **) &gpu_array_in, len*sizeof(int))); \
+    CUDASSERT(cudaMalloc((void **) &gpu_array_out, len*sizeof(int))); \
+    CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));\
+    CUDASSERT(cudaDeviceSynchronize());\
+    cout << (benchmark_name) << endl; \
+    gettimeofday(&t_startpar, NULL); \
+    for(unsigned x = 0; x < RUNS; x++){ \
+        (call); \
+    }\
+    CUDASSERT(cudaDeviceSynchronize());\
+    gettimeofday(&t_endpar, NULL);\
+    CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, len*sizeof(int), cudaMemcpyDeviceToHost));\
+    CUDASSERT(cudaDeviceSynchronize());\
+    timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);\
+    unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;\
+    elapsed /= RUNS;\
+    printf("    mean elapsed time was: %lu microseconds\n", elapsed);\
+    printf("%d %d %d\n", arr_out[0], arr_out[10], arr_out[len-1]); \
+    free(arr_in);\
+    free(arr_out);\
+    cudaFree(gpu_array_in);\
+    cudaFree(gpu_array_out);\
+}
+
 
 static int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
@@ -34,7 +65,81 @@ static inline void cudAssert(cudaError_t exit_code,
 }
 #define CUDASSERT(exit_code) { cudAssert((exit_code), __FILE__, __LINE__); }
 
-static void sevenPointStencil(
+template<int W>
+void stencil_1d_tiled(
+    const int * start,
+    int * out,
+    const unsigned len
+    )
+{
+    const int block = 1024;
+    const int grid = (len + (block-1)) / block;
+
+    tiled_generic1d<W,block><<<grid,block>>>(start, out, len);
+    CUDASSERT(cudaDeviceSynchronize());
+}
+
+template<int W>
+void stencil_1d_global_read(
+    const int * start,
+    int * out,
+    const unsigned len
+    )
+{
+    const int block = 1024;
+    const int grid = (len + (block-1)) / block;
+
+    breathFirst_generic1d<W><<<grid,block>>>(start, out, len);
+    CUDASSERT(cudaDeviceSynchronize());
+}
+
+#define call_kernel(kernel,blocksize) {\
+    const int block = blocksize;\
+    const int grid = (len + (block-1)) / block;\
+    kernel;\
+    CUDASSERT(cudaDeviceSynchronize());\
+}
+
+int main()
+{
+    struct timeval t_startpar, t_endpar, t_diffpar;
+    const int W = 3;
+    int RUNS = 100;
+    {
+        const int len = 1000000;
+
+        GPU_RUN(call_kernel((breathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len)),1024),
+                "## Benchmark GPU 1d global-mem ##");
+        GPU_RUN(call_kernel((tiled_generic1d<W,block><<<grid,block>>>(gpu_array_in, gpu_array_out, len)),1024),
+                "## Benchmark GPU 1d tiled ##"); // best for very large W
+        GPU_RUN(call_kernel((inlinedIndexesBreathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len)),1024),
+                "## Benchmark GPU 1d inlined global read indxs ##");
+        GPU_RUN(call_kernel((outOfSharedtiled_generic1d<W,block><<<grid,block>>>(gpu_array_in, gpu_array_out, len)),1024),
+                "## Benchmark GPU 1d out of shared tiled ##"); //best for somewhat large W, but not very large
+        GPU_RUN(call_kernel((inSharedtiled_generic1d<W,block><<<grid,block>>>(gpu_array_in, gpu_array_out, len)),(1024-2*W)),
+                "## Benchmark GPU 1d in shared tiled ##"); //best for somewhat large W, but not very large
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*static void sevenPointStencil(
         float * start,
         float * swap_out,
         const unsigned nx,
@@ -114,161 +219,4 @@ static void sevenPointStencil_tiledSliding_fully(
     }
     CUDASSERT(cudaDeviceSynchronize());
 
-}
-
-template<int W>
-void stencil_1d_global_read(
-    const int * start,
-    int * out,
-    const unsigned len
-    )
-{
-    const int block = 1024;
-    const int grid = (len + (block-1)) / block;
-
-    breathFirst<W><<<grid,block>>>(start, out, len);
-    CUDASSERT(cudaDeviceSynchronize());
-}
-
-
-int main()
-{
-    struct timeval t_startpar, t_endpar, t_diffpar;
-    int RUNS = 100;
-
-//    const unsigned nx = 1000;
-//    const unsigned ny = 1000;
-//    const unsigned nz = 3;
-//    const unsigned iterations = 30; // must be an even number
-//
-//    const unsigned total_size = nx*ny*nz;
-//
-//    float* array3d_s = (float*)malloc(total_size*sizeof(float));
-//    float* array3d_ts = (float*)malloc(total_size*sizeof(float));
-//    float* array3d_tsr = (float*)malloc(total_size*sizeof(float));
-//
-//    float* gpu_array3d;
-//    float* gpu_array3d_2;
-//
-//    CUDASSERT(cudaMalloc((void **) &gpu_array3d, 2*nx*ny*nz*sizeof(float)));
-//    gpu_array3d_2 = &(gpu_array3d[nx*ny*nz]);
-//    const float et_godt_primtal = 7.0;
-//
-//    CUDASSERT(cudaMemset(gpu_array3d, et_godt_primtal, nx*ny*nz*sizeof(float)));
-//    CUDASSERT(cudaMemset(gpu_array3d_2, et_godt_primtal, nx*ny*nz*sizeof(float)));
-
-/*
-    {
-        CUDASSERT(cudaDeviceSynchronize());
-        cout << "## Benchmark GPU stupid ##" << endl;
-
-        gettimeofday(&t_startpar, NULL);
-
-        for(unsigned x = 0; x < RUNS; x++){
-            sevenPointStencil(gpu_array3d, gpu_array3d_2, nx, ny, nz, iterations);
-        }
-
-        gettimeofday(&t_endpar, NULL);
-	CUDASSERT(cudaMemcpy(array3d_s, gpu_array3d_2, nx*ny*nz*sizeof(float), cudaMemcpyDeviceToHost))
-
-        timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
-        unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
-            elapsed /= RUNS;
-        unsigned long el_sec = elapsed / 1000000;
-        unsigned long el_mil_sec = (elapsed / 1000) % 1000;
-        printf("    mean elapsed time was: %lu.%03lu seconds\n", el_sec, el_mil_sec);
-
-    }
-
-    {
-        CUDASSERT(cudaDeviceSynchronize());
-        cout << "## Benchmark GPU tiled sliding ##" << endl;
-
-        gettimeofday(&t_startpar, NULL);
-
-        for(unsigned x = 0; x < RUNS; x++){
-            sevenPointStencil_tiledSliding(gpu_array3d, gpu_array3d_2, nx, ny, nz, iterations);
-        }
-
-        gettimeofday(&t_endpar, NULL);
-	CUDASSERT(cudaMemcpy(array3d_ts, gpu_array3d_2, nx*ny*nz*sizeof(float), cudaMemcpyDeviceToHost))
-
-        timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
-        unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
-            elapsed /= RUNS;
-        unsigned long el_sec = elapsed / 1000000;
-        unsigned long el_mil_sec = (elapsed / 1000) % 1000;
-        printf("    mean elapsed time was: %lu.%03lu seconds\n", el_sec, el_mil_sec);
-
-    }
-    {
-        CUDASSERT(cudaDeviceSynchronize());
-        cout << "## Benchmark GPU fully-tiled ##" << endl;
-
-        gettimeofday(&t_startpar, NULL);
-
-        for(unsigned x = 0; x < RUNS; x++){
-            sevenPointStencil_tiledSliding_fully(gpu_array3d, gpu_array3d_2, nx, ny, nz, iterations);
-        }
-
-        gettimeofday(&t_endpar, NULL);
-	CUDASSERT(cudaMemcpy(array3d_tsr, gpu_array3d_2, nx*ny*nz*sizeof(float), cudaMemcpyDeviceToHost))
-
-        timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
-        unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
-            elapsed /= RUNS;
-        unsigned long el_sec = elapsed / 1000000;
-        unsigned long el_mil_sec = (elapsed / 1000) % 1000;
-        printf("    mean elapsed time was: %lu.%03lu seconds\n", el_sec, el_mil_sec);
-
-    }
-*/
-    CUDASSERT(cudaDeviceSynchronize());
-    {
-        const int len = 1000000;
-        const int mem_size = len*sizeof(int);
-        int* arr_in  = (int*)malloc(mem_size);
-        int* arr_out = (int*)malloc(mem_size);
-        for(int i=0; i<len; i++){ arr_in[i] = 7; }
-
-        int* gpu_array_in;
-        int* gpu_array_out;
-        CUDASSERT(cudaMalloc((void **) &gpu_array_in, len*sizeof(int)));
-        CUDASSERT(cudaMalloc((void **) &gpu_array_out, len*sizeof(int)));
-
-        CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));
-        CUDASSERT(cudaDeviceSynchronize());
-        cout << "## Benchmark GPU 1d global-mem ##" << endl;
-
-        gettimeofday(&t_startpar, NULL);
-
-        for(unsigned x = 0; x < RUNS; x++){
-            stencil_1d_global_read<10000>(gpu_array_in, gpu_array_out, len);
-        }
-
-        CUDASSERT(cudaDeviceSynchronize());
-        gettimeofday(&t_endpar, NULL);
-		CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, len*sizeof(int), cudaMemcpyDeviceToHost));
-        CUDASSERT(cudaDeviceSynchronize());
-        timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
-        unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
-        elapsed /= RUNS;
-        printf("    mean elapsed time was: %lu microseconds\n", elapsed);
-        printf("%d %d %d\n", arr_out[0], arr_out[10], arr_out[len-1]);
-
-        free(arr_in);
-        free(arr_out);
-        cudaFree(gpu_array_in);
-        cudaFree(gpu_array_out);
-    }
-
-
-//    free(array3d_s);
-//    free(array3d_ts);
-//    free(array3d_tsr);
-//
-//    cudaFree(gpu_array3d);
-//    cudaFree(gpu_array3d_2);
-
-    return 0;
-}
+}*/

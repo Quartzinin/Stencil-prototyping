@@ -12,7 +12,7 @@ default: compile run
 compile: $(EXECUTABLE)
 
 
-$(EXECUTABLE): $(SRC) 
+$(EXECUTABLE): $(SRC) kernels.h
 	$(CXX) -o $(EXECUTABLE) $(SRC)
 
 
