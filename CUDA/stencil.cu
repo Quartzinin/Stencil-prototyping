@@ -114,12 +114,15 @@ void stencil_1d_inSharedtiled(
     CUDASSERT(cudaDeviceSynchronize());\
 }
 
-int main()
+
+
+template<int W, int RUNS, int standard_block_size>
+void doTest()
 {
     struct timeval t_startpar, t_endpar, t_diffpar;
-    const int W = 3;
-    const int RUNS = 1000;
-    const int standard_block_size = 1024;
+    //const int W = w_in;
+    //const int RUNS = runs_in;
+    //const int standard_block_size = blocksize_in;
     {
         const int len = 5000000;
 
@@ -142,7 +145,11 @@ int main()
         GPU_RUN((stencil_1d_inSharedtiled<W,standard_block_size>(gpu_array_in, gpu_array_out, len)),
                 "## Benchmark GPU 1d in shared tiled ##"); //best for somewhat large W, but not very large
     }
+}
 
+int main()
+{
+    doTest<3,1000,1024>();
     return 0;
 }
 
