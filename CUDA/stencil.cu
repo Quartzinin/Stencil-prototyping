@@ -104,7 +104,7 @@ void stencil_1d_inSharedtiled(
     const unsigned len
     )
 {
-    const int working_block = block-D;
+    const int working_block = block-(D-1);
     const int grid = (D + len + (working_block-1)) / working_block;
 
     inSharedtiled_generic1d<D,block><<<grid,block>>>(start, ixs, out, len);
@@ -141,7 +141,7 @@ template<int W, int RUNS, int standard_block_size>
 void doTest()
 {
     struct timeval t_startpar, t_endpar, t_diffpar;
-    int* temp;
+    //int* temp;
 
     const int D = (2*W+1);
     const int ixs_size = D*sizeof(int);
@@ -172,10 +172,10 @@ void doTest()
                 ,"## Benchmark GPU 1d out of shared tiled ##",(void)0,(void)0);
         GPU_RUN((stencil_1d_inSharedtiled<D, standard_block_size>(gpu_array_in, gpu_ixs, gpu_array_out, len)),
                 "## Benchmark GPU 1d in shared tiled ##",(void)0,(void)0);
-        GPU_RUN((stencil_1d_global_temp<D, standard_block_size>(gpu_array_in, gpu_ixs, temp, gpu_array_out, len)),
+        /*GPU_RUN((stencil_1d_global_temp<D, standard_block_size>(gpu_array_in, gpu_ixs, temp, gpu_array_out, len)),
                 "## Benchmark GPU 1d global temp ##"
                 ,(CUDASSERT(cudaMalloc((void **) &temp, D*mem_size)))
-                ,(cudaFree(temp)));
+                ,(cudaFree(temp)));*/
     }
 
     cudaFree(gpu_ixs);
