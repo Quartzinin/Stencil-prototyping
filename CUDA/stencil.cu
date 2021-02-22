@@ -15,13 +15,12 @@ using std::endl;
 #define GPU_RUN(call,benchmark_name, preproc, destroy) {\
     const int mem_size = len*sizeof(int); \
     int* arr_in  = (int*)malloc(mem_size*2); \
-    int* arr_out = arr_in + len; /*(int*)malloc(mem_size);*/ \
+    int* arr_out = arr_in + len; \
     for(int i=0; i<len; i++){ arr_in[i] = i+1; } \
     int* gpu_array_in; \
     int* gpu_array_out; \
     CUDASSERT(cudaMalloc((void **) &gpu_array_in, 2*mem_size)); \
     gpu_array_out = gpu_array_in + len; \
-    /*CUDASSERT(cudaMalloc((void **) &gpu_array_out, mem_size));*/ \
     CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));\
     CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));\
     (preproc);\
@@ -45,9 +44,7 @@ using std::endl;
         printf("%s\n", "VALIDATED");\
     }\
     free(arr_in);\
-    /*free(arr_out);*/\
     CUDASSERT(cudaFree(gpu_array_in));\
-    /*cudaFree(gpu_array_out);*/\
     (destroy);\
 }
 
