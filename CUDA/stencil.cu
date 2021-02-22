@@ -46,7 +46,7 @@ using std::endl;
     }\
     free(arr_in);\
     /*free(arr_out);*/\
-    cudaFree(gpu_array_in);\
+    CUDASSERT(cudaFree(gpu_array_in));\
     /*cudaFree(gpu_array_out);*/\
     (destroy);\
 }
@@ -131,6 +131,19 @@ void stencil_1d_inSharedtiled(
     inSharedtiled_1d<D,block><<<grid,block>>>(start, ixs, out, len);
     CUDASSERT(cudaDeviceSynchronize());
 }
+template<int D, int block>
+void stencil_1d_inSharedtiled_const_ixs(
+    const int * start,
+    int * out,
+    const unsigned len
+    )
+{
+    const int working_block = block-(D-1);
+    const int grid = (D + len + (working_block-1)) / working_block;
+
+    inSharedtiled_1d_const_ixs<block><<<grid,block>>>(start, out, len);
+    CUDASSERT(cudaDeviceSynchronize());
+}
 
 #define call_kernel(kernel,blocksize) {\
     const int block = blocksize;\
@@ -174,45 +187,62 @@ int* run_cpu(const int* idxs, const int len)
 }
 
 
-template<int W, int RUNS, int standard_block_size>
+template<int RUNS, int standard_block_size>
 void doTest()
 {
     struct timeval t_startpar, t_endpar, t_diffpar;
 
-    const int D = (2*W+1);
+    const int D = ixs_len;
+    const int W = D / 2;
     const int ixs_size = D*sizeof(int);
-    int* ixs = (int*)malloc(ixs_size);
-    for(int i=0; i < D ; i++){ ixs[i] = i-W; } \
+    int* cpu_ixs = (int*)malloc(ixs_size);
+    for(int i=0; i < D ; i++){ cpu_ixs[i] = i-W; } \
     int* gpu_ixs;
     CUDASSERT(cudaMalloc((void **) &gpu_ixs, ixs_size));
-    CUDASSERT(cudaMemcpy(gpu_ixs, ixs, ixs_size, cudaMemcpyHostToDevice));
+    CUDASSERT(cudaMemcpy(gpu_ixs, cpu_ixs, ixs_size, cudaMemcpyHostToDevice));
+    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
 
     const int len = 5000000;
-    int* cpu_out = run_cpu<W>(ixs,len);
+    int* cpu_out = run_cpu<W>(cpu_ixs,len);
 
+    cout << "D=" << ixs_len << endl;
     {
-//        GPU_RUN(call_kernel(
-//                    (breathFirst_1d<W><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
-//                    ,standard_block_size)
-//                ,"## Benchmark GPU 1d global-mem ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
                     (big_tiled_1d<W,block><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
                 ,"## Benchmark GPU 1d big-tiled ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
+                    (big_tiled_1d_const_ixs<block><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    ,standard_block_size)
+                ,"## Benchmark GPU 1d big-tiled const ixs ##",(void)0,(void)0);
+        GPU_RUN(call_kernel(
                     (inlinedIndexes_1d<W><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
                 ,"## Benchmark GPU 1d inlined idxs with global reads ##",(void)0,(void)0);
+        GPU_RUN(call_kernel(
+                    (inlinedIndexes_1d_const_ixs<<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    ,standard_block_size)
+                ,"## Benchmark GPU 1d inlined idxs with global reads const ixs ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
                     (threadLocalArr_1d<W><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
                 ,"## Benchmark GPU 1d local temp-array ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
+                    (threadLocalArr_1d_const_ixs<<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    ,standard_block_size)
+                ,"## Benchmark GPU 1d local temp-array const ixs ##",(void)0,(void)0);
+        GPU_RUN(call_kernel(
                     (outOfSharedtiled_1d<W,block><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
                 ,"## Benchmark GPU 1d out of shared tiled ##",(void)0,(void)0);
+        GPU_RUN(call_kernel(
+                    (outOfSharedtiled_1d_const_ixs<block><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    ,standard_block_size)
+                ,"## Benchmark GPU 1d out of shared tiled const ixs ##",(void)0,(void)0);
         GPU_RUN((stencil_1d_inSharedtiled<D, standard_block_size>(gpu_array_in, gpu_ixs, gpu_array_out, len)),
                 "## Benchmark GPU 1d in shared tiled ##",(void)0,(void)0);
+        GPU_RUN((stencil_1d_inSharedtiled_const_ixs<D, standard_block_size>(gpu_array_in, gpu_array_out, len)),
+                "## Benchmark GPU 1d in shared tiled const ixs ##",(void)0,(void)0);
         /*GPU_RUN((stencil_1d_global_temp<D, standard_block_size>(gpu_array_in, gpu_ixs, temp, gpu_array_out, len)),
                 "## Benchmark GPU 1d global temp ##"
                 ,(CUDASSERT(cudaMalloc((void **) &temp, D*mem_size)))
@@ -221,12 +251,12 @@ void doTest()
 
     free(cpu_out);
     cudaFree(gpu_ixs);
-    free(ixs);
+    free(cpu_ixs);
 }
 
 int main()
 {
-    doTest<5,1000,1024>();
+    doTest<100,1024>();
     return 0;
 }
 
