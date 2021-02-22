@@ -5,7 +5,7 @@
 
 #define BOUND_2D(i,j,max_ix,max_jx) (min((max_ix*max_jx-1),max(0,(i*max_jx + j))))
 
-__constant__ int ixs[512];
+__constant__ int ixs[1024];
 
 template<int D>
 __device__

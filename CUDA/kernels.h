@@ -6,7 +6,7 @@
 #define BOUND(i,max_ix) (min((max_ix),max(0,(i))))
 #define T 1024
 
-__constant__ int ixs[501];
+__constant__ int ixs[T];
 
 template<int D>
 __device__

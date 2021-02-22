@@ -390,10 +390,16 @@ void doTest()
 
     const int len = 5000000;
     int* cpu_out = run_cpu<D>(cpu_ixs,len);
-    printf("%d %d %d %d %d %d\n", cpu_out[0], cpu_out[1], cpu_out[2], cpu_out[3],cpu_out[10], cpu_out[len-1]);
 
-    cout << "D=" << D << endl;
-    cout << "W=" << (D/2) << endl;
+    cout << "const int ixs [" << D << "] \n";
+    /*cout << "const int ixs[" << D << "] = [";
+    for(int i=0; i < D ; i++){
+        cout << " " << cpu_ixs[i];
+        if(i == D-1)
+        { cout << "]" << endl; }
+        else{ cout << ", "; }
+    }*/
+
     {
         GPU_RUN(call_kernel(
                     (inlinedIndexes_1d_const_ixs<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
@@ -436,8 +442,20 @@ void doTest_2D()
 
 int main()
 {
-    //doAllTest<4,5,5>();
-    doTest<4,5,5>();
+    //doAllTest<4,5,5>(); 
+    doTest<1,0,0>();
+    doTest<2,0,1>();
+    doTest<3,0,2>();
+    doTest<6,0,5>();
+    doTest<12,0,11>();
+    doTest<100,0,99>();
+    doTest<200,0,199>();
+    doTest<300,0,299>();
+    doTest<400,0,399>();
+    doTest<600,0,599>();
+    //find the point where they flip between 600 and 1000
+    doTest<1000,0,999>();
+    //Try with small length ixs, but with a large gap between indices.
     return 0;
 }
 
