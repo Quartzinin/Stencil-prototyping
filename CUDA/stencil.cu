@@ -149,6 +149,32 @@ void stencil_1d_cpu(
     }
 }
 
+template<int W>
+void stencil_2d_cpu(
+    const int* start,
+    const int* idxs,
+    int* out,
+    const int n_rows,
+    const int n_columns)
+{
+    int w2 = 2*W+1;
+    for (int i = 0; i < n_rows; ++i)
+    {
+        for (int k = 0; k < n_columns; ++k)
+        {
+            int arr[w2];
+            for (int j = 0; j < w2; ++j)
+            {
+                int idx = idxs[j];
+                int bound = min(n_rows*n_columns - 1,max(0,i*n_columns + k + idx));
+                arr[j] = start[bound];
+            }
+            int lambda_res = stencil_fun_cpu(arr,w2);
+            out[i] = lambda_res;
+        }
+    }
+}
+
 template<int ixs_len, int ix_min, int ix_max>
 void stencil_1d_inSharedtiled(
     const int * start,
@@ -164,6 +190,7 @@ void stencil_1d_inSharedtiled(
     inSharedtiled_1d<ixs_len,ix_min,ix_max><<<grid,T>>>(start, ixs, out, len);
     CUDASSERT(cudaDeviceSynchronize());
 }
+
 template<int ixs_len, int ix_min, int ix_max>
 void stencil_1d_inSharedtiled_const_ixs_inline(
     const int * start,
@@ -178,6 +205,7 @@ void stencil_1d_inSharedtiled_const_ixs_inline(
     inSharedtiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,T>>>(start, out, len);
     CUDASSERT(cudaDeviceSynchronize());
 }
+
 template<int ixs_len, int ix_min, int ix_max>
 void stencil_1d_inSharedtiled_const_ixs(
     const int * start,
@@ -234,9 +262,26 @@ int* run_cpu(const int* idxs, const int len)
     return cpu_out;
 }
 
+template<int W>
+int* run_cpu_2d(const int* idxs, const int n_rows, const int n_columns)
+{
+    int len = n_rows*n_columns;
+    int* cpu_in = (int*)malloc(len*sizeof(int));
+    int* cpu_out = (int*)malloc(len*sizeof(int));
+
+    for (int i = 0; i < len; ++i)
+    {
+        cpu_in[i] = i+1;
+    }
+
+    stencil_2d_cpu<W>(cpu_in,idxs,cpu_out,n_rows,n_columns);
+    free(cpu_in);
+    return cpu_out;
+}
+
 
 template<int ixs_len, int ix_min, int ix_max>
-void doTest()
+void doAllTest()
 {
     const int RUNS = 100;
     const int standard_block_size = T;
@@ -328,11 +373,31 @@ void DoTest_2D()
 {
     const int RUNS = 100;
     const int standard_block_size = 1024;
+
+    struct timeval t_startpar, t_endpar, t_diffpar;
+
+    const int D = ixs_len;
+    const int W = D / 2;
+    const int ixs_size = D*sizeof(int);
+    int* cpu_ixs = (int*)malloc(ixs_size);
+    for(int i=0; i < D ; i++){ cpu_ixs[i] = i-W; } \
+    int* gpu_ixs;
+    CUDASSERT(cudaMalloc((void **) &gpu_ixs, ixs_size));
+    CUDASSERT(cudaMemcpy(gpu_ixs, cpu_ixs, ixs_size, cudaMemcpyHostToDevice));
+    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+
+    const int n_rows = 1000;
+    const int n_columns = 1000;
+    int* cpu_out = run_cpu_2d<W>(cpu_ixs,n_rows,n_columns);
+
+    cout << "D=" << D << endl;
+    cout << "W=" << W << endl;
+
 }
 
 int main()
 {
-    doTest<5,5,5>();
+    doAllTest<5,5,5>();
     return 0;
 }
 
