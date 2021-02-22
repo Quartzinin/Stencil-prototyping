@@ -21,12 +21,12 @@ inline int stencil_fun2d(const int* arr){
 
 template<int D>
 __device__
-inline int stencil_fun2d(const int* arr){
-    int sum_acc = 0;
-    for (int i = 0; i < D; ++i){
-        sum_acc += arr[i];
-    }
-    return sum_acc/(D);
+void* stencil_global_mem(const int* A,
+                         int* out
+                         const int n_rows,
+                         const int n_columns)
+{
+    out[0] = 0;
 }
 
 

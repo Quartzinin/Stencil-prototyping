@@ -1,6 +1,6 @@
 CXX        = nvcc -O3 -arch=compute_35 -D_FORCE_INLINES -Wno-deprecated-gpu-targets
 
-SRC = stencil.cu kernels.cu
+SRC = stencil.cu
 OBJECTS     =stencil.o kernels.o
 EXECUTABLE  =runproject
 
@@ -12,7 +12,7 @@ default: compile run
 compile: $(EXECUTABLE)
 
 
-$(EXECUTABLE): $(SRC) kernels.h
+$(EXECUTABLE): $(SRC) kernels.h kernels-2d.h
 	$(CXX) -o $(EXECUTABLE) $(SRC)
 
 
