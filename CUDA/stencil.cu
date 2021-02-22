@@ -39,10 +39,9 @@ using std::endl;
     unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;\
     elapsed /= RUNS;\
     printf("    mean elapsed time was: %lu microseconds\n", elapsed);\
-    printf("%d %d %d %d %d %d\n", arr_out[0], arr_out[1], arr_out[2], arr_out[3],arr_out[10], arr_out[len-1]); \
     if (validate(cpu_out,arr_out,len)) \
     { \
-        printf("%s\n", "VALIDATED");\
+        printf("%s\n", "    VALIDATED");\
     }\
     free(arr_in);\
     CUDASSERT(cudaFree(gpu_array_in));\
@@ -78,7 +77,7 @@ using std::endl;
     printf("%d %d %d %d %d %d\n", arr_out[0], arr_out[1], arr_out[2], arr_out[3],arr_out[10], arr_out[len-1]); \
     if (validate(cpu_out,arr_out,len)) \
     { \
-        printf("%s\n", "VALIDATED");\
+        printf("%s\n", "    VALIDATED");\
     }\
     free(arr_in);\
     CUDASSERT(cudaFree(gpu_array_in));\
@@ -247,7 +246,7 @@ void doTest()
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
     int* cpu_ixs = (int*)malloc(ixs_size);
-    for(int i=0; i < D ; i++){ cpu_ixs[i] = i; }
+    for(int i=0; i < D ; i++){ cpu_ixs[i] = D - i*2; }
 
     for(int i=0; i < D ; i++){
         const int V = cpu_ixs[i];
@@ -262,10 +261,14 @@ void doTest()
 
     const int len = 5000000;
     int* cpu_out = run_cpu<D>(cpu_ixs,len);
-    printf("%d %d %d %d %d %d\n", cpu_out[0], cpu_out[1], cpu_out[2], cpu_out[3],cpu_out[10], cpu_out[len-1]);
 
-    cout << "D=" << D << endl;
-    cout << "W=" << (D/2) << endl;
+    cout << "const int ixs[" << D << "] = [";
+    for(int i=0; i < D ; i++){
+        cout << " " << cpu_ixs[i];
+        if(i == D-1)
+        { cout << "]" << endl; }
+        else{ cout << ", "; }
+    }
     {
         GPU_RUN(call_kernel(
                     (big_tiled_1d<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
@@ -329,7 +332,7 @@ void DoTest_2D()
 
 int main()
 {
-    doTest<4,5,5>();
+    doTest<5,5,5>();
     return 0;
 }
 
