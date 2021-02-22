@@ -366,7 +366,47 @@ void doAllTest()
 }
 
 template<int ixs_len, int ix_min, int ix_max>
-void DoTest_2D()
+void doTest()
+{
+    const int RUNS = 100;
+    const int standard_block_size = T;
+
+    struct timeval t_startpar, t_endpar, t_diffpar;
+
+    const int D = ixs_len;
+    const int ixs_size = D*sizeof(int);
+    int* cpu_ixs = (int*)malloc(ixs_size);
+    for(int i=0; i < D ; i++){ cpu_ixs[i] = i; }
+
+    for(int i=0; i < D ; i++){
+        const int V = cpu_ixs[i];
+        if(-ix_min <= V && V <= ix_max)
+        {}
+        else { printf("index array contains indexes not in range\n"); }
+    }
+    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+
+    const int len = 5000000;
+    int* cpu_out = run_cpu<D>(cpu_ixs,len);
+    printf("%d %d %d %d %d %d\n", cpu_out[0], cpu_out[1], cpu_out[2], cpu_out[3],cpu_out[10], cpu_out[len-1]);
+
+    cout << "D=" << D << endl;
+    cout << "W=" << (D/2) << endl;
+    {
+        GPU_RUN(call_kernel(
+                    (inlinedIndexes_1d_const_ixs<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    ,standard_block_size)
+                ,"## Benchmark GPU 1d inlined idxs with global reads const ixs ##",(void)0,(void)0);
+        GPU_RUN((stencil_1d_inSharedtiled_const_ixs_inline<ixs_len,ix_min,ix_max>(gpu_array_in, gpu_array_out, len)),
+                "## Benchmark GPU 1d in shared tiled const inline ixs ##",(void)0,(void)0);
+    }
+
+    free(cpu_out);
+    free(cpu_ixs);
+}
+
+template<int ixs_len, int ix_min, int ix_max>
+void doTest_2D()
 {
     const int RUNS = 100;
     const int standard_block_size = 1024;
@@ -394,7 +434,8 @@ void DoTest_2D()
 
 int main()
 {
-    doAllTest<4,5,5>();
+    //doAllTest<4,5,5>();
+    doTest<4,5,5>();
     return 0;
 }
 
