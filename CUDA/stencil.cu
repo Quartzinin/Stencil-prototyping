@@ -75,7 +75,6 @@ static inline void cudAssert(cudaError_t exit_code,
 
 bool validate(const int* A, const int* B, unsigned int sizeAB){
     int c = 0;
-    unsigned k = sizeAB - 1;
     for(unsigned i = 0; i < sizeAB; i++)
         if (fabs(A[i] - B[i]) > 0.00001 || isnan(A[i]) || isinf(A[i]) || isnan(B[i]) || isinf(B[i])){
             printf("INVALID RESULT at index %d: (expected, actual) == (%d, %d)\n",
@@ -188,14 +187,14 @@ void doTest()
     CUDASSERT(cudaMalloc((void **) &gpu_ixs, ixs_size));
     CUDASSERT(cudaMemcpy(gpu_ixs, ixs, ixs_size, cudaMemcpyHostToDevice));
 
-    {
-        const int len = 5000000;
-        int* cpu_out = run_cpu<W>(ixs,len);
+    const int len = 5000000;
+    int* cpu_out = run_cpu<W>(ixs,len);
 
+    {
         GPU_RUN(call_kernel(
-                    (breathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
-                    ,standard_block_size)
-                ,"## Benchmark GPU 1d global-mem ##",(void)0,(void)0);
+                (breathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                ,standard_block_size)
+            ,"## Benchmark GPU 1d global-mem ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
                     (big_tiled_generic1d<W,block><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
                     ,standard_block_size)
@@ -216,6 +215,7 @@ void doTest()
                 ,(cudaFree(temp)));*/
     }
 
+    free(cpu_out);
     cudaFree(gpu_ixs);
     free(ixs);
 }
