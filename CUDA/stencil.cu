@@ -40,6 +40,10 @@ using std::endl;
     elapsed /= RUNS;\
     printf("    mean elapsed time was: %lu microseconds\n", elapsed);\
     printf("%d %d %d %d %d %d\n", arr_out[0], arr_out[1], arr_out[2], arr_out[3],arr_out[10], arr_out[len-1]); \
+    if (validate(cpu_out,arr_out,len)) \
+    { \
+        printf("%s\n", "VALIDATED");\
+    }\
     free(arr_in);\
     /*free(arr_out);*/\
     cudaFree(gpu_array_in);\
@@ -69,33 +73,51 @@ static inline void cudAssert(cudaError_t exit_code,
 }
 #define CUDASSERT(exit_code) { cudAssert((exit_code), __FILE__, __LINE__); }
 
-template<int W>
-void stencil_1d_tiled(
-    const int * start,
-    int * out,
-    const unsigned len
-    )
-{
-    const int block = 1024;
-    const int grid = (len + (block-1)) / block;
+bool validate(const int* A, const int* B, unsigned int sizeAB){
+    int c = 0;
+    unsigned k = sizeAB - 1;
+    for(unsigned i = 0; i < sizeAB; i++)
+        if (fabs(A[i] - B[i]) > 0.00001 || isnan(A[i]) || isinf(A[i]) || isnan(B[i]) || isinf(B[i])){
+            printf("INVALID RESULT at index %d: (expected, actual) == (%d, %d)\n",
+                    i, A[i], B[i]);
+            c++;
+            if(c > 20)
+                return false;
+        }
+    return c == 0;
+}
 
-    big_tiled_generic1d<W,block><<<grid,block>>>(start, out, len);
-    CUDASSERT(cudaDeviceSynchronize());
+int stencil_fun_cpu(const int* arr, const int D)
+{
+    int sum_acc = 0;
+    for (int i = 0; i < D; ++i){
+        sum_acc += arr[i];
+    }
+    return sum_acc/(D);
 }
 
 template<int W>
-void stencil_1d_global_read(
-    const int * start,
-    int * out,
-    const unsigned len
-    )
+void stencil_1d_cpu(
+    const int* start,
+    const int* idxs,
+    int* out,
+    const int len)
 {
-    const int block = 1024;
-    const int grid = (len + (block-1)) / block;
-
-    breathFirst_generic1d<W><<<grid,block>>>(start, out, len);
-    CUDASSERT(cudaDeviceSynchronize());
+    int w2 = 2*W+1;
+    for (int i = 0; i < len; ++i)
+    {
+        int arr[w2];
+        for (int j = 0; j < w2; ++j)
+        {
+            int idx = idxs[j];
+            int bound = min(len-1,max(0,i+idx));
+            arr[j] = start[bound];
+        }
+        int lambda_res = stencil_fun_cpu(arr,w2);
+        out[i] = lambda_res;
+    }
 }
+
 template<int D, int block>
 void stencil_1d_inSharedtiled(
     const int * start,
@@ -136,12 +158,27 @@ void stencil_1d_global_temp(
     CUDASSERT(cudaDeviceSynchronize());
 }
 
+template<int W>
+int* run_cpu(const int* idxs, const int len)
+{
+    int* cpu_in = (int*)malloc(len*sizeof(int));
+    int* cpu_out = (int*)malloc(len*sizeof(int));
+
+    for (int i = 0; i < len; ++i)
+    {
+        cpu_in[i] = i+1;
+    }
+
+    stencil_1d_cpu<W>(cpu_in,idxs,cpu_out,len);
+    free(cpu_in);
+    return cpu_out;
+}
+
 
 template<int W, int RUNS, int standard_block_size>
 void doTest()
 {
     struct timeval t_startpar, t_endpar, t_diffpar;
-    //int* temp;
 
     const int D = (2*W+1);
     const int ixs_size = D*sizeof(int);
@@ -153,6 +190,7 @@ void doTest()
 
     {
         const int len = 5000000;
+        int* cpu_out = run_cpu<W>(ixs,len);
 
         GPU_RUN(call_kernel(
                     (breathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
@@ -199,6 +237,34 @@ int main()
 
 
 
+
+/*template<int W>
+void stencil_1d_tiled(
+    const int * start,
+    int * out,
+    const unsigned len
+    )
+{
+    const int block = 1024;
+    const int grid = (len + (block-1)) / block;
+
+    big_tiled_generic1d<W,block><<<grid,block>>>(start, out, len);
+    CUDASSERT(cudaDeviceSynchronize());
+}
+
+template<int W>
+void stencil_1d_global_read(
+    const int * start,
+    int * out,
+    const unsigned len
+    )
+{
+    const int block = 1024;
+    const int grid = (len + (block-1)) / block;
+
+    breathFirst_generic1d<W><<<grid,block>>>(start, out, len);
+    CUDASSERT(cudaDeviceSynchronize());
+}*/
 
 
 
