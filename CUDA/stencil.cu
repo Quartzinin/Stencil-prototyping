@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "kernels.h"
+#include "kernels-2d.h"
 using namespace std;
 
 #include <iostream>
@@ -15,13 +16,12 @@ using std::endl;
 #define GPU_RUN(call,benchmark_name, preproc, destroy) {\
     const int mem_size = len*sizeof(int); \
     int* arr_in  = (int*)malloc(mem_size*2); \
-    int* arr_out = arr_in + len; /*(int*)malloc(mem_size);*/ \
+    int* arr_out = arr_in + len; \
     for(int i=0; i<len; i++){ arr_in[i] = i+1; } \
     int* gpu_array_in; \
     int* gpu_array_out; \
     CUDASSERT(cudaMalloc((void **) &gpu_array_in, 2*mem_size)); \
     gpu_array_out = gpu_array_in + len; \
-    /*CUDASSERT(cudaMalloc((void **) &gpu_array_out, mem_size));*/ \
     CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));\
     CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));\
     (preproc);\
@@ -45,9 +45,43 @@ using std::endl;
         printf("%s\n", "VALIDATED");\
     }\
     free(arr_in);\
-    /*free(arr_out);*/\
     CUDASSERT(cudaFree(gpu_array_in));\
-    /*cudaFree(gpu_array_out);*/\
+    (destroy);\
+}
+
+#define GPU_RUN_2D(call,benchmark_name) {\
+    const int mem_size = len*sizeof(int); \
+    int* arr_in  = (int*)malloc(mem_size*2); \
+    int* arr_out = arr_in + len; \
+    for(int i=0; i<len; i++){ arr_in[i] = i+1; } \
+    int* gpu_array_in; \
+    int* gpu_array_out; \
+    CUDASSERT(cudaMalloc((void **) &gpu_array_in, 2*mem_size)); \
+    gpu_array_out = gpu_array_in + len; \
+    CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));\
+    CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));\
+    (preproc);\
+    CUDASSERT(cudaDeviceSynchronize());\
+    cout << (benchmark_name) << endl; \
+    gettimeofday(&t_startpar, NULL); \
+    for(unsigned x = 0; x < RUNS; x++){ \
+        (call); \
+    }\
+    CUDASSERT(cudaDeviceSynchronize());\
+    gettimeofday(&t_endpar, NULL);\
+    CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, mem_size, cudaMemcpyDeviceToHost));\
+    CUDASSERT(cudaDeviceSynchronize());\
+    timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);\
+    unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;\
+    elapsed /= RUNS;\
+    printf("    mean elapsed time was: %lu microseconds\n", elapsed);\
+    printf("%d %d %d %d %d %d\n", arr_out[0], arr_out[1], arr_out[2], arr_out[3],arr_out[10], arr_out[len-1]); \
+    if (validate(cpu_out,arr_out,len)) \
+    { \
+        printf("%s\n", "VALIDATED");\
+    }\
+    free(arr_in);\
+    CUDASSERT(cudaFree(gpu_array_in));\
     (destroy);\
 }
 
@@ -284,6 +318,13 @@ void doTest()
     free(cpu_out);
     cudaFree(gpu_ixs);
     free(cpu_ixs);
+}
+
+template<int ixs_len, int ix_min, int ix_max>
+void DoTest_2D()
+{
+    const int RUNS = 100;
+    const int standard_block_size = 1024;
 }
 
 int main()
