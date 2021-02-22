@@ -3,6 +3,8 @@
 
 #include <cuda_runtime.h>
 
+#define BOUND(i,max_ix) (min((max_ix),max(0,(i))))
+
 template<int D>
 __device__
 inline int stencil_fun(const int* arr){
@@ -13,159 +15,136 @@ inline int stencil_fun(const int* arr){
     return sum_acc/(D);
 }
 
-template<int W>
-__global__
-void breathFirst_generic1d(
-    const int* A,
-    int* out,
-    const unsigned nx
-    )
-{
-    const int gid = blockIdx.x*blockDim.x + threadIdx.x;
-    const int idx = gid - W;
-    const int D = 2*W+1;
-    int sum[D];
-    if (gid < nx)
-    {
-        for (int i = 0; i < D; ++i)
-        {
-            int newIdx = idx + i;
-            newIdx = newIdx < 0 ? 0 : newIdx;
-            newIdx = newIdx > nx - 1 ? nx - 1 : newIdx;
-            sum[i] = A[newIdx];
-        }
-        int lambda_res = stencil_fun<D>(sum);
-        //lambda_res
-        out[gid] = lambda_res;
-    }
-}
-
 //sacrifice potential parallelism, to ensure that all threads are doing work
-template<int W, int T>
+template<int W, int T> // assume T = blockDim.x
 __global__
-void big_tiled_generic1d(
+void big_tiled_1d(
     const int* A,
+    const int* ixs,
     int* out,
     const unsigned nx
     )
 {
-    const int gid = blockIdx.x*blockDim.x + threadIdx.x;
+    const int block_offset = blockIdx.x*blockDim.x;
+    const int gid = block_offset + threadIdx.x;
     const int D = 2*W+1;
-    const int shared_size = D+T;
-    __shared__ int sum[shared_size];
+    const int left_extra = W;
+    const int right_extra = W;
+    const int shared_size = left_extra + T + right_extra;
+    const int max_ix = nx - 1;
+    __shared__ int sixs[D];
+    __shared__ int tile[shared_size];
+    if(threadIdx.x < D){ sixs[threadIdx.x] = ixs[threadIdx.x]; }
 
-    int varIdx = threadIdx.x;
-    const int end = nx - 1;
-
-    for (int i = gid-W; i < gid+(W+1); i+=blockDim.x)
+    const int right_most = block_offset - left_extra + shared_size;
+    int loc_ix = threadIdx.x;
+    for (int i = gid - left_extra; i < right_most; i += blockDim.x)
     {
-        if (varIdx < shared_size)
+        if (loc_ix < shared_size)
         {
-            if (i < 0)
-            {
-                sum[varIdx] = A[0];
-            }
-            else if (i > end)
-            {
-                sum[varIdx] = A[end];
-            }
-            else
-            {
-               sum[varIdx] = A[i];
-            }
-            varIdx += blockDim.x;
+            tile[loc_ix] = A[BOUND(i, max_ix)];
+            loc_ix += blockDim.x;
         }
     }
     __syncthreads();
 
-    const int* pointer = &(sum[threadIdx.x]);
-    const int w2 = D;
     if (gid < nx)
     {
-        const int lambda_res = stencil_fun<w2>(pointer);
-        out[gid] = lambda_res;
+        int subtile[D];
+        const int base = threadIdx.x + left_extra;
+        for(int i = 0; i < D; i++){
+            subtile[i] = tile[sixs[i] + base];
+        }
+        out[gid] = stencil_fun<D>(subtile);
     }
 }
 
 
 template<int W>
 __global__
-void inlinedIndexesBreathFirst_generic1d(
+void inlinedIndexes_1d(
     const int* A,
+    const int* ixs,
     int* out,
     const unsigned nx
     )
 {
     const int gid = blockIdx.x*blockDim.x + threadIdx.x;
-    const int idx = gid - W;
     const int D = 2*W + 1;
+    const int max_ix = nx - 1;
     if (gid < nx)
     {
         int sum_acc = 0;
         for (int i = 0; i < D; ++i)
         {
-            int newIdx = idx + i;
-            newIdx = newIdx < 0 ? 0 : newIdx;
-            newIdx = newIdx > nx - 1 ? nx - 1 : newIdx;
-            sum_acc += A[newIdx];
+            sum_acc += A[BOUND(gid +  ixs[i], max_ix)];
         }
-        int lambda_res = sum_acc/D;
+        const int lambda_res = sum_acc/D;
         //lambda_res
         out[gid] = lambda_res;
     }
 }
 
-template<int W, int T>
+template<int W>
 __global__
-void outOfSharedtiled_generic1d(
+void threadLocalArr_1d(
     const int* A,
+    const int* ixs,
     int* out,
     const unsigned nx
     )
 {
     const int gid = blockIdx.x*blockDim.x + threadIdx.x;
-    const int offset = blockDim.x*blockIdx.x;
-    const int start = gid - W;
     const int D = 2*W + 1;
-    __shared__ int tile[T];
+    const int max_ix = nx - 1;
     if (gid < nx)
     {
-        tile[threadIdx.x] = A[gid];
+        int arr[D];
+        for (int i = 0; i < D; ++i)
+        {
+            arr[i] = A[BOUND(gid +  ixs[i], max_ix)];
+        }
+        out[gid] = stencil_fun<D>(arr);
     }
+}
+
+template<int W, int T>
+__global__
+void outOfSharedtiled_1d(
+    const int* A,
+    const int* ixs,
+    int* out,
+    const unsigned nx
+    )
+{
+    const int block_offset = blockDim.x*blockIdx.x;
+    const int gid = block_offset + threadIdx.x;
+    const int max_ix = nx - 1;
+    const int D = 2*W + 1;
+    __shared__ int sixs[D];
+    if(threadIdx.x < D){ sixs[threadIdx.x] = ixs[threadIdx.x]; }
+    __shared__ int tile[T];
+    if (gid < nx){ tile[threadIdx.x] = A[gid]; }
+
     __syncthreads();
 
     if (gid < nx)
     {
-        int sum_acc = 0;
-
+        int arr[D];
         for (int i = 0; i < D; ++i)
         {
-            int val;
-            int Idx = start + i;
-            Idx = Idx < 0 ? 0 : Idx;
-            Idx = Idx > nx - 1 ? nx - 1 : Idx;
-
-            int temp = Idx - offset;
-            if (0 <= temp && temp < T)
-            {
-                val = tile[temp];
-            }
-            else
-            {
-                val = A[Idx];
-            }
-
-            sum_acc += val;
+            int gix = BOUND(gid + sixs[i], max_ix);
+            int lix = gix - block_offset;
+            arr[i] = (0 <= lix && lix < T) ? tile[lix] : A[gix];
         }
-        int lambda_res = sum_acc/(D);
-        //lambda_res
+        const int lambda_res = stencil_fun<D>(arr);
         out[gid] = lambda_res;
     }
 }
 
 template<int D, int T>
 __global__
-void inSharedtiled_generic1d(
+void inSharedtiled_1d(
     const int* A,
     const int* ixs,
     int* out,
@@ -177,17 +156,18 @@ void inSharedtiled_generic1d(
     if(threadIdx.x < D){ sixs[threadIdx.x] = ixs[threadIdx.x]; }
 
     const int W = D / 2;
-    const int offset = (blockDim.x-W)*blockIdx.x;
+    const int offset = (blockDim.x-2*W)*blockIdx.x;
     const int gid = offset + threadIdx.x - W;
     const int max_ix = nx - 1;
-
-    tile[threadIdx.x] = A[max(0,min(max_ix,gid))];
+    tile[threadIdx.x] = A[BOUND(gid, max_ix)];
     __syncthreads();
 
     if ((0 <= gid && gid < nx) && (W <= threadIdx.x && threadIdx.x < T-W))
     {
         int subtile[D];
-        for(int i = 0; i < D; i++){ subtile[i] = tile[sixs[i] + threadIdx.x]; }
+        for(int i = 0; i < D; i++){
+            subtile[i] = tile[sixs[i] + threadIdx.x];
+        }
         const int lambda_res = stencil_fun<D>(subtile);
         out[gid] = lambda_res;
     }
@@ -195,7 +175,7 @@ void inSharedtiled_generic1d(
 
 template<int D>
 __global__
-void global_temp_generic_1d_to_temp(
+void global_temp__1d_to_temp(
     const int* A,
     const int* ixs,
     int* temp,
@@ -213,7 +193,7 @@ void global_temp_generic_1d_to_temp(
 
 template<int D>
 __global__
-void global_temp_generic_1d(
+void global_temp__1d(
     const int* temp,
     int* out,
     const unsigned nx

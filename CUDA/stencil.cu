@@ -76,7 +76,7 @@ static inline void cudAssert(cudaError_t exit_code,
 bool validate(const int* A, const int* B, unsigned int sizeAB){
     int c = 0;
     for(unsigned i = 0; i < sizeAB; i++)
-        if (fabs(A[i] - B[i]) > 0.00001 || isnan(A[i]) || isinf(A[i]) || isnan(B[i]) || isinf(B[i])){
+        if (A[i] != B[i]){
             printf("INVALID RESULT at index %d: (expected, actual) == (%d, %d)\n",
                     i, A[i], B[i]);
             c++;
@@ -128,7 +128,7 @@ void stencil_1d_inSharedtiled(
     const int working_block = block-(D-1);
     const int grid = (D + len + (working_block-1)) / working_block;
 
-    inSharedtiled_generic1d<D,block><<<grid,block>>>(start, ixs, out, len);
+    inSharedtiled_1d<D,block><<<grid,block>>>(start, ixs, out, len);
     CUDASSERT(cudaDeviceSynchronize());
 }
 
@@ -152,8 +152,8 @@ void stencil_1d_global_temp(
     const int grid1 = (len*D + (block_size-1)) / block_size;
     const int grid2 = (len + (block_size-1)) / block_size;
 
-    global_temp_generic_1d_to_temp<D><<<grid1,block_size>>>(start, ixs, temp, len);
-    global_temp_generic_1d<D><<<grid2,block_size>>>(temp, out, len);
+    global_temp__1d_to_temp<D><<<grid1,block_size>>>(start, ixs, temp, len);
+    global_temp__1d<D><<<grid2,block_size>>>(temp, out, len);
     CUDASSERT(cudaDeviceSynchronize());
 }
 
@@ -191,20 +191,24 @@ void doTest()
     int* cpu_out = run_cpu<W>(ixs,len);
 
     {
+//        GPU_RUN(call_kernel(
+//                    (breathFirst_1d<W><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
+//                    ,standard_block_size)
+//                ,"## Benchmark GPU 1d global-mem ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
-                (breathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
-                ,standard_block_size)
-            ,"## Benchmark GPU 1d global-mem ##",(void)0,(void)0);
-        GPU_RUN(call_kernel(
-                    (big_tiled_generic1d<W,block><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    (big_tiled_1d<W,block><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
-                ,"## Benchmark GPU 1d tiled ##",(void)0,(void)0);
+                ,"## Benchmark GPU 1d big-tiled ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
-                    (inlinedIndexesBreathFirst_generic1d<W><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    (inlinedIndexes_1d<W><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
-                ,"## Benchmark GPU 1d inlined global read indxs ##",(void)0,(void)0);
+                ,"## Benchmark GPU 1d inlined idxs with global reads ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
-                    (outOfSharedtiled_generic1d<W,block><<<grid,block>>>(gpu_array_in, gpu_array_out, len))
+                    (threadLocalArr_1d<W><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
+                    ,standard_block_size)
+                ,"## Benchmark GPU 1d local temp-array ##",(void)0,(void)0);
+        GPU_RUN(call_kernel(
+                    (outOfSharedtiled_1d<W,block><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len))
                     ,standard_block_size)
                 ,"## Benchmark GPU 1d out of shared tiled ##",(void)0,(void)0);
         GPU_RUN((stencil_1d_inSharedtiled<D, standard_block_size>(gpu_array_in, gpu_ixs, gpu_array_out, len)),
@@ -222,49 +226,9 @@ void doTest()
 
 int main()
 {
-    doTest<9,1000,1024>();
+    doTest<5,1000,1024>();
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*template<int W>
-void stencil_1d_tiled(
-    const int * start,
-    int * out,
-    const unsigned len
-    )
-{
-    const int block = 1024;
-    const int grid = (len + (block-1)) / block;
-
-    big_tiled_generic1d<W,block><<<grid,block>>>(start, out, len);
-    CUDASSERT(cudaDeviceSynchronize());
-}
-
-template<int W>
-void stencil_1d_global_read(
-    const int * start,
-    int * out,
-    const unsigned len
-    )
-{
-    const int block = 1024;
-    const int grid = (len + (block-1)) / block;
-
-    breathFirst_generic1d<W><<<grid,block>>>(start, out, len);
-    CUDASSERT(cudaDeviceSynchronize());
-}*/
 
 
 
