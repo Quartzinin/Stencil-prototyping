@@ -3,7 +3,7 @@
 
 #include <cuda_runtime.h>
 
-#define BOUND_2D(i,j,max_ix,max_jx) (min(((max_ix-1)*max_jx),max(0,(i*max_jx + j))))
+#define BOUND_2D(i,j,max_ix,max_jx) (min((max_ix*max_jx-1),max(0,(i*max_jx + j))))
 
 __constant__ int ixs[512];
 
@@ -26,7 +26,10 @@ void* stencil_global_mem(const int* A,
                          const int n_rows,
                          const int n_columns)
 {
-    out[0] = 0;
+    for (int i = 0; i < D; ++i)
+    {
+        /* code */
+    }
 }
 
 
