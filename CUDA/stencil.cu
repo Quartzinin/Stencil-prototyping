@@ -12,7 +12,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-#define T float
+#define T int
 
 #define GPU_RUN(call,benchmark_name, preproc, destroy) {\
     const int mem_size = len*sizeof(T); \
@@ -84,7 +84,6 @@ using std::endl;
     (destroy);\
 }
 
-
 static int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
     unsigned int resolution=1000000;
@@ -104,6 +103,7 @@ static inline void cudAssert(cudaError_t exit_code,
         exit(exit_code);
     }
 }
+
 #define CUDASSERT(exit_code) { cudAssert((exit_code), __FILE__, __LINE__); }
 
 bool validate(const T* A, const T* B, unsigned int sizeAB){
@@ -121,7 +121,6 @@ bool validate(const T* A, const T* B, unsigned int sizeAB){
     }
     return c == 0;
 }
-
 
 template<int D>
 T stencil_fun_cpu(const T* arr)
@@ -194,7 +193,6 @@ void stencil_2d_cpu(
     CUDASSERT(cudaDeviceSynchronize());\
 }
 
-
 template<int D>
 void stencil_1d_global_temp(
     const T* start,
@@ -245,7 +243,6 @@ T* run_cpu_2d(const int* idxs, const int n_rows, const int n_columns)
     return cpu_out;
 }
 
-
 template<int ixs_len, int ix_min, int ix_max>
 void doAllTest()
 {
@@ -256,13 +253,13 @@ void doAllTest()
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
     int* cpu_ixs = (int*)malloc(ixs_size);
-    for(int i=0; i < D ; i++){ cpu_ixs[i] = D - i*2; }
+    for(int i=0; i < D ; i++){ cpu_ixs[i] = i; }
 
     for(int i=0; i < D ; i++){
         const int V = cpu_ixs[i];
         if(-ix_min <= V && V <= ix_max)
         {}
-        else { printf("index array contains indexes not in range\n"); }
+        else { printf("index array contains indexes not in range\n"); exit(1); }
     }
     int* gpu_ixs;
     CUDASSERT(cudaMalloc((void **) &gpu_ixs, ixs_size));
@@ -287,7 +284,7 @@ void doAllTest()
                     (big_tiled_1d_const_ixs<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark GPU 1d big-tiled const ixs ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
-                    (big_tiled_1d_const_ixs<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                    (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark GPU 1d big-tiled const inline ixs ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
                     (inlinedIndexes_1d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_ixs, gpu_array_out, len)))
@@ -343,14 +340,14 @@ void doTest()
         const int V = cpu_ixs[i];
         if(-ix_min <= V && V <= ix_max)
         {}
-        else { printf("index array contains indexes not in range\n"); }
+        else { printf("index array contains indexes not in range\n"); exit(1);}
     }
     CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
 
     const int len = 5000000;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
 
-    cout << "const int ixs [" << D << "] \n";
+    cout << "const int ixs[" << D << "] \n";
     /*cout << "const int ixs[" << D << "] = [";
     for(int i=0; i < D ; i++){
         cout << " " << cpu_ixs[i];
@@ -358,6 +355,54 @@ void doTest()
         { cout << "]" << endl; }
         else{ cout << ", "; }
     }*/
+
+    {
+        GPU_RUN(call_kernel(
+                    (inlinedIndexes_1d_const_ixs<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                ,"## Benchmark GPU 1d inlined idxs with global reads const ixs ##",(void)0,(void)0);
+        GPU_RUN(call_inSharedKernel(
+                    (inSharedtiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,BLOCKSIZE>>>(gpu_array_in, gpu_array_out, len)))
+                ,"## Benchmark GPU 1d in shared tiled const inline ixs ##",(void)0,(void)0);
+    }
+
+    free(cpu_out);
+    free(cpu_ixs);
+}
+
+template<int ixs_len, int ix_min, int ix_max>
+void doWideTest()
+{
+    const int RUNS = 1000;
+
+    struct timeval t_startpar, t_endpar, t_diffpar;
+
+    const int D = ixs_len;
+    const int ixs_size = D*sizeof(int);
+    int* cpu_ixs = (int*)malloc(ixs_size);
+    const int step = (ix_min + ix_max) / (ixs_len-1);
+    {
+        int s = -ix_min;
+        for(int i=0; i < D ; i++){ cpu_ixs[i] = s; s += step; }
+    }
+    for(int i=0; i < D ; i++){
+        const int V = cpu_ixs[i];
+        if(-ix_min <= V && V <= ix_max)
+        {}
+        else { printf("index array contains indexes not in range\n"); exit(1);}
+    }
+    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+
+    const int len = 10000000;
+    T* cpu_out = run_cpu<D>(cpu_ixs,len);
+
+    //cout << "const int ixs[" << D << "] \n";
+    cout << "const int ixs[" << D << "] = [";
+    for(int i=0; i < D ; i++){
+        cout << " " << cpu_ixs[i];
+        if(i == D-1)
+        { cout << "]" << endl; }
+        else{ cout << ", "; }
+    }
 
     {
         GPU_RUN(call_kernel(
@@ -400,22 +445,35 @@ void doTest_2D()
 
 int main()
 {
-//    doAllTest<4,5,5>();
+    // tests all kernels
+    //doAllTest<3,0,2>();
+
+    // find limits for a small iota pattern stencil
+    /*
     doTest<1,0,0>();
     doTest<2,0,1>();
     doTest<3,0,2>();
+    doTest<4,0,3>();
+    doTest<5,0,4>();
     doTest<6,0,5>();
-    doTest<12,0,11>();
-    doTest<100,0,99>();
-    doTest<200,0,199>();
-    doTest<300,0,299>();
-    doTest<400,0,399>();
-    doTest<600,0,599>();
-    //find the point where they flip between 600 and 1000
-    doTest<1000,0,999>();
+    doTest<980,0,979>();
+    doTest<985,0,984>();
+    doTest<990,0,989>();
+    */
+
     //Try with small length ixs, but with a large gap between indices.
+
+    doWideTest<5,2,2>();
+    doWideTest<5,20,20>();
+    doWideTest<5,25,25>();
+    doWideTest<5,30,30>();
+    doWideTest<5,35,35>();
+
     return 0;
 }
+
+
+
 
 
 
