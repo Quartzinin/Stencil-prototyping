@@ -1,21 +1,17 @@
-#ifndef CUDA_PROJ_HELPER
-#define CUDA_PROJ_HELPER
+#ifndef KERNELS1D
+#define KERNELS1D
 
 #include <cuda_runtime.h>
-
-#define BOUND(i,max_ix) (min((max_ix),max(0,(i))))
-#define BLOCKSIZE 1024
-
-__constant__ int ixs[BLOCKSIZE];
+#include "constants.h"
 
 template<int D, class T>
 __device__
-inline T stencil_fun(const T* arr){
+inline int stencil_fun_inline_ix_bounded(const T* arr, const int cix, const int max_ix){
     T sum_acc = 0;
     for (int i = 0; i < D; ++i){
-        sum_acc += arr[i];
+        sum_acc += arr[BOUND(cix + ixs[i], max_ix)];
     }
-    return sum_acc/(D);
+    return sum_acc/D;
 }
 
 template<int D, class T>
@@ -26,6 +22,92 @@ inline int stencil_fun_inline_ix(const T* arr){
         sum_acc += arr[ixs[i]];
     }
     return sum_acc/D;
+}
+
+
+template<int ixs_len, class T>
+__global__
+void inlinedIndexes_1d_const_ixs(
+    const T* A,
+    T* out,
+    const unsigned nx
+    )
+{
+    const int gid = blockIdx.x*blockDim.x + threadIdx.x;
+    const int max_ix = nx - 1;
+    if (gid < nx)
+    {
+        out[gid] = stencil_fun_inline_ix_bounded<ixs_len, T>(A, gid, max_ix);
+    }
+}
+
+template<int ixs_len, int ix_min, int ix_max, class T>
+__global__
+void inSharedtiled_1d_const_ixs_inline(
+    const T* A,
+    T* out,
+    const unsigned nx
+    )
+{
+    __shared__ T tile[BLOCKSIZE];
+
+    const int wasted = ix_min + ix_max;
+    const int offset = (blockDim.x-wasted)*blockIdx.x;
+    const int gid = offset + threadIdx.x - ix_min;
+    const int max_ix = nx - 1;
+    tile[threadIdx.x] = A[BOUND(gid, max_ix)];
+    __syncthreads();
+
+    if ((0 <= gid && gid < nx) && (ix_min <= threadIdx.x && threadIdx.x < BLOCKSIZE-ix_max))
+    {
+        out[gid] = stencil_fun_inline_ix<ixs_len, T>(&(tile[threadIdx.x]));
+    }
+}
+
+template<int ixs_len, int ix_min, int ix_max, class T>
+__global__
+void big_tiled_1d_const_ixs_inline(
+    const T* A,
+    T* out,
+    const unsigned nx
+    )
+{
+
+    const int block_offset = blockIdx.x*blockDim.x;
+    const int gid = block_offset + threadIdx.x;
+    const int shared_size = ix_min + BLOCKSIZE + ix_max;
+    const int max_ix = nx - 1;
+    __shared__ T tile[shared_size];
+
+    const int left_most = block_offset - ix_min;
+    const int right_most = left_most + shared_size;
+    int loc_ix = threadIdx.x;
+    for (int i = left_most + threadIdx.x; i < right_most; i += blockDim.x)
+    {
+        if (loc_ix < shared_size)
+        {
+            tile[loc_ix] = A[BOUND(i, max_ix)];
+        }
+        loc_ix += blockDim.x;
+    }
+    __syncthreads();
+
+    if (gid < nx)
+    {
+        out[gid] = stencil_fun_inline_ix<ixs_len, T>(&(tile[ix_min + threadIdx.x]));
+    }
+}
+
+/*
+
+template<int D, class T>
+__device__
+inline T stencil_fun(const T* arr){
+    T sum_acc = 0;
+    for (int i = 0; i < D; ++i){
+        sum_acc += arr[i];
+    }
+    return sum_acc/(D);
 }
 
 template<int ixs_len, int ix_min, int ix_max, class T>
@@ -109,42 +191,8 @@ void big_tiled_1d_const_ixs(
         out[gid] = stencil_fun<D, T>(subtile);
     }
 }
-template<int ixs_len, int ix_min, int ix_max, class T>
-__global__
-void big_tiled_1d_const_ixs_inline(
-    const T* A,
-    T* out,
-    const unsigned nx
-    )
-{
-
-    const int block_offset = blockIdx.x*blockDim.x;
-    const int gid = block_offset + threadIdx.x;
-    const int D = ixs_len;
-    const int left_extra = ix_min;
-    const int right_extra = ix_max;
-    const int shared_size = left_extra + BLOCKSIZE + right_extra;
-    const int max_ix = nx - 1;
-    __shared__ T tile[shared_size];
-
-    const int right_most = block_offset - left_extra + shared_size;
-    int loc_ix = threadIdx.x;
-    for (int i = gid - left_extra; i < right_most; i += blockDim.x)
-    {
-        if (loc_ix < shared_size)
-        {
-            tile[loc_ix] = A[BOUND(i, max_ix)];
-            loc_ix += blockDim.x;
-        }
-    }
-    __syncthreads();
-
-    if (gid < nx)
-    {
-        out[gid] = stencil_fun_inline_ix<D, T>(&(tile[left_extra + threadIdx.x]));
-    }
-}
-
+*/
+/*
 template<int ixs_len, class T>
 __global__
 void inlinedIndexes_1d(
@@ -167,29 +215,10 @@ void inlinedIndexes_1d(
         out[gid] = sum_acc/D;
     }
 }
+*/
 
-template<int ixs_len, class T>
-__global__
-void inlinedIndexes_1d_const_ixs(
-    const T* A,
-    T* out,
-    const unsigned nx
-    )
-{
-    const int gid = blockIdx.x*blockDim.x + threadIdx.x;
-    const int D = ixs_len;
-    const int max_ix = nx - 1;
-    if (gid < nx)
-    {
-        T sum_acc = 0;
-        for (int i = 0; i < D; ++i)
-        {
-            sum_acc += A[BOUND(gid + ixs[i], max_ix)];
-        }
-        out[gid] = sum_acc/D;
-    }
-}
 
+/*
 template<int ixs_len, class T>
 __global__
 void threadLocalArr_1d(
@@ -323,32 +352,10 @@ void inSharedtiled_1d_const_ixs(
         out[gid] = stencil_fun<ixs_len, T>(subtile);
     }
 }
-
-template<int ixs_len, int ix_min, int ix_max, class T>
-__global__
-void inSharedtiled_1d_const_ixs_inline(
-    const T* A,
-    T* out,
-    const unsigned nx
-    )
-{
-    __shared__ T tile[BLOCKSIZE];
-
-    const int D = ixs_len;
-    const int wasted = ix_min + ix_max;
-    const int offset = (blockDim.x-wasted)*blockIdx.x;
-    const int gid = offset + threadIdx.x - ix_min;
-    const int max_ix = nx - 1;
-    tile[threadIdx.x] = A[BOUND(gid, max_ix)];
-    __syncthreads();
-
-    if ((0 <= gid && gid < nx) && (ix_min <= threadIdx.x && threadIdx.x < BLOCKSIZE-ix_max))
-    {
-        out[gid] = stencil_fun_inline_ix<D, T>(&(tile[threadIdx.x]));
-    }
-}
+*/
 
 
+/*
 template<int ixs_len, int ix_min, int ix_max, class T>
 __global__
 void inSharedtiled_1d(
@@ -411,10 +418,9 @@ void global_temp__1d(
         out[gid] = stencil_fun<D, T>(temp + temp_i_start);
     }
 }
+*/
 
 
-
-#endif
 
 
 
@@ -470,3 +476,4 @@ void breathFirst(
     }
 }
 */
+#endif

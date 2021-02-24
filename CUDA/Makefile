@@ -16,7 +16,7 @@ $(EXECUTABLE): $(SRC) kernels.h kernels-2d.h
 	$(CXX) -o $(EXECUTABLE) $(SRC)
 
 
-run: $(EXECUTABLE) 
+run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
 clean:
