@@ -21,8 +21,8 @@ inline T stencil_fun_inline_ix_2d(const T arr[y_l][x_l], const int y_off, const 
 template<int ixs_len, class T>
 __global__
 void global_reads_2d(
-    const T* A,
-    T* out,
+    const T* __restrict__ A,
+    T* __restrict__ out,
     const unsigned row_len,
     const unsigned col_len
     )
@@ -49,8 +49,8 @@ void global_reads_2d(
 template<int ixs_len, int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
 __global__
 void small_tile_2d(
-    const T* A,
-    T* out,
+    const T* __restrict__ A,
+    T* __restrict__ out,
     const unsigned row_len,
     const unsigned col_len
     )
@@ -83,8 +83,8 @@ void small_tile_2d(
 template<int ixs_len, int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
 __global__
 void big_tile_2d(
-    const T* A,
-    T* out,
+    const T* __restrict__ A,
+    T* __restrict__ out,
     const unsigned row_len,
     const unsigned col_len
     )
