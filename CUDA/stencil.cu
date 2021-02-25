@@ -17,6 +17,7 @@ using std::endl;
 #define CEIL_DIV(x,d) (((x)+(d)-1)/(d))
 
 #define GPU_RUN(call,benchmark_name, preproc, destroy) {\
+    struct timeval t_startpar, t_endpar, t_diffpar;\
     const int mem_size = len*sizeof(T); \
     T* arr_in  = (T*)malloc(mem_size*2); \
     T* arr_out = arr_in + len; \
@@ -41,7 +42,10 @@ using std::endl;
     timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);\
     unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;\
     elapsed /= RUNS;\
-    printf("    mean elapsed time was: %lu microseconds\n", elapsed);\
+    const int n_reads_writes = ixs_len + 1;\
+    const double GBperSec = len * sizeof(T) * n_reads_writes / elapsed / 1e3; \
+    printf("    mean elapsed time was : %lu microseconds\n", elapsed);\
+    printf("    mean GigaBytes per sec: %lf GiBs\n", GBperSec);\
     if (validate(cpu_out,arr_out,len)) \
     { \
         printf("%s\n", "    VALIDATED");\
@@ -50,6 +54,7 @@ using std::endl;
     CUDASSERT(cudaFree(gpu_array_in));\
     (destroy);\
 }
+
 
 static int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
@@ -71,6 +76,30 @@ static inline void cudAssert(cudaError_t exit_code,
 }
 
 #define CUDASSERT(exit_code) { cudAssert((exit_code), __FILE__, __LINE__); }
+
+void measure_memset_bandwidth(const int mem_size){
+    struct timeval t_startpar, t_endpar, t_diffpar;
+    T* gpu_array_in;
+    T* gpu_array_out;
+    CUDASSERT(cudaMalloc((void **) &gpu_array_in, 2*mem_size));
+    gpu_array_out = gpu_array_in + (mem_size / sizeof(T)); \
+    gettimeofday(&t_startpar, NULL);
+    const unsigned RUNS = 100;
+    for(unsigned x = 0; x < RUNS; x++){
+        CUDASSERT(cudaMemcpy(gpu_array_out, gpu_array_in, mem_size, cudaMemcpyDeviceToDevice));
+    }
+    CUDASSERT(cudaDeviceSynchronize());
+    gettimeofday(&t_endpar, NULL);\
+    timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
+    unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
+    elapsed /= RUNS;
+    const int n_reads_writes = 1 + 1;
+    const double GBperSec = mem_size * n_reads_writes / elapsed / 1e3;
+    printf("## Benchmark memcpy device to device ##\n");
+    printf("    mean elapsed time was : %lu microseconds\n", elapsed);
+    printf("    mean GigaBytes per sec: %lf GiBs\n", GBperSec);
+    CUDASSERT(cudaFree(gpu_array_in));\
+}
 
 bool validate(const T* A, const T* B, unsigned int sizeAB){
     int c = 0;
@@ -95,7 +124,7 @@ T stencil_fun_cpu(const T* arr)
     for (int i = 0; i < D; ++i){
         sum_acc += arr[i];
     }
-    return sum_acc/D;
+    return sum_acc / (T)D;
 }
 
 template<int D>
@@ -320,7 +349,6 @@ void doTest()
 {
     const int RUNS = 100;
 
-    struct timeval t_startpar, t_endpar, t_diffpar;
 
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
@@ -414,52 +442,51 @@ void doWideTest()
     free(cpu_ixs);
 }
 
-template<int ixs_len, int ix_min, int ix_max>
+template<int sq_ixs_len, int ix_min, int ix_max>
 void doTest_2D()
 {
     const int RUNS = 100;
 
-    struct timeval t_startpar, t_endpar, t_diffpar;
-
-    const int D = ixs_len * ixs_len;
+    const int ixs_len = sq_ixs_len * sq_ixs_len;
     //const int W = D / 2;
-    const int ixs_size = D*sizeof(int)*2;
+    const int ixs_size = ixs_len*sizeof(int)*2;
     int* cpu_ixs = (int*)malloc(ixs_size);
     {
         int q = 0;
-        for(int i=0; i < ixs_len; i++){
-            for(int j=0; j < ixs_len; j++){
+        for(int i=0; i < sq_ixs_len; i++){
+            for(int j=0; j < sq_ixs_len; j++){
                 cpu_ixs[q++] = i-ix_min;
                 cpu_ixs[q++] = j-ix_min;
             }
         }
-    } // stringCopy(char* from, char* to) { while(*to++ = *from++ ); }
-    // [(-1,-1), (-1,0), (-1, 1), (0,-1), (0,0), (0,1), (1,-1), (1,0), (1,1)]
+    }
     CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
 
-    cout << "const int ixs[" << (D/2) << "] = [";
-    for(int i=0; i < D ; i++){
+    cout << "const int ixs[" << ixs_len << "] = [";
+    for(int i=0; i < ixs_len ; i++){
         cout << " (" << cpu_ixs[i*2] << "," << cpu_ixs[i*2+1] << ")";
-        if(i == D-1)
+        if(i == ixs_len-1)
         { cout << "]" << endl; }
         else{ cout << ", "; }
     }
 
-    const int n_rows = 2000;
-    const int n_columns = 1000;
+    const int n_rows = 2 << 11;
+    const int n_columns = 2 << 10;
     const int len = n_rows * n_columns;
-    T* cpu_out = run_cpu_2d<D>(cpu_ixs,n_rows,n_columns);
+    cout << "{ row_len = " << n_columns << ", col_len = " << n_rows << " }" << endl;
+    T* cpu_out = run_cpu_2d<ixs_len>(cpu_ixs,n_rows,n_columns);
 
+    measure_memset_bandwidth(len * sizeof(T));
 
     {
         GPU_RUN(call_kernel_2d(
-                    (global_reads_2d<D><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
-                ,"## Benchmark 2d global Tile ##",(void)0,(void)0);
+                    (global_reads_2d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                ,"## Benchmark 2d global read ##",(void)0,(void)0);
         GPU_RUN(call_small_tile_2d(
-                    (small_tile_2d<D,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                    (small_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                 ,"## Benchmark 2d small tile ##",(void)0,(void)0);
         GPU_RUN(call_kernel_2d(
-                    (big_tile_2d<D,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                    (big_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
     }
 }
@@ -493,7 +520,7 @@ int main()
     //doWideTest<5,30,30>();
     //doWideTest<5,35,35>();
 
-    doTest_2D<3,1,1>();
+    doTest_2D<5,2,2>();
 
     return 0;
 }
