@@ -238,11 +238,11 @@ void stencil_3d_cpu(
     const int z_block = SQ_BLOCKSIZE; \
     const int y_block = z_block/2; \
     const int x_block = z_block/y_block; \
-    const dim3 block(x_block,y_block,z_block);\
+    const dim3 block(z_block,y_block,x_block);\
     const int BNx = CEIL_DIV(x_len, x_block);\
     const int BNy = CEIL_DIV(y_len, y_block);\
     const int BNz = CEIL_DIV(z_len, z_block);\
-    const dim3 grid(BNx, BNy, BNz);\
+    const dim3 grid(BNz, BNy, BNx);\
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
@@ -559,7 +559,7 @@ void doTest_2D()
 template<int sq_ixs_len, int ix_min, int ix_max>
 void doTest_3D()
 {
-    const int RUNS = 10;
+    const int RUNS = 200;
 
     const int ixs_len = sq_ixs_len * sq_ixs_len * sq_ixs_len;
     const int ixs_size = ixs_len*sizeof(int)*3;
@@ -604,8 +604,8 @@ void doTest_3D()
         /*GPU_RUN(call_small_tile_2d(
                     (small_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                 ,"## Benchmark 2d small tile ##",(void)0,(void)0);
-        GPU_RUN(call_kernel_2d(
-                    (big_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+        GPU_RUN(call_kernel_3d(
+                    (big_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
         */
     }
