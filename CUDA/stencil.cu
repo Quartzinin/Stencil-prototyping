@@ -13,7 +13,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-#define T float
+#define T int
 #define CEIL_DIV(x,d) (((x)+(d)-1)/(d))
 
 #define GPU_RUN(call,benchmark_name, preproc, destroy) {\
@@ -176,6 +176,42 @@ void stencil_2d_cpu(
     }
 }
 
+template<int D>
+void stencil_3d_cpu(
+    const T* start,
+    const int* idxs,
+    T* out,
+    const int x_len,
+    const int y_len,
+    const int z_len)
+{
+    const int max_x_idx = x_len - 1;
+    const int max_y_idx = y_len - 1;
+    const int max_z_idx = z_len - 1;
+    for (int i = 0; i < x_len; ++i)
+    {
+        for (int j = 0; j < y_len; ++j)
+        {
+            for (int k = 0; k < z_len; ++k)
+            {
+                T arr[D];
+                for (int p = 0; p < D; ++p)
+                {
+                    int x = BOUND(i + idxs[p*3  ], max_x_idx);
+                    int y = BOUND(j + idxs[p*3+1], max_y_idx);
+                    int z = BOUND(k + idxs[p*3+2], max_z_idx);
+                    
+                    int index = x * y_len * z_len + y * z_len + z;
+                    arr[p] = start[index];
+                }
+                
+                T lambda_res = stencil_fun_cpu<D>(arr);
+                out[i*y_len*z_len + j*z_len + k] = lambda_res;
+            }
+        }
+    }
+}
+
 #define call_inSharedKernel(kernel) {\
     const int wasted = ix_min + ix_max;\
     const int working_block = BLOCKSIZE-wasted;\
@@ -195,6 +231,18 @@ void stencil_2d_cpu(
     const int BNx = CEIL_DIV(n_columns, SQ_BLOCKSIZE);\
     const int BNy = CEIL_DIV(n_rows, SQ_BLOCKSIZE);\
     const dim3 grid(BNx, BNy, 1);\
+    kernel;\
+    CUDASSERT(cudaDeviceSynchronize());\
+}
+#define call_kernel_3d(kernel) {\
+    const int z_block = SQ_BLOCKSIZE; \
+    const int y_block = z_block/2; \
+    const int x_block = z_block/y_block; \
+    const dim3 block(x_block,y_block,z_block);\
+    const int BNx = CEIL_DIV(x_len, x_block);\
+    const int BNy = CEIL_DIV(y_len, y_block);\
+    const int BNz = CEIL_DIV(z_len, z_block);\
+    const dim3 grid(BNx, BNy, BNz);\
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
@@ -259,6 +307,23 @@ T* run_cpu_2d(const int* idxs, const int n_rows, const int n_columns)
     }
 
     stencil_2d_cpu<D>(cpu_in,idxs,cpu_out,n_rows,n_columns);
+    free(cpu_in);
+    return cpu_out;
+}
+
+template<int D>
+T* run_cpu_3d(const int* idxs, const int x_len, const int y_len, const int z_len)
+{
+    int len = x_len*y_len*z_len;
+    T* cpu_in = (T*)malloc(len*sizeof(T));
+    T* cpu_out = (T*)malloc(len*sizeof(T));
+
+    for (int i = 0; i < len; ++i)
+    {
+        cpu_in[i] = (T)(i+1);
+    }
+
+    stencil_3d_cpu<D>(cpu_in,idxs,cpu_out,x_len,y_len,z_len);
     free(cpu_in);
     return cpu_out;
 }
@@ -491,6 +556,61 @@ void doTest_2D()
     }
 }
 
+template<int sq_ixs_len, int ix_min, int ix_max>
+void doTest_3D()
+{
+    const int RUNS = 10;
+
+    const int ixs_len = sq_ixs_len * sq_ixs_len * sq_ixs_len;
+    const int ixs_size = ixs_len*sizeof(int)*3;
+    int* cpu_ixs = (int*)malloc(ixs_size);
+    {
+        int q = 0;
+        for(int i=0; i < sq_ixs_len; i++){
+            for(int j=0; j < sq_ixs_len; j++){
+                for(int k=0; k < sq_ixs_len; k++){
+                    cpu_ixs[q++] = i-ix_min;
+                    cpu_ixs[q++] = j-ix_min;
+                    cpu_ixs[q++] = k-ix_min;
+                }
+            }
+        }
+    }
+    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+
+    cout << "const int ixs[" << ixs_len << "] = [";
+    for(int i=0; i < ixs_len ; i++){
+        cout << " (" << cpu_ixs[i*2] << "," << cpu_ixs[i*2+1] << "," << cpu_ixs[i*2+2] << ")";
+        if(i == ixs_len-1)
+        { cout << "]" << endl; }
+        else{ cout << ", "; }
+    }
+
+    const int x_len = (2 << 7) + 2;
+    const int y_len = 2 << 7;
+    const int z_len = 2 << 5;
+
+    const int len = x_len * y_len * z_len;
+    cout << "{ x = " << x_len << ", y = " << y_len << ", z = " << z_len << " }" << endl;
+    
+    T* cpu_out = run_cpu_3d<ixs_len>(cpu_ixs,x_len,y_len,z_len);
+
+    measure_memset_bandwidth(len * sizeof(T));
+
+    {
+        GPU_RUN(call_kernel_3d(
+                    (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len, z_len)))
+                ,"## Benchmark 3d global read ##",(void)0,(void)0);
+        /*GPU_RUN(call_small_tile_2d(
+                    (small_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                ,"## Benchmark 2d small tile ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_2d(
+                    (big_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                ,"## Benchmark 2d big tile ##",(void)0,(void)0);
+        */
+    }
+}
+
 int main()
 {
     // tests all kernels
@@ -521,6 +641,7 @@ int main()
     //doWideTest<5,35,35>();
 
     doTest_2D<5,2,2>();
+    doTest_3D<3,2,2>();
 
     return 0;
 }
