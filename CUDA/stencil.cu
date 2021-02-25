@@ -151,7 +151,7 @@ void stencil_1d_cpu(
 template<int D>
 void stencil_2d_cpu(
     const T* start,
-    const int* idxs,
+    const int2* idxs,
     T* out,
     const int n_rows,
     const int n_columns)
@@ -165,8 +165,8 @@ void stencil_2d_cpu(
             T arr[D];
             for (int j = 0; j < D; ++j)
             {
-                int y = BOUND(i + idxs[j*2], max_y_ix);
-                int x = BOUND(k + idxs[j*2+1], max_x_ix);
+                int y = BOUND(i + idxs[j].y, max_y_ix);
+                int x = BOUND(k + idxs[j].x, max_x_ix);
                 int index = y * n_columns + x;
                 arr[j] = start[index];
             }
@@ -247,7 +247,7 @@ T* run_cpu(const int* idxs, const int len)
 }
 
 template<int D>
-T* run_cpu_2d(const int* idxs, const int n_rows, const int n_columns)
+T* run_cpu_2d(const int2* idxs, const int n_rows, const int n_columns)
 {
     int len = n_rows*n_columns;
     T* cpu_in = (T*)malloc(len*sizeof(T));
@@ -396,8 +396,6 @@ void doWideTest()
 {
     const int RUNS = 1000;
 
-    struct timeval t_startpar, t_endpar, t_diffpar;
-
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
     int* cpu_ixs = (int*)malloc(ixs_size);
@@ -449,22 +447,21 @@ void doTest_2D()
 
     const int ixs_len = sq_ixs_len * sq_ixs_len;
     //const int W = D / 2;
-    const int ixs_size = ixs_len*sizeof(int)*2;
-    int* cpu_ixs = (int*)malloc(ixs_size);
+    const int ixs_size = ixs_len*sizeof(int2);
+    int2* cpu_ixs = (int2*)malloc(ixs_size);
     {
         int q = 0;
         for(int i=0; i < sq_ixs_len; i++){
             for(int j=0; j < sq_ixs_len; j++){
-                cpu_ixs[q++] = i-ix_min;
-                cpu_ixs[q++] = j-ix_min;
+                cpu_ixs[q++] = make_int2(j-ix_min, i-ix_min);
             }
         }
     }
-    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+    CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
 
     cout << "const int ixs[" << ixs_len << "] = [";
     for(int i=0; i < ixs_len ; i++){
-        cout << " (" << cpu_ixs[i*2] << "," << cpu_ixs[i*2+1] << ")";
+        cout << " (" << cpu_ixs[i].x << "," << cpu_ixs[i].y << ")";
         if(i == ixs_len-1)
         { cout << "]" << endl; }
         else{ cout << ", "; }
@@ -473,7 +470,8 @@ void doTest_2D()
     const int n_rows = 2 << 11;
     const int n_columns = 2 << 10;
     const int len = n_rows * n_columns;
-    cout << "{ row_len = " << n_columns << ", col_len = " << n_rows << " }" << endl;
+    cout << "{ row_len = " << n_columns << ", col_len = " << n_rows
+         << ", total_len = " << len << " }" << endl;
     T* cpu_out = run_cpu_2d<ixs_len>(cpu_ixs,n_rows,n_columns);
 
     measure_memset_bandwidth(len * sizeof(T));
@@ -488,6 +486,17 @@ void doTest_2D()
         GPU_RUN(call_kernel_2d(
                     (big_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
+        if(ixs_len == 9){
+            GPU_RUN(call_kernel_2d(
+                        (global_reads_2d_9<<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                    ,"## Benchmark 2d global read constant ixs ##",(void)0,(void)0);
+            GPU_RUN(call_small_tile_2d(
+                        (small_tile_2d_9<<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                    ,"## Benchmark 2d small tile constant ixs ##",(void)0,(void)0);
+            GPU_RUN(call_kernel_2d(
+                        (big_tile_2d_9<<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                    ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
+        }
     }
 }
 
@@ -520,7 +529,7 @@ int main()
     //doWideTest<5,30,30>();
     //doWideTest<5,35,35>();
 
-    doTest_2D<5,2,2>();
+    doTest_2D<3,1,1>();
 
     return 0;
 }
