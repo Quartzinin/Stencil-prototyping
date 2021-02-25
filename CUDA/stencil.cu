@@ -480,7 +480,8 @@ void doWideTest()
     const int len = 10000000;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
 
-    //cout << "const int ixs[" << D << "] \n";
+    cout << "const int ixs[" << D << "]" << endl;
+    /*
     cout << "const int ixs[" << D << "] = [";
     for(int i=0; i < D ; i++){
         cout << " " << cpu_ixs[i];
@@ -488,17 +489,33 @@ void doWideTest()
         { cout << "]" << endl; }
         else{ cout << ", "; }
     }
+    */
 
     {
-        GPU_RUN(call_kernel(
-                    (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
-                ,"## Benchmark GPU 1d big-tiled const inline ixs ##",(void)0,(void)0);
+        /*
         GPU_RUN(call_kernel(
                     (inlinedIndexes_1d_const_ixs<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
-                ,"## Benchmark GPU 1d inlined idxs with global reads const ixs ##",(void)0,(void)0);
+                ,"## Benchmark 1d global reads ##",(void)0,(void)0);
         GPU_RUN(call_inSharedKernel(
                     (inSharedtiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,BLOCKSIZE>>>(gpu_array_in, gpu_array_out, len)))
-                ,"## Benchmark GPU 1d in shared tiled const inline ixs ##",(void)0,(void)0);
+                ,"## Benchmark 1d small tile ##",(void)0,(void)0);
+        GPU_RUN(call_kernel(
+                    (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                ,"## Benchmark 1d big tile ##",(void)0,(void)0);
+        */
+        const int cap = 401;
+        const int q_off = (cap - ixs_len)/2;
+        if(3 <= ixs_len && ixs_len <= cap && ixs_len & 1 > 0){
+            GPU_RUN(call_kernel(
+                        (global_read_1d_const<ixs_len,q_off,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                    ,"## Benchmark 1d global reads constant ixs ##",(void)0,(void)0);
+            GPU_RUN(call_inSharedKernel(
+                        (small_tile_1d_const<ixs_len,q_off,ix_min,ix_max><<<grid,BLOCKSIZE>>>(gpu_array_in, gpu_array_out, len)))
+                    ,"## Benchmark 1d small tile constant ixs  ##",(void)0,(void)0);
+            GPU_RUN(call_kernel(
+                        (big_tile_1d_const<ixs_len,q_off,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                    ,"## Benchmark 1d big tile constant ixs ##",(void)0,(void)0);
+        }
     }
 
     free(cpu_out);
@@ -642,16 +659,19 @@ int main()
     //Try with small length ixs, but with a large gap between indices.
 
     //doWideTest<3,256,256>();
-    //doWideTest<3,1,1>();
-    //doWideTest<5,2,2>();
+    doWideTest<3,1,1>();
+    doWideTest<5,2,2>();
+    doWideTest<7,3,3>();
+    doWideTest<9,4,4>();
+    doWideTest<65,32,32>();
     //doWideTest<5,20,20>();
     //doWideTest<15,8,8>();
     //doWideTest<5,30,30>();
     //doWideTest<5,35,35>();
 
-    doTest_2D<3,1,1>();
-    doTest_2D<5,2,2>();
-    doTest_3D<3,2,2>();
+    //doTest_2D<3,1,1>();
+    //doTest_2D<5,2,2>();
+    //doTest_3D<3,2,2>();
 
     return 0;
 }
