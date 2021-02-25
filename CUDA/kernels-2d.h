@@ -11,11 +11,11 @@ __device__
 inline T stencil_fun_inline_ix_2d(const T arr[y_l][x_l], const int y_off, const int x_off){
     T sum_acc = 0;
     for (int i = 0; i < D*2; i += 2 ){
-        const int y = y_off + threadIdx.y + ixs[i  ];
-        const int x = x_off + threadIdx.x + ixs[i+1];
+        const int y = y_off + ixs[i  ];
+        const int x = x_off + ixs[i+1];
         sum_acc += arr[y][x];
     }
-    return sum_acc / D;
+    return sum_acc / (T)D;
 }
 
 template<int ixs_len, class T>
@@ -35,7 +35,7 @@ void global_reads_2d(
 
     if (gidx < row_len && gidy < col_len)
     {
-        int sum_acc = 0;
+        T sum_acc = 0;
         for (int i = 0; i < ixs_len*2; i += 2 ){
             const int y = BOUND(gidy + ixs[i  ], max_y_ix);
             const int x = BOUND(gidx + ixs[i+1], max_x_ix);
@@ -75,7 +75,8 @@ void small_tile_2d(
         &&  (y_axis_min <= threadIdx.y && threadIdx.y < SQ_BLOCKSIZE - y_axis_max)
         )
     {
-        out[gindex] = stencil_fun_inline_ix_2d<ixs_len, T, SQ_BLOCKSIZE,SQ_BLOCKSIZE>(tile,0,0);
+        out[gindex] = stencil_fun_inline_ix_2d<ixs_len, T, SQ_BLOCKSIZE,SQ_BLOCKSIZE>
+                                              (tile, threadIdx.y ,threadIdx.x);
     }
 }
 
@@ -102,30 +103,22 @@ void big_tile_2d(
     const int shared_size_y = SQ_BLOCKSIZE + waste_y;
     __shared__ T tile[shared_size_y][shared_size_x];
 
-    const int gmin_x = block_offset_x - x_axis_min;
-    const int gmin_y = block_offset_y - y_axis_min;
-    const int gmax_x = gmin_x + shared_size_x;
-    const int gmax_y = gmin_y + shared_size_y;
-
-    int local_x = threadIdx.x;
-    int local_y = threadIdx.y;
-    for(int j = gmin_y + threadIdx.y; j < gmax_y; j += blockDim.y){
-        for(int i = gmin_x + threadIdx.x; i < gmax_x; i += blockDim.x){
+    for(int local_y = threadIdx.y; local_y < shared_size_y; local_y += blockDim.y){
+        for(int local_x = threadIdx.x; local_x < shared_size_x; local_x += blockDim.x){
             if(local_x < shared_size_x && local_y < shared_size_y){
-                const int x = BOUND(i, max_x_ix);
-                const int y = BOUND(j, max_y_ix);
-                const int index = y * row_len + x;
+                const int gx = BOUND( local_x + block_offset_x - x_axis_min, max_x_ix);
+                const int gy = BOUND( local_y + block_offset_y - y_axis_min, max_y_ix);
+                const int index = gy * row_len + gx;
                 tile[local_y][local_x] = A[index];
             }
-            local_x += blockDim.x;
         }
-        local_y += blockDim.y;
     }
     __syncthreads();
 
     if((gidx < row_len) && (gidy < col_len))
     {
-        out[gindex] = stencil_fun_inline_ix_2d<ixs_len, T, shared_size_y, shared_size_x>(tile, y_axis_min, x_axis_min);
+        out[gindex] = stencil_fun_inline_ix_2d<ixs_len, T, shared_size_y, shared_size_x>
+                                              (tile, threadIdx.y + y_axis_min, threadIdx.x + x_axis_min);
     }
 }
 
