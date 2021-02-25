@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "kernels.h"
 #include "kernels-2d.h"
+#include "kernels-3d.h"
 using namespace std;
 
 #include <iostream>
