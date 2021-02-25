@@ -235,14 +235,14 @@ void stencil_3d_cpu(
     CUDASSERT(cudaDeviceSynchronize());\
 }
 #define call_kernel_3d(kernel) {\
-    const int z_block = SQ_BLOCKSIZE; \
-    const int y_block = z_block/2; \
-    const int x_block = z_block/y_block; \
-    const dim3 block(z_block,y_block,x_block);\
+    const int x_block = SQ_BLOCKSIZE; \
+    const int y_block = x_block/4; \
+    const int z_block = x_block/y_block; \
+    const dim3 block(x_block,y_block,z_block);\
     const int BNx = CEIL_DIV(x_len, x_block);\
     const int BNy = CEIL_DIV(y_len, y_block);\
     const int BNz = CEIL_DIV(z_len, z_block);\
-    const dim3 grid(BNz, BNy, BNx);\
+    const dim3 grid(BNx, BNy, BNz);\
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
@@ -255,6 +255,22 @@ void stencil_3d_cpu(
     const int BNx = CEIL_DIV(n_columns, working_block_x);\
     const int BNy = CEIL_DIV(n_rows   , working_block_y);\
     const dim3 grid(BNx, BNy, 1);\
+    kernel;\
+    CUDASSERT(cudaDeviceSynchronize());\
+}
+
+#define call_small_tile_3d(kernel) {\
+    const int x_block = SQ_BLOCKSIZE; \
+    const int y_block = x_block/4; \
+    const int z_block = x_block/y_block; \
+    const dim3 block(x_block,y_block,z_block);\
+    const int working_block_z = z_block - (ix_min + ix_max);\
+    const int working_block_y = y_block - (ix_min + ix_max);\
+    const int working_block_x = x_block - (ix_min + ix_max);\
+    const int BNx = CEIL_DIV(x_len, working_block_x);\
+    const int BNy = CEIL_DIV(y_len, working_block_y);\
+    const int BNz = CEIL_DIV(z_len, working_block_z);\
+    const dim3 grid(BNx, BNy, BNz);\
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
@@ -595,28 +611,28 @@ void doTest_3D()
         else{ cout << ", "; }
     }
 
-    const int x_len = (2 << 7) + 2;
-    const int y_len = 2 << 7;
-    const int z_len = 2 << 5;
+    const int z_len = (2 << 7); //outermost
+    const int y_len = 2 << 7; //middle
+    const int x_len = 2 << 6; //innermost
 
-    const int len = x_len * y_len * z_len;
-    cout << "{ x = " << x_len << ", y = " << y_len << ", z = " << z_len << " }" << endl;
+    const int len = z_len * y_len * x_len;
+    cout << "{ z = " << z_len << ", y = " << y_len << ", x = " << x_len << ", total_len = " << len << " }" << endl;
 
-    T* cpu_out = run_cpu_3d<ixs_len>(cpu_ixs,x_len,y_len,z_len);
+    T* cpu_out = run_cpu_3d<ixs_len>(cpu_ixs,z_len,y_len,x_len);
 
     measure_memset_bandwidth(len * sizeof(T));
 
     {
         GPU_RUN(call_kernel_3d(
-                    (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len, z_len)))
+                    (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d global read ##",(void)0,(void)0);
-        /*GPU_RUN(call_small_tile_2d(
-                    (small_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
-                ,"## Benchmark 2d small tile ##",(void)0,(void)0);
+        GPU_RUN(call_small_tile_3d(
+                    (small_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                ,"## Benchmark 3d small tile ##",(void)0,(void)0); 
         GPU_RUN(call_kernel_3d(
-                    (big_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
-                ,"## Benchmark 2d big tile ##",(void)0,(void)0);
-        */
+                    (big_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                ,"## Benchmark 3d big tile ##",(void)0,(void)0);
+        
     }
 }
 
@@ -651,7 +667,7 @@ int main()
 
     doTest_2D<3,1,1>();
     doTest_2D<5,2,2>();
-    doTest_3D<3,2,2>();
+    doTest_3D<6,3,3>();
 
     return 0;
 }
