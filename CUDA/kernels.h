@@ -33,7 +33,7 @@ void inlinedIndexes_1d_const_ixs(
     const unsigned nx
     )
 {
-    const int gid = blockIdx.x*blockDim.x + threadIdx.x;
+    const int gid = blockIdx.x*BLOCKSIZE + threadIdx.x;
     const int max_ix = nx - 1;
     if (gid < nx)
     {
@@ -52,7 +52,7 @@ void inSharedtiled_1d_const_ixs_inline(
     __shared__ T tile[BLOCKSIZE];
 
     const int wasted = ix_min + ix_max;
-    const int offset = (blockDim.x-wasted)*blockIdx.x;
+    const int offset = (BLOCKSIZE-wasted)*blockIdx.x;
     const int gid = offset + threadIdx.x - ix_min;
     const int max_ix = nx - 1;
     tile[threadIdx.x] = A[BOUND(gid, max_ix)];
@@ -73,22 +73,22 @@ void big_tiled_1d_const_ixs_inline(
     )
 {
 
-    const int block_offset = blockIdx.x*blockDim.x;
+    const int block_offset = blockIdx.x*BLOCKSIZE;
     const int gid = block_offset + threadIdx.x;
     const int shared_size = ix_min + BLOCKSIZE + ix_max;
     const int max_ix = nx - 1;
     __shared__ T tile[shared_size];
 
     const int left_most = block_offset - ix_min;
-    const int right_most = left_most + shared_size;
-    int loc_ix = threadIdx.x;
-    for (int i = left_most + threadIdx.x; i < right_most; i += blockDim.x)
+    const int x_iters = (shared_size + (BLOCKSIZE-1)) / BLOCKSIZE;
+    for (int i = 0; i < x_iters; i++)
     {
-        if (loc_ix < shared_size)
+        const int local_x = threadIdx.x + i*BLOCKSIZE;
+        const int gx = local_x + left_most;
+        if (local_x < shared_size)
         {
-            tile[loc_ix] = A[BOUND(i, max_ix)];
+            tile[local_x] = A[BOUND(gx, max_ix)];
         }
-        loc_ix += blockDim.x;
     }
     __syncthreads();
 
