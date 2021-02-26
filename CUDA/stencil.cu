@@ -667,7 +667,7 @@ int main()
 
     doTest_2D<3,1,1>();
     doTest_2D<5,2,2>();
-    doTest_3D<6,3,3>();
+    doTest_3D<3,1,1>();
 
     return 0;
 }
