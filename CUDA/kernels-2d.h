@@ -128,17 +128,19 @@ void big_tile_2d(
 /*
  * versions with hardcoded index arrays:
  */
-template<int D, int y_l, int x_l, int2* qixs, class T>
-__device__
-inline T stencil_fun_2d_ce(const T arr[y_l][x_l], const int y_off, const int x_off){
-    T sum_acc = 0;
-    for (int i = 0; i < D; i++ ){
-        const int y = y_off + qixs[i].y;
-        const int x = x_off + qixs[i].x;
-        sum_acc += arr[y][x];
-    }
-    return sum_acc / (T)D;
-}
+
+#define CONST_9_IXS \
+    const int D = 9;\
+    const int2 qixs[D] = { make_int2(-1,-1), make_int2(0,-1), make_int2(1,-1), make_int2(-1,0)\
+        , make_int2(0,0),  make_int2(1,0),  make_int2(-1,1),  make_int2(0,1),  make_int2(1,1)};
+
+#define CONST_9_WASTE \
+    const int x_axis_min = 1;\
+    const int x_axis_max = 1;\
+    const int y_axis_min = 1;\
+    const int y_axis_max = 1;\
+    const int waste_x = x_axis_min + x_axis_max;\
+    const int waste_y = y_axis_min + y_axis_max;
 
 
 template<class T>
@@ -150,8 +152,7 @@ void global_reads_2d_9(
     const unsigned col_len
     )
 {
-    const int D = 9;
-    const int2 qixs[D] = { make_int2(-1,-1), make_int2(0,-1), make_int2(1,-1), make_int2(-1,0), make_int2(0,0),  make_int2(1,0),  make_int2(-1,1),  make_int2(0,1),  make_int2(1,1)};
+    CONST_9_IXS;
     const int gidx = blockIdx.x*SQ_BLOCKSIZE + threadIdx.x;
     const int gidy = blockIdx.y*SQ_BLOCKSIZE + threadIdx.y;
     const int gindex = gidy * row_len + gidx;
@@ -181,15 +182,8 @@ void small_tile_2d_9(
     const unsigned col_len
     )
 {
-    const int D = 9;
-    const int2 qixs[D] = { make_int2(-1,-1), make_int2(0,-1), make_int2(1,-1), make_int2(-1,0), make_int2(0,0),  make_int2(1,0),  make_int2(-1,1),  make_int2(0,1),  make_int2(1,1)};
-    __shared__ T tile[SQ_BLOCKSIZE][SQ_BLOCKSIZE];
-    const int x_axis_min = 1;
-    const int x_axis_max = 1;
-    const int y_axis_min = 1;
-    const int y_axis_max = 1;
-    const int waste_x = x_axis_min + x_axis_max;
-    const int waste_y = y_axis_min + y_axis_max;
+    CONST_9_IXS;
+    CONST_9_WASTE;
     const int gidx = blockIdx.x*(SQ_BLOCKSIZE - waste_x) + threadIdx.x - x_axis_min;
     const int gidy = blockIdx.y*(SQ_BLOCKSIZE - waste_y) + threadIdx.y - y_axis_min;
     const int gindex = gidy * row_len + gidx;
@@ -198,6 +192,7 @@ void small_tile_2d_9(
     const int x = BOUND(gidx, max_x_ix);
     const int y = BOUND(gidy, max_y_ix);
     const int index = y * row_len + x;
+    __shared__ T tile[SQ_BLOCKSIZE][SQ_BLOCKSIZE];
     tile[threadIdx.y][threadIdx.x] = A[index];
     __syncthreads();
 
@@ -227,14 +222,8 @@ void big_tile_2d_9(
     const unsigned col_len
     )
 {
-    const int D = 9;
-    const int2 qixs[9] = { make_int2(-1,-1), make_int2(0,-1), make_int2(1,-1), make_int2(-1,0), make_int2(0,0),  make_int2(1,0),  make_int2(-1,1),  make_int2(0,1),  make_int2(1,1)};
-    const int x_axis_min = 1;
-    const int x_axis_max = 1;
-    const int y_axis_min = 1;
-    const int y_axis_max = 1;
-    const int waste_x = x_axis_min + x_axis_max;
-    const int waste_y = y_axis_min + y_axis_max;
+    CONST_9_IXS;
+    CONST_9_WASTE;
     const int block_offset_x = blockIdx.x*SQ_BLOCKSIZE;
     const int block_offset_y = blockIdx.y*SQ_BLOCKSIZE;
     const int gidx = block_offset_x + threadIdx.x;
