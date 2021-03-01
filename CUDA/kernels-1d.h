@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include "constants.h"
 
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void inlinedIndexes_1d_const_ixs(
     const T* __restrict__ A,
@@ -26,7 +26,7 @@ void inlinedIndexes_1d_const_ixs(
     }
 }
 
-template<int ixs_len, int ix_min, int ix_max, class T>
+template<int ixs_len, int ix_min, int ix_max>
 __global__
 void inSharedtiled_1d_const_ixs_inline(
     const T* __restrict__ A,
@@ -55,7 +55,7 @@ void inSharedtiled_1d_const_ixs_inline(
     }
 }
 
-template<int ixs_len, int ix_min, int ix_max, class T>
+template<int ixs_len, int ix_min, int ix_max>
 __global__
 void big_tiled_1d_const_ixs_inline(
     const T* __restrict__ A,
@@ -99,7 +99,7 @@ void big_tiled_1d_const_ixs_inline(
  * CONST INDICES
  */
 
-template<int D, int ix_min, int ix_max, class T>
+template<int D, int ix_min, int ix_max>
 __global__
 void global_read_1d_const(
     const T* __restrict__ A,
@@ -122,7 +122,7 @@ void global_read_1d_const(
     }
 }
 
-template<int D, int ix_min, int ix_max, class T>
+template<int D, int ix_min, int ix_max>
 __global__
 void small_tile_1d_const(
     const T* __restrict__ A,
@@ -151,7 +151,7 @@ void small_tile_1d_const(
     }
 }
 
-template<int D, int ix_min, int ix_max, class T>
+template<int D, int ix_min, int ix_max>
 __global__
 void big_tile_1d_const(
     const T* __restrict__ A,
@@ -215,7 +215,7 @@ void big_tile_1d_const(
 
 /*
 
-template<int D, class T>
+template<int D>
 __device__
 inline T stencil_fun(const T* arr){
     T sum_acc = 0;
@@ -225,7 +225,7 @@ inline T stencil_fun(const T* arr){
     return sum_acc/(D);
 }
 
-template<int ixs_len, int ix_min, int ix_max, class T>
+template<int ixs_len, int ix_min, int ix_max>
 __global__
 void big_tiled_1d(
     const T* __restrict__ A,
@@ -267,7 +267,7 @@ void big_tiled_1d(
     }
 }
 
-template<int ixs_len, int ix_min, int ix_max, class T>
+template<int ixs_len, int ix_min, int ix_max>
 __global__
 void big_tiled_1d_const_ixs(
     const T* __restrict__ A,
@@ -308,7 +308,7 @@ void big_tiled_1d_const_ixs(
 }
 */
 /*
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void inlinedIndexes_1d(
     const T* __restrict__ A,
@@ -334,7 +334,7 @@ void inlinedIndexes_1d(
 
 
 /*
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void threadLocalArr_1d(
     const T* __restrict__ A,
@@ -356,7 +356,7 @@ void threadLocalArr_1d(
         out[gid] = stencil_fun<D, T>(arr);
     }
 }
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void threadLocalArr_1d_const_ixs(
     const T* __restrict__ A,
@@ -378,7 +378,7 @@ void threadLocalArr_1d_const_ixs(
     }
 }
 
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void outOfSharedtiled_1d(
     const T* __restrict__ A,
@@ -410,7 +410,7 @@ void outOfSharedtiled_1d(
         out[gid] = stencil_fun<D, T>(arr);
     }
 }
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void outOfSharedtiled_1d_const_ixs(
     const T* __restrict__ A,
@@ -440,7 +440,7 @@ void outOfSharedtiled_1d_const_ixs(
     }
 }
 
-template<int ixs_len, int ix_min, int ix_max, class T>
+template<int ixs_len, int ix_min, int ix_max>
 __global__
 void inSharedtiled_1d_const_ixs(
     const T* __restrict__ A,
@@ -471,7 +471,7 @@ void inSharedtiled_1d_const_ixs(
 
 
 /*
-template<int ixs_len, int ix_min, int ix_max, class T>
+template<int ixs_len, int ix_min, int ix_max>
 __global__
 void inSharedtiled_1d(
     const T* __restrict__ A,
@@ -502,7 +502,7 @@ void inSharedtiled_1d(
     }
 }
 
-template<int D, class T>
+template<int D>
 __global__
 void global_temp__1d_to_temp(
     const T* __restrict__ A,
@@ -520,7 +520,7 @@ void global_temp__1d_to_temp(
     }
 }
 
-template<int D, class T>
+template<int D>
 __global__
 void global_temp__1d(
     const T* temp,

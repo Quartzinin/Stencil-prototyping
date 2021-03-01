@@ -4,21 +4,21 @@
 #include <cuda_runtime.h>
 #include "constants.h"
 
-template<int D, class T, int z_l, int y_l, int x_l>
+template<int D, int z_l, int y_l, int x_l>
 __device__
 inline T stencil_fun_inline_ix_3d(const T arr[z_l][y_l][x_l], const int z_off, const int y_off, const int x_off){
     T sum_acc = 0;
     for (int i = 0; i < D; i++ ){
-        const int z = z_off + ixs_1d[i*3  ];
-        const int y = y_off + ixs_1d[i*3+1];
-        const int x = x_off + ixs_1d[i*3+2];
+        const int z = z_off + ixs_3d[i].z;
+        const int y = y_off + ixs_3d[i].y;
+        const int x = x_off + ixs_3d[i].x;
         sum_acc += arr[z][y][x];
     }
     return sum_acc / (T)D;
 }
 
 
-template<int D, class T>
+template<int D>
 __global__
 void global_reads_3d(
     const T* __restrict__ A,
@@ -41,9 +41,9 @@ void global_reads_3d(
         T sum_acc = 0;
         for (int i = 0; i < D; i++)
         {
-            const int z = BOUND(gidz + ixs_1d[i*3  ],z_len_maxIdx);
-            const int y = BOUND(gidy + ixs_1d[i*3+1],y_len_maxIdx);
-            const int x = BOUND(gidx + ixs_1d[i*3+2],x_len_maxIdx);
+            const int z = BOUND(gidz + ixs_3d[i].z, z_len_maxIdx);
+            const int y = BOUND(gidy + ixs_3d[i].y, y_len_maxIdx);
+            const int x = BOUND(gidx + ixs_3d[i].x, x_len_maxIdx);
             const int index = z*y_len*x_len + y*x_len + x;
             sum_acc += A[index];
         }
@@ -55,8 +55,7 @@ void global_reads_3d(
 template<int ixs_len,
     int z_axis_min, int z_axis_max,
     int y_axis_min, int y_axis_max,
-    int x_axis_min, int x_axis_max,
-class T>
+    int x_axis_min, int x_axis_max>
 __global__
 void small_tile_3d(
     const T* __restrict__ A,
@@ -99,7 +98,7 @@ void small_tile_3d(
         &&  (z_axis_min <= threadIdx.z && threadIdx.z < z_block - z_axis_max)
         )
     {
-        out[gindex] = stencil_fun_inline_ix_3d<ixs_len, T, z_block, y_block, x_block>
+        out[gindex] = stencil_fun_inline_ix_3d<ixs_len, z_block, y_block, x_block>
                                               (tile, threadIdx.z, threadIdx.y, threadIdx.x);
     }
 }
@@ -107,8 +106,7 @@ void small_tile_3d(
 template<int ixs_len,
     int z_axis_min, int z_axis_max,
     int y_axis_min, int y_axis_max,
-    int x_axis_min, int x_axis_max,
-    class T>
+    int x_axis_min, int x_axis_max>
 __global__
 void big_tile_3d(
     const T* __restrict__ A,
@@ -167,7 +165,7 @@ void big_tile_3d(
 
     if((gidx < x_len) && (gidy < y_len) && (gidz < z_len))
     {
-        out[gindex] = stencil_fun_inline_ix_3d<ixs_len, T, shared_size_z, shared_size_y, shared_size_x>
+        out[gindex] = stencil_fun_inline_ix_3d<ixs_len, shared_size_z, shared_size_y, shared_size_x>
                                               (tile, threadIdx.z + z_axis_min, threadIdx.y + y_axis_min, threadIdx.x + x_axis_min);
     }
 }
@@ -179,8 +177,7 @@ void big_tile_3d(
 template<
     int z_axis_min, int z_axis_max,
     int y_axis_min, int y_axis_max,
-    int x_axis_min, int x_axis_max,
-    class T>
+    int x_axis_min, int x_axis_max>
 __global__
 void global_reads_3d_const(
     const T* __restrict__ A,
@@ -228,8 +225,7 @@ void global_reads_3d_const(
 template<
     int z_axis_min, int z_axis_max,
     int y_axis_min, int y_axis_max,
-    int x_axis_min, int x_axis_max,
-class T>
+    int x_axis_min, int x_axis_max>
 __global__
 void small_tile_3d_const(
     const T* __restrict__ A,
@@ -297,8 +293,7 @@ void small_tile_3d_const(
 template<
     int z_axis_min, int z_axis_max,
     int y_axis_min, int y_axis_max,
-    int x_axis_min, int x_axis_max,
-    class T>
+    int x_axis_min, int x_axis_max>
 __global__
 void big_tile_3d_const(
     const T* __restrict__ A,

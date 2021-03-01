@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include "constants.h"
 
-template<int ixs_len, class T>
+template<int ixs_len>
 __global__
 void global_reads_2d(
     const T* __restrict__ A,
@@ -33,7 +33,7 @@ void global_reads_2d(
     }
 }
 
-template<int ixs_len, int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
+template<int ixs_len, int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max>
 __global__
 void small_tile_2d(
     const T* __restrict__ A,
@@ -74,7 +74,7 @@ void small_tile_2d(
     }
 }
 
-template<int ixs_len, int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
+template<int ixs_len, int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max>
 __global__
 void big_tile_2d(
     const T* __restrict__ A,
@@ -133,7 +133,7 @@ void big_tile_2d(
  * CONST INDICE VERSIONS:
  */
 
-template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
+template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max>
 __global__
 void global_reads_2d_const(
     const T* __restrict__ A,
@@ -168,7 +168,7 @@ void global_reads_2d_const(
     }
 }
 
-template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
+template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max>
 __global__
 void small_tile_2d_const(
     const T* __restrict__ A,
@@ -214,7 +214,7 @@ void small_tile_2d_const(
     }
 }
 
-template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
+template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max>
 __global__
 void big_tile_2d_const(
     const T* __restrict__ A,
