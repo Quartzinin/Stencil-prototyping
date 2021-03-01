@@ -259,15 +259,15 @@ void stencil_3d_cpu(
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
-
+ //16
 #define call_small_tile_3d(kernel) {\
-    const int x_block = SQ_BLOCKSIZE; \
-    const int y_block = x_block/4; \
-    const int z_block = x_block/y_block; \
+    const int x_block = X_BLOCK; \
+    const int y_block = Y_BLOCK; \
+    const int z_block = Z_BLOCK; \
     const dim3 block(x_block,y_block,z_block);\
-    const int working_block_z = z_block - (ix_min + ix_max);\
-    const int working_block_y = y_block - (ix_min + ix_max);\
-    const int working_block_x = x_block - (ix_min + ix_max);\
+    const int working_block_z = z_block - (z_min + z_max);\
+    const int working_block_y = y_block - (y_min + y_max);\
+    const int working_block_x = x_block - (x_min + x_max);\
     const int BNx = CEIL_DIV(x_len, working_block_x);\
     const int BNy = CEIL_DIV(y_len, working_block_y);\
     const int BNz = CEIL_DIV(z_len, working_block_z);\
@@ -540,7 +540,7 @@ void doWideTest()
 template<int sq_ixs_len, int ix_min, int ix_max>
 void doTest_2D()
 {
-    const int RUNS = 100;
+    const int RUNS = 200;
 
     const int ixs_len = sq_ixs_len * sq_ixs_len;
     //const int W = D / 2;
@@ -597,31 +597,35 @@ void doTest_2D()
     }
 }
 
-template<int sq_ixs_len, int ix_min, int ix_max>
+template<int z_min, int z_max, int y_min, int y_max, int x_min, int x_max>
 void doTest_3D()
 {
-    const int RUNS = 200;
+    const int RUNS = 1000;
+    const int z_range = (z_min + z_max + 1);
+    const int y_range = (y_min + y_max + 1);
+    const int x_range = (x_min + x_max + 1);
 
-    const int ixs_len = sq_ixs_len * sq_ixs_len * sq_ixs_len;
+    const int ixs_len = z_range  * y_range * x_range;
     const int ixs_size = ixs_len*sizeof(int)*3;
     int* cpu_ixs = (int*)malloc(ixs_size);
-    {
-        int q = 0;
-        for(int i=0; i < sq_ixs_len; i++){
-            for(int j=0; j < sq_ixs_len; j++){
-                for(int k=0; k < sq_ixs_len; k++){
-                    cpu_ixs[q++] = i-ix_min;
-                    cpu_ixs[q++] = j-ix_min;
-                    cpu_ixs[q++] = k-ix_min;
-                }
+
+    int q = 0;
+    for(int i=0; i < z_range; i++){
+        for(int j=0; j < y_range; j++){
+            for(int k=0; k < x_range; k++){
+                cpu_ixs[q] = i-z_min;
+                q++;
+                cpu_ixs[q] = j-y_min;
+                q++;
+                cpu_ixs[q] = k-x_min;
+                q++;
             }
         }
     }
     CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
-
     cout << "const int ixs[" << ixs_len << "] = [";
     for(int i=0; i < ixs_len ; i++){
-        cout << " (" << cpu_ixs[i*2] << "," << cpu_ixs[i*2+1] << "," << cpu_ixs[i*2+2] << ")";
+        cout << " (" << cpu_ixs[i*3] << "," << cpu_ixs[i*3+1] << "," << cpu_ixs[i*3+2] << ")";
         if(i == ixs_len-1)
         { cout << "]" << endl; }
         else{ cout << ", "; }
@@ -642,11 +646,14 @@ void doTest_3D()
         GPU_RUN(call_kernel_3d(
                     (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d global read ##",(void)0,(void)0);
-        GPU_RUN(call_small_tile_3d(
-                    (small_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d small tile ##",(void)0,(void)0);
+        if (!(z_range > Z_BLOCK || y_range > Y_BLOCK || x_range > X_BLOCK))
+        {
+            GPU_RUN(call_small_tile_3d(
+                        (small_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                    ,"## Benchmark 3d small tile ##",(void)0,(void)0);
+        }
         GPU_RUN(call_kernel_3d(
-                    (big_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                    (big_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d big tile ##",(void)0,(void)0);
 
     }
@@ -689,8 +696,10 @@ int main()
     doTest_2D<3,1,1>();
     doTest_2D<5,2,2>();
     doTest_2D<7,3,3>();
-    //doTest_3D<3,1,1>();
 
+    doTest_3D<0,0,0,0,1,1>();
+    doTest_3D<0,0,0,0,5,5>();
+    doTest_3D<0,1,0,1,1,1>();
 
     return 0;
 }

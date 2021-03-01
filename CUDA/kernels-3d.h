@@ -59,16 +59,16 @@ template<int ixs_len,
 class T>
 __global__
 void small_tile_3d(
-    const T* A,
-    T* out,
+    const T* __restrict__ A,
+    T* __restrict__ out,
     const unsigned z_len,
     const unsigned y_len,
     const unsigned x_len
     )
 {
-    const int x_block = SQ_BLOCKSIZE; \
-    const int y_block = x_block/4; \
-    const int z_block = x_block/y_block; \
+    const int x_block = X_BLOCK; \
+    const int y_block = Y_BLOCK; \
+    const int z_block = Z_BLOCK; \
     __shared__ T tile[z_block][y_block][x_block];
     const int waste_x = x_axis_min + x_axis_max;
     const int waste_y = y_axis_min + y_axis_max;
