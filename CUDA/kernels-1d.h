@@ -4,29 +4,6 @@
 #include <cuda_runtime.h>
 #include "constants.h"
 
-/*
-template<int D, class T>
-__device__
-inline int stencil_fun_inline_ix_bounded(const T* arr, const int cix, const int max_ix){
-    T sum_acc = 0;
-    for (int i = 0; i < D; ++i){
-        sum_acc += arr[BOUND(cix + ixs[i], max_ix)];
-    }
-    return sum_acc/D;
-}
-
-template<int D, int arr_len, class T>
-__device__
-inline int stencil_fun_inline_ix(const T arr[arr_len]){
-    T sum_acc = 0;
-    for (int i = 0; i < D; ++i){
-        sum_acc += arr[ixs[i]];
-    }
-    return sum_acc/D;
-}
-*/
-
-
 template<int ixs_len, class T>
 __global__
 void inlinedIndexes_1d_const_ixs(

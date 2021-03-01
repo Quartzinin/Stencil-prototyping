@@ -130,7 +130,7 @@ void big_tile_2d(
 
 
 /*
- * CONST INDICES:
+ * CONST INDICE VERSIONS:
  */
 
 template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
@@ -156,9 +156,9 @@ void global_reads_2d_const(
         T sum_acc = 0;
         #pragma unroll
         for(int i=0; i < y_range; i++){
+            const int y = BOUND(gidy + i - y_axis_min, max_y_ix);
             #pragma unroll
             for(int j=0; j < x_range; j++){
-                const int y = BOUND(gidy + i - y_axis_min, max_y_ix);
                 const int x = BOUND(gidx + j - x_axis_min, max_x_ix);
                 const int index = y * row_len + x;
                 sum_acc += A[index];
@@ -241,15 +241,15 @@ void big_tile_2d_const(
     const int y_iters = (shared_size_y + (SQ_BLOCKSIZE-1)) / SQ_BLOCKSIZE;
     #pragma unroll
     for(int i = 0; i < y_iters; i++){
+        const int local_y = threadIdx.y + i*SQ_BLOCKSIZE;
+        const int gy = BOUND( local_y + block_offset_y - y_axis_min, max_y_ix)
+                     * row_len;
         #pragma unroll
         for(int j = 0; j < x_iters; j++){
-            const int local_y = threadIdx.y + i*SQ_BLOCKSIZE;
             const int local_x = threadIdx.x + j*SQ_BLOCKSIZE;
+            const int gx = BOUND( local_x + block_offset_x - x_axis_min, max_x_ix);
             if(local_x < shared_size_x && local_y < shared_size_y){
-                const int gx = BOUND( local_x + block_offset_x - x_axis_min, max_x_ix);
-                const int gy = BOUND( local_y + block_offset_y - y_axis_min, max_y_ix);
-                const int index = gy * row_len + gx;
-                tile[local_y][local_x] = A[index];
+                tile[local_y][local_x] = A[gx + gy];
             }
         }
     }

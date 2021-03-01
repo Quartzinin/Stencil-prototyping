@@ -476,7 +476,7 @@ void doTest()
 template<int ixs_len, int ix_min, int ix_max>
 void doWideTest()
 {
-    const int RUNS = 1000;
+    const int RUNS = 100;
 
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
@@ -631,7 +631,7 @@ void doTest_3D()
         else{ cout << ", "; }
     }
 
-    const int z_len = (2 << 7); //outermost
+    const int z_len = 2 << 8; //outermost
     const int y_len = 2 << 7; //middle
     const int x_len = 2 << 6; //innermost
 
@@ -655,6 +655,18 @@ void doTest_3D()
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d big tile ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_3d(
+                    (global_reads_3d_const<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                ,"## Benchmark 3d global read const ##",(void)0,(void)0);
+        if (!(z_range > Z_BLOCK || y_range > Y_BLOCK || x_range > X_BLOCK))
+        {
+            GPU_RUN(call_small_tile_3d(
+                        (small_tile_3d_const<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                    ,"## Benchmark 3d small tile const ##",(void)0,(void)0);
+        }
+        GPU_RUN(call_kernel_3d(
+                    (big_tile_3d_const<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                ,"## Benchmark 3d big tile const ##",(void)0,(void)0);
 
     }
 }
@@ -693,13 +705,14 @@ int main()
     //doWideTest<31,15,15>();
     //doWideTest<41,20,20>();
 
-    doTest_2D<3,1,1>();
-    doTest_2D<5,2,2>();
-    doTest_2D<7,3,3>();
+    //doTest_2D<3,1,1>();
+    //doTest_2D<5,2,2>();
+    //doTest_2D<7,3,3>();
 
     doTest_3D<0,0,0,0,1,1>();
     doTest_3D<0,0,0,0,5,5>();
     doTest_3D<0,1,0,1,1,1>();
+    doTest_3D<1,1,1,1,1,1>();
 
     return 0;
 }
