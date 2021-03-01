@@ -12,7 +12,7 @@ default: compile run
 compile: $(EXECUTABLE)
 
 
-$(EXECUTABLE): $(SRC) kernels.h kernels-2d.h kernels-3d.h
+$(EXECUTABLE): $(SRC) kernels-1d.h kernels-2d.h kernels-3d.h
 	$(CXX) -o $(EXECUTABLE) $(SRC)
 
 

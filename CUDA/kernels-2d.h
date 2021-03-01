@@ -4,18 +4,6 @@
 #include <cuda_runtime.h>
 #include "constants.h"
 
-template<int D, int y_l, int x_l, int2 qixs[D], class T>
-__device__
-inline T stencil_fun_inline_ix_2d(const T arr[y_l][x_l], const int y_off, const int x_off){
-    T sum_acc = 0;
-    for (int i = 0; i < D; i++ ){
-        const int y = y_off + qixs[i].y;
-        const int x = x_off + qixs[i].x;
-        sum_acc += arr[y][x];
-    }
-    return sum_acc / (T)D;
-}
-
 template<int ixs_len, class T>
 __global__
 void global_reads_2d(
@@ -34,6 +22,7 @@ void global_reads_2d(
     if (gidx < row_len && gidy < col_len)
     {
         T sum_acc = 0;
+        #pragma unroll
         for (int i = 0; i < ixs_len; i++ ){
             const int y = BOUND(gidy + ixs_2d[i].y, max_y_ix);
             const int x = BOUND(gidx + ixs_2d[i].x, max_x_ix);
@@ -73,8 +62,15 @@ void small_tile_2d(
         &&  (y_axis_min <= threadIdx.y && threadIdx.y < SQ_BLOCKSIZE - y_axis_max)
         )
     {
-        out[gindex] = stencil_fun_inline_ix_2d<ixs_len, SQ_BLOCKSIZE,SQ_BLOCKSIZE, ixs_2d>
-                                              (tile, threadIdx.y ,threadIdx.x);
+        T sum_acc = 0;
+        #pragma unroll
+        for (int i = 0; i < ixs_len; i++ ){
+            const int y = threadIdx.y + ixs_2d[i].y;
+            const int x = threadIdx.x + ixs_2d[i].x;
+            sum_acc += tile[y][x];
+        }
+        out[gindex] = sum_acc / (T)ixs_len;
+
     }
 }
 
@@ -103,7 +99,9 @@ void big_tile_2d(
 
     const int x_iters = (shared_size_x + (SQ_BLOCKSIZE-1)) / SQ_BLOCKSIZE;
     const int y_iters = (shared_size_y + (SQ_BLOCKSIZE-1)) / SQ_BLOCKSIZE;
+    #pragma unroll
     for(int i = 0; i < y_iters; i++){
+        #pragma unroll
         for(int j = 0; j < x_iters; j++){
             const int local_y = threadIdx.y + i*SQ_BLOCKSIZE;
             const int local_x = threadIdx.x + j*SQ_BLOCKSIZE;
@@ -119,40 +117,31 @@ void big_tile_2d(
 
     if((gidx < row_len) && (gidy < col_len))
     {
-        out[gindex] = stencil_fun_inline_ix_2d<ixs_len, shared_size_y, shared_size_x, ixs_2d>
-                                              (tile, threadIdx.y + y_axis_min, threadIdx.x + x_axis_min);
+        T sum_acc = 0;
+        #pragma unroll
+        for (int i = 0; i < ixs_len; i++ ){
+            const int y = threadIdx.y + y_axis_min + ixs_2d[i].y;
+            const int x = threadIdx.x + x_axis_min + ixs_2d[i].x;
+            sum_acc += tile[y][x];
+        }
+        out[gindex] = sum_acc / (T)ixs_len;
     }
 }
 
 
 /*
- * versions with hardcoded index arrays:
+ * CONST INDICES:
  */
 
-#define CONST_9_IXS \
-    const int D = 9;\
-    const int2 qixs[D] = { make_int2(-1,-1), make_int2(0,-1), make_int2(1,-1), make_int2(-1,0)\
-        , make_int2(0,0),  make_int2(1,0),  make_int2(-1,1),  make_int2(0,1),  make_int2(1,1)};
-
-#define CONST_9_WASTE \
-    const int x_axis_min = 1;\
-    const int x_axis_max = 1;\
-    const int y_axis_min = 1;\
-    const int y_axis_max = 1;\
-    const int waste_x = x_axis_min + x_axis_max;\
-    const int waste_y = y_axis_min + y_axis_max;
-
-
-template<class T>
+template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
 __global__
-void global_reads_2d_9(
+void global_reads_2d_const(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned row_len,
     const unsigned col_len
     )
 {
-    CONST_9_IXS;
     const int gidx = blockIdx.x*SQ_BLOCKSIZE + threadIdx.x;
     const int gidy = blockIdx.y*SQ_BLOCKSIZE + threadIdx.y;
     const int gindex = gidy * row_len + gidx;
@@ -161,29 +150,36 @@ void global_reads_2d_9(
 
     if (gidx < row_len && gidy < col_len)
     {
-
+        const int x_range = x_axis_max + x_axis_min + 1;
+        const int y_range = y_axis_max + y_axis_min + 1;
+        const int total_range = x_range * y_range;
         T sum_acc = 0;
-        for (int i = 0; i < D; i++ ){
-            const int y = BOUND(gidy + qixs[i].y, max_y_ix);
-            const int x = BOUND(gidx + qixs[i].x, max_x_ix);
-            const int index = y * row_len + x;
-            sum_acc += A[index];
+        #pragma unroll
+        for(int i=0; i < y_range; i++){
+            #pragma unroll
+            for(int j=0; j < x_range; j++){
+                const int y = BOUND(gidy + i - y_axis_min, max_y_ix);
+                const int x = BOUND(gidx + j - x_axis_min, max_x_ix);
+                const int index = y * row_len + x;
+                sum_acc += A[index];
+            }
         }
-        out[gindex] = sum_acc / (T)D;
+        out[gindex] = sum_acc / (T)total_range;
     }
 }
 
-template<class T>
+template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
 __global__
-void small_tile_2d_9(
+void small_tile_2d_const(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned row_len,
     const unsigned col_len
     )
 {
-    CONST_9_IXS;
-    CONST_9_WASTE;
+    __shared__ T tile[SQ_BLOCKSIZE][SQ_BLOCKSIZE];
+    const int waste_x = x_axis_min + x_axis_max;
+    const int waste_y = y_axis_min + y_axis_max;
     const int gidx = blockIdx.x*(SQ_BLOCKSIZE - waste_x) + threadIdx.x - x_axis_min;
     const int gidy = blockIdx.y*(SQ_BLOCKSIZE - waste_y) + threadIdx.y - y_axis_min;
     const int gindex = gidy * row_len + gidx;
@@ -192,7 +188,6 @@ void small_tile_2d_9(
     const int x = BOUND(gidx, max_x_ix);
     const int y = BOUND(gidy, max_y_ix);
     const int index = y * row_len + x;
-    __shared__ T tile[SQ_BLOCKSIZE][SQ_BLOCKSIZE];
     tile[threadIdx.y][threadIdx.x] = A[index];
     __syncthreads();
 
@@ -202,28 +197,34 @@ void small_tile_2d_9(
         &&  (y_axis_min <= threadIdx.y && threadIdx.y < SQ_BLOCKSIZE - y_axis_max)
         )
     {
+        const int x_range = x_axis_max + x_axis_min + 1;
+        const int y_range = y_axis_max + y_axis_min + 1;
+        const int total_range = x_range * y_range;
         T sum_acc = 0;
-        for (int i = 0; i < D; i++ ){
-            const int y = threadIdx.y + qixs[i].y;
-            const int x = threadIdx.x + qixs[i].x;
-            sum_acc += tile[y][x];
+        #pragma unroll
+        for(int i=0; i < y_range; i++){
+            #pragma unroll
+            for(int j=0; j < x_range; j++){
+                const int y = threadIdx.y + i - y_axis_min;
+                const int x = threadIdx.x + j - x_axis_min;
+                sum_acc += tile[y][x];
+            }
         }
-        const T lambda_res = sum_acc / (T)D;
-        out[gindex] = lambda_res;
+        out[gindex] = sum_acc / (T)total_range;
     }
 }
 
-template<class T>
+template<int x_axis_min, int x_axis_max, int y_axis_min, int y_axis_max, class T>
 __global__
-void big_tile_2d_9(
+void big_tile_2d_const(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned row_len,
     const unsigned col_len
     )
 {
-    CONST_9_IXS;
-    CONST_9_WASTE;
+    const int waste_x = x_axis_min + x_axis_max;
+    const int waste_y = y_axis_min + y_axis_max;
     const int block_offset_x = blockIdx.x*SQ_BLOCKSIZE;
     const int block_offset_y = blockIdx.y*SQ_BLOCKSIZE;
     const int gidx = block_offset_x + threadIdx.x;
@@ -238,7 +239,9 @@ void big_tile_2d_9(
 
     const int x_iters = (shared_size_x + (SQ_BLOCKSIZE-1)) / SQ_BLOCKSIZE;
     const int y_iters = (shared_size_y + (SQ_BLOCKSIZE-1)) / SQ_BLOCKSIZE;
+    #pragma unroll
     for(int i = 0; i < y_iters; i++){
+        #pragma unroll
         for(int j = 0; j < x_iters; j++){
             const int local_y = threadIdx.y + i*SQ_BLOCKSIZE;
             const int local_x = threadIdx.x + j*SQ_BLOCKSIZE;
@@ -250,21 +253,29 @@ void big_tile_2d_9(
             }
         }
     }
-
     __syncthreads();
 
     if((gidx < row_len) && (gidy < col_len))
     {
+        const int x_range = x_axis_max + x_axis_min + 1;
+        const int y_range = y_axis_max + y_axis_min + 1;
+        const int total_range = x_range * y_range;
         T sum_acc = 0;
-        for (int i = 0; i < D; i++ ){
-            const int y = y_axis_min + threadIdx.y + qixs[i].y;
-            const int x = x_axis_min + threadIdx.x + qixs[i].x;
-            sum_acc += tile[y][x];
+        #pragma unroll
+        for(int i=0; i < y_range; i++){
+            #pragma unroll
+            for(int j=0; j < x_range; j++){
+                const int y = threadIdx.y + i;
+                const int x = threadIdx.x + j;
+                sum_acc += tile[y][x];
+            }
         }
-        const T lambda_res = sum_acc / (T)D;
-        out[gindex] = lambda_res;
+        out[gindex] = sum_acc / (T)total_range;
     }
 }
+
+
+
 
 #endif
 

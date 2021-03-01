@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include <assert.h>
 #include <stdio.h>
-#include "kernels.h"
+#include "kernels-1d.h"
 #include "kernels-2d.h"
 #include "kernels-3d.h"
 using namespace std;
@@ -213,6 +213,7 @@ void stencil_3d_cpu(
 }
 
 #define call_inSharedKernel(kernel) {\
+    const int block = BLOCKSIZE;\
     const int wasted = ix_min + ix_max;\
     const int working_block = BLOCKSIZE-wasted;\
     const int grid = (wasted + len + (working_block-1)) / working_block;\
@@ -365,7 +366,7 @@ void doAllTest()
     int* gpu_ixs;
     CUDASSERT(cudaMalloc((void **) &gpu_ixs, ixs_size));
     CUDASSERT(cudaMemcpy(gpu_ixs, cpu_ixs, ixs_size, cudaMemcpyHostToDevice));
-    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+    CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
     const int len = 2 << 20;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
@@ -442,7 +443,7 @@ void doTest()
         {}
         else { printf("index array contains indexes not in range\n"); exit(1);}
     }
-    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+    CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
     const int len = 2 << 20;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
@@ -491,9 +492,9 @@ void doWideTest()
         {}
         else { printf("index array contains indexes not in range\n"); exit(1);}
     }
-    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+    CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
-    const int len = 2 << 20;
+    const int len = 2 << 22;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
 
     cout << "const int ixs[" << D << "]" << endl;
@@ -508,30 +509,28 @@ void doWideTest()
     */
 
     {
-        /*
         GPU_RUN(call_kernel(
                     (inlinedIndexes_1d_const_ixs<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d global reads ##",(void)0,(void)0);
         GPU_RUN(call_inSharedKernel(
-                    (inSharedtiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,BLOCKSIZE>>>(gpu_array_in, gpu_array_out, len)))
+                    (inSharedtiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d small tile ##",(void)0,(void)0);
         GPU_RUN(call_kernel(
                     (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d big tile ##",(void)0,(void)0);
-        */
-        const int cap = 401;
-        const int q_off = (cap - ixs_len)/2;
-        if(3 <= ixs_len && ixs_len <= cap && ixs_len & 1 > 0){
+
+        if(ixs_len == ix_min + ix_max + 1){
             GPU_RUN(call_kernel(
-                        (global_read_1d_const<ixs_len,q_off,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                        (global_read_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                     ,"## Benchmark 1d global reads constant ixs ##",(void)0,(void)0);
             GPU_RUN(call_inSharedKernel(
-                        (small_tile_1d_const<ixs_len,q_off,ix_min,ix_max><<<grid,BLOCKSIZE>>>(gpu_array_in, gpu_array_out, len)))
+                        (small_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                     ,"## Benchmark 1d small tile constant ixs  ##",(void)0,(void)0);
             GPU_RUN(call_kernel(
-                        (big_tile_1d_const<ixs_len,q_off,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                        (big_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                     ,"## Benchmark 1d big tile constant ixs ##",(void)0,(void)0);
         }
+
     }
 
     free(cpu_out);
@@ -584,15 +583,15 @@ void doTest_2D()
         GPU_RUN(call_kernel_2d(
                     (big_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
-        if(ixs_len == 9){
+        if(ixs_len == (ix_min + ix_max + 1) * (ix_min + ix_max + 1)){
             GPU_RUN(call_kernel_2d(
-                        (global_reads_2d_9<<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                        (global_reads_2d_const<ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                     ,"## Benchmark 2d global read constant ixs ##",(void)0,(void)0);
             GPU_RUN(call_small_tile_2d(
-                        (small_tile_2d_9<<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                        (small_tile_2d_const<ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                     ,"## Benchmark 2d small tile constant ixs ##",(void)0,(void)0);
             GPU_RUN(call_kernel_2d(
-                        (big_tile_2d_9<<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
+                        (big_tile_2d_const<ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, n_columns, n_rows)))
                     ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
         }
     }
@@ -618,7 +617,7 @@ void doTest_3D()
             }
         }
     }
-    CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
+    CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
     cout << "const int ixs[" << ixs_len << "] = [";
     for(int i=0; i < ixs_len ; i++){
@@ -675,20 +674,21 @@ int main()
     //Try with small length ixs, but with a large gap between indices.
 
     //doWideTest<3,256,256>();
-    doWideTest<3,1,1>();
-    doWideTest<5,2,2>();
-    doWideTest<7,3,3>();
-    doWideTest<9,4,4>();
-    doWideTest<21,10,10>();
-    doWideTest<23,11,11>();
-    doWideTest<25,12,12>();
-    doWideTest<27,13,13>();
-    doWideTest<29,14,14>();
-    doWideTest<31,15,15>();
-    doWideTest<41,20,20>();
+    //doWideTest<3,1,1>();
+    //doWideTest<5,2,2>();
+    //doWideTest<7,3,3>();
+    //doWideTest<9,4,4>();
+    //doWideTest<21,10,10>();
+    //doWideTest<23,11,11>();
+    //doWideTest<25,12,12>();
+    //doWideTest<27,13,13>();
+    //doWideTest<29,14,14>();
+    //doWideTest<31,15,15>();
+    //doWideTest<41,20,20>();
 
     doTest_2D<3,1,1>();
     doTest_2D<5,2,2>();
+    doTest_2D<7,3,3>();
     //doTest_3D<3,1,1>();
 
 

@@ -9,9 +9,9 @@ __device__
 inline T stencil_fun_inline_ix_3d(const T arr[z_l][y_l][x_l], const int z_off, const int y_off, const int x_off){
     T sum_acc = 0;
     for (int i = 0; i < D; i++ ){
-        const int z = z_off + ixs[i*3  ];
-        const int y = y_off + ixs[i*3+1];
-        const int x = x_off + ixs[i*3+2];
+        const int z = z_off + ixs_1d[i*3  ];
+        const int y = y_off + ixs_1d[i*3+1];
+        const int x = x_off + ixs_1d[i*3+2];
         sum_acc += arr[z][y][x];
     }
     return sum_acc / (T)D;
@@ -35,16 +35,16 @@ void global_reads_3d(
     const int y_len_maxIdx = y_len - 1;
     const int x_len_maxIdx = x_len - 1;
     const int z_len_maxIdx = z_len - 1;
-    
+
     if (gidx < x_len && gidy < y_len && gidz < z_len)
     {
         T sum_acc = 0;
         for (int i = 0; i < D; i++)
         {
-            const int z = BOUND(gidz + ixs[i*3  ],z_len_maxIdx);
-            const int y = BOUND(gidy + ixs[i*3+1],y_len_maxIdx);
-            const int x = BOUND(gidx + ixs[i*3+2],x_len_maxIdx);
-            const int index = z*y_len*x_len + y*x_len + x; 
+            const int z = BOUND(gidz + ixs_1d[i*3  ],z_len_maxIdx);
+            const int y = BOUND(gidy + ixs_1d[i*3+1],y_len_maxIdx);
+            const int x = BOUND(gidx + ixs_1d[i*3+2],x_len_maxIdx);
+            const int index = z*y_len*x_len + y*x_len + x;
             sum_acc += A[index];
         }
         out[gindex] = sum_acc / (T)D;
@@ -52,9 +52,9 @@ void global_reads_3d(
 }
 
 
-template<int ixs_len, 
-    int z_axis_min, int z_axis_max, 
-    int y_axis_min, int y_axis_max, 
+template<int ixs_len,
+    int z_axis_min, int z_axis_max,
+    int y_axis_min, int y_axis_max,
     int x_axis_min, int x_axis_max,
 class T>
 __global__
@@ -97,17 +97,17 @@ void small_tile_3d(
         &&  (y_axis_min <= threadIdx.y && threadIdx.y < y_block - y_axis_max)
         &&  (0 <= gidz && gidz < z_len)
         &&  (z_axis_min <= threadIdx.z && threadIdx.z < z_block - z_axis_max)
-        )  
+        )
     {
         out[gindex] = stencil_fun_inline_ix_3d<ixs_len, T, z_block, y_block, x_block>
                                               (tile, threadIdx.z, threadIdx.y, threadIdx.x);
     }
 }
 
-template<int ixs_len, 
-    int z_axis_min, int z_axis_max, 
-    int y_axis_min, int y_axis_max, 
-    int x_axis_min, int x_axis_max, 
+template<int ixs_len,
+    int z_axis_min, int z_axis_max,
+    int y_axis_min, int y_axis_max,
+    int x_axis_min, int x_axis_max,
     class T>
 __global__
 void big_tile_3d(
@@ -152,7 +152,7 @@ void big_tile_3d(
                 const int local_z = threadIdx.z + i*block_z;
                 const int local_y = threadIdx.y + j*block_y;
                 const int local_x = threadIdx.x + k*block_x;
-                
+
                 if(local_x < shared_size_x && local_y < shared_size_y && local_z < shared_size_z){
                     const int gx = BOUND( local_x + block_offset_x - x_axis_min, max_x_idx);
                     const int gy = BOUND( local_y + block_offset_y - y_axis_min, max_y_idx);
