@@ -367,7 +367,7 @@ void doAllTest()
     CUDASSERT(cudaMemcpy(gpu_ixs, cpu_ixs, ixs_size, cudaMemcpyHostToDevice));
     CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
 
-    const int len = 5000000;
+    const int len = 2 << 20;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
 
     cout << "const int ixs[" << D << "] = [";
@@ -444,7 +444,7 @@ void doTest()
     }
     CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
 
-    const int len = 10000000;
+    const int len = 2 << 20;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
 
     cout << "const int ixs[" << D << "] \n";
@@ -493,7 +493,7 @@ void doWideTest()
     }
     CUDASSERT(cudaMemcpyToSymbol(ixs, cpu_ixs, ixs_size));
 
-    const int len = 10000000;
+    const int len = 2 << 20;
     T* cpu_out = run_cpu<D>(cpu_ixs,len);
 
     cout << "const int ixs[" << D << "]" << endl;
@@ -565,8 +565,8 @@ void doTest_2D()
         else{ cout << ", "; }
     }
 
-    const int n_rows = 2 << 11;
-    const int n_columns = 2 << 10;
+    const int n_rows = 2 << 12;
+    const int n_columns = 2 << 8;
     const int len = n_rows * n_columns;
     cout << "{ row_len = " << n_columns << ", col_len = " << n_rows
          << ", total_len = " << len << " }" << endl;
@@ -645,11 +645,11 @@ void doTest_3D()
                 ,"## Benchmark 3d global read ##",(void)0,(void)0);
         GPU_RUN(call_small_tile_3d(
                     (small_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d small tile ##",(void)0,(void)0); 
+                ,"## Benchmark 3d small tile ##",(void)0,(void)0);
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d<ixs_len,ix_min,ix_max,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d big tile ##",(void)0,(void)0);
-        
+
     }
 }
 
@@ -679,15 +679,17 @@ int main()
     doWideTest<5,2,2>();
     doWideTest<7,3,3>();
     doWideTest<9,4,4>();
-    doWideTest<65,32,32>();
-    //doWideTest<5,20,20>();
-    //doWideTest<15,8,8>();
-    //doWideTest<5,30,30>();
-    //doWideTest<5,35,35>();
+    doWideTest<21,10,10>();
+    doWideTest<23,11,11>();
+    doWideTest<25,12,12>();
+    doWideTest<27,13,13>();
+    doWideTest<29,14,14>();
+    doWideTest<31,15,15>();
+    doWideTest<41,20,20>();
 
     doTest_2D<3,1,1>();
     doTest_2D<5,2,2>();
-    doTest_3D<3,1,1>();
+    //doTest_3D<3,1,1>();
 
 
     return 0;
