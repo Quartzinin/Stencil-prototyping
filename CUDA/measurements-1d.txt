@@ -1,0 +1,276 @@
+ixs[3] = [ -1,  0,  1
+## Benchmark 1d global reads constant ixs ## : 917 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1011 microseconds
+## Benchmark 1d big tile constant ixs ## : 1016 microseconds
+ixs[5] = [ -2,  -1,  0, 
+## Benchmark 1d global reads constant ixs ## : 919 microseconds
+## Benchmark 1d small tile constant ixs  ## : 912 microseconds
+## Benchmark 1d big tile constant ixs ## : 960 microseconds
+ixs[7] = [ -3,  -2,  -1, 
+## Benchmark 1d global reads constant ixs ## : 1118 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1001 microseconds
+## Benchmark 1d big tile constant ixs ## : 1026 microseconds
+ixs[9] = [ -4,  -3,  -2, 
+## Benchmark 1d global reads constant ixs ## : 1205 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1031 microseconds
+## Benchmark 1d big tile constant ixs ## : 1075 microseconds
+ixs[11] = [ -5,  -4,  -3, 
+## Benchmark 1d global reads constant ixs ## : 1331 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1121 microseconds
+## Benchmark 1d big tile constant ixs ## : 1139 microseconds
+ixs[13] = [ -6,  -5,  -4, 
+## Benchmark 1d global reads constant ixs ## : 1468 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1172 microseconds
+## Benchmark 1d big tile constant ixs ## : 1186 microseconds
+ixs[15] = [ -7,  -6,  -5, 
+## Benchmark 1d global reads constant ixs ## : 1589 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1209 microseconds
+## Benchmark 1d big tile constant ixs ## : 1255 microseconds
+ixs[17] = [ -8,  -7,  -6, 
+## Benchmark 1d global reads constant ixs ## : 1777 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1301 microseconds
+## Benchmark 1d big tile constant ixs ## : 1290 microseconds
+ixs[19] = [ -9,  -8,  -7, 
+## Benchmark 1d global reads constant ixs ## : 1839 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1354 microseconds
+## Benchmark 1d big tile constant ixs ## : 1347 microseconds
+ixs[21] = [ -10,  -9,  -8, 
+## Benchmark 1d global reads constant ixs ## : 1955 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1390 microseconds
+## Benchmark 1d big tile constant ixs ## : 1392 microseconds
+ixs[23] = [ -11,  -10,  -9, 
+## Benchmark 1d global reads constant ixs ## : 2101 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1480 microseconds
+## Benchmark 1d big tile constant ixs ## : 1466 microseconds
+ixs[25] = [ -12,  -11,  -10, 
+## Benchmark 1d global reads constant ixs ## : 2271 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1537 microseconds
+## Benchmark 1d big tile constant ixs ## : 1521 microseconds
+ixs[27] = [ -13,  -12,  -11, 
+## Benchmark 1d global reads constant ixs ## : 2404 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1578 microseconds
+## Benchmark 1d big tile constant ixs ## : 1577 microseconds
+ixs[29] = [ -14,  -13,  -12, 
+## Benchmark 1d global reads constant ixs ## : 2561 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1658 microseconds
+## Benchmark 1d big tile constant ixs ## : 1641 microseconds
+ixs[31] = [ -15,  -14,  -13, 
+## Benchmark 1d global reads constant ixs ## : 2575 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1721 microseconds
+## Benchmark 1d big tile constant ixs ## : 1691 microseconds
+ixs[33] = [ -16,  -15,  -14, 
+## Benchmark 1d global reads constant ixs ## : 2599 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1746 microseconds
+## Benchmark 1d big tile constant ixs ## : 1742 microseconds
+ixs[35] = [ -17,  -16,  -15, 
+## Benchmark 1d global reads constant ixs ## : 2779 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1832 microseconds
+## Benchmark 1d big tile constant ixs ## : 1799 microseconds
+ixs[37] = [ -18,  -17,  -16, 
+## Benchmark 1d global reads constant ixs ## : 2920 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1899 microseconds
+## Benchmark 1d big tile constant ixs ## : 1854 microseconds
+ixs[39] = [ -19,  -18,  -17, 
+## Benchmark 1d global reads constant ixs ## : 3021 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1923 microseconds
+## Benchmark 1d big tile constant ixs ## : 1900 microseconds
+ixs[41] = [ -20,  -19,  -18, 
+## Benchmark 1d global reads constant ixs ## : 3179 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2012 microseconds
+## Benchmark 1d big tile constant ixs ## : 1955 microseconds
+ixs[43] = [ -21,  -20,  -19, 
+## Benchmark 1d global reads constant ixs ## : 3293 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2076 microseconds
+## Benchmark 1d big tile constant ixs ## : 2015 microseconds
+ixs[45] = [ -22,  -21,  -20, 
+## Benchmark 1d global reads constant ixs ## : 3390 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2117 microseconds
+## Benchmark 1d big tile constant ixs ## : 2065 microseconds
+ixs[47] = [ -23,  -22,  -21, 
+## Benchmark 1d global reads constant ixs ## : 3551 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2209 microseconds
+## Benchmark 1d big tile constant ixs ## : 2140 microseconds
+ixs[49] = [ -24,  -23,  -22, 
+## Benchmark 1d global reads constant ixs ## : 4474 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2264 microseconds
+## Benchmark 1d big tile constant ixs ## : 2196 microseconds
+ixs[51] = [ -25,  -24,  -23, 
+## Benchmark 1d global reads constant ixs ## : 4062 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2317 microseconds
+## Benchmark 1d big tile constant ixs ## : 2247 microseconds
+ixs[101] = [ -50,  -49,  -48, 
+## Benchmark 1d global reads constant ixs ## : 7807 microseconds
+## Benchmark 1d small tile constant ixs  ## : 3740 microseconds
+## Benchmark 1d big tile constant ixs ## : 3787 microseconds
+ixs[201] = [ -100,  -99,  -98, 
+## Benchmark 1d global reads constant ixs ## : 14413 microseconds
+## Benchmark 1d small tile constant ixs  ## : 6819 microseconds
+## Benchmark 1d big tile constant ixs ## : 6840 microseconds
+ixs[301] = [ -150,  -149,  -148, 
+## Benchmark 1d global reads constant ixs ## : 21655 microseconds
+## Benchmark 1d small tile constant ixs  ## : 10611 microseconds
+## Benchmark 1d big tile constant ixs ## : 9966 microseconds
+ixs[401] = [ -200,  -199,  -198, 
+## Benchmark 1d global reads constant ixs ## : 27675 microseconds
+## Benchmark 1d small tile constant ixs  ## : 13570 microseconds
+## Benchmark 1d big tile constant ixs ## : 13240 microseconds
+ixs[501] = [ -250,  -249,  -248, 
+## Benchmark 1d global reads constant ixs ## : 34323 microseconds
+## Benchmark 1d small tile constant ixs  ## : 18133 microseconds
+## Benchmark 1d big tile constant ixs ## : 16542 microseconds
+ixs[601] = [ -300,  -299,  -298, 
+## Benchmark 1d global reads constant ixs ## : 41517 microseconds
+## Benchmark 1d small tile constant ixs  ## : 23384 microseconds
+## Benchmark 1d big tile constant ixs ## : 19770 microseconds
+ixs[701] = [ -350,  -349,  -348, 
+## Benchmark 1d global reads constant ixs ## : 49598 microseconds
+## Benchmark 1d small tile constant ixs  ## : 28529 microseconds
+## Benchmark 1d big tile constant ixs ## : 22908 microseconds
+ixs[801] = [ -400,  -399,  -398, 
+## Benchmark 1d global reads constant ixs ## : 54935 microseconds
+## Benchmark 1d small tile constant ixs  ## : 32070 microseconds
+## Benchmark 1d big tile constant ixs ## : 26119 microseconds
+ixs[901] = [ -450,  -449,  -448, 
+## Benchmark 1d global reads constant ixs ## : 62003 microseconds
+## Benchmark 1d small tile constant ixs  ## : 35112 microseconds
+## Benchmark 1d big tile constant ixs ## : 29394 microseconds
+ixs[1001] = [ -500,  -499,  -498, 
+## Benchmark 1d global reads constant ixs ## : 69965 microseconds
+## Benchmark 1d small tile constant ixs  ## : 169687 microseconds
+## Benchmark 1d big tile constant ixs ## : 32668 microseconds
+ixs[3] = [ -2,  0,  2
+## Benchmark 1d global reads constant ixs ## : 806 microseconds
+## Benchmark 1d small tile constant ixs  ## : 882 microseconds
+## Benchmark 1d big tile constant ixs ## : 938 microseconds
+ixs[3] = [ -3,  0,  3
+## Benchmark 1d global reads constant ixs ## : 807 microseconds
+## Benchmark 1d small tile constant ixs  ## : 884 microseconds
+## Benchmark 1d big tile constant ixs ## : 937 microseconds
+ixs[3] = [ -4,  0,  4
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 882 microseconds
+## Benchmark 1d big tile constant ixs ## : 934 microseconds
+ixs[3] = [ -5,  0,  5
+## Benchmark 1d global reads constant ixs ## : 805 microseconds
+## Benchmark 1d small tile constant ixs  ## : 886 microseconds
+## Benchmark 1d big tile constant ixs ## : 934 microseconds
+ixs[3] = [ -6,  0,  6
+## Benchmark 1d global reads constant ixs ## : 805 microseconds
+## Benchmark 1d small tile constant ixs  ## : 888 microseconds
+## Benchmark 1d big tile constant ixs ## : 934 microseconds
+ixs[3] = [ -7,  0,  7
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 890 microseconds
+## Benchmark 1d big tile constant ixs ## : 934 microseconds
+ixs[3] = [ -8,  0,  8
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 877 microseconds
+## Benchmark 1d big tile constant ixs ## : 935 microseconds
+ixs[3] = [ -9,  0,  9
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 892 microseconds
+## Benchmark 1d big tile constant ixs ## : 935 microseconds
+ixs[3] = [ -10,  0,  10
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 893 microseconds
+## Benchmark 1d big tile constant ixs ## : 935 microseconds
+ixs[3] = [ -11,  0,  11
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 895 microseconds
+## Benchmark 1d big tile constant ixs ## : 935 microseconds
+ixs[3] = [ -12,  0,  12
+## Benchmark 1d global reads constant ixs ## : 805 microseconds
+## Benchmark 1d small tile constant ixs  ## : 894 microseconds
+## Benchmark 1d big tile constant ixs ## : 938 microseconds
+ixs[3] = [ -13,  0,  13
+## Benchmark 1d global reads constant ixs ## : 806 microseconds
+## Benchmark 1d small tile constant ixs  ## : 898 microseconds
+## Benchmark 1d big tile constant ixs ## : 938 microseconds
+ixs[3] = [ -14,  0,  14
+## Benchmark 1d global reads constant ixs ## : 806 microseconds
+## Benchmark 1d small tile constant ixs  ## : 898 microseconds
+## Benchmark 1d big tile constant ixs ## : 938 microseconds
+ixs[3] = [ -15,  0,  15
+## Benchmark 1d global reads constant ixs ## : 806 microseconds
+## Benchmark 1d small tile constant ixs  ## : 900 microseconds
+## Benchmark 1d big tile constant ixs ## : 938 microseconds
+ixs[3] = [ -16,  0,  16
+## Benchmark 1d global reads constant ixs ## : 810 microseconds
+## Benchmark 1d small tile constant ixs  ## : 894 microseconds
+## Benchmark 1d big tile constant ixs ## : 944 microseconds
+ixs[3] = [ -17,  0,  17
+## Benchmark 1d global reads constant ixs ## : 810 microseconds
+## Benchmark 1d small tile constant ixs  ## : 902 microseconds
+## Benchmark 1d big tile constant ixs ## : 945 microseconds
+ixs[3] = [ -18,  0,  18
+## Benchmark 1d global reads constant ixs ## : 811 microseconds
+## Benchmark 1d small tile constant ixs  ## : 904 microseconds
+## Benchmark 1d big tile constant ixs ## : 945 microseconds
+ixs[3] = [ -19,  0,  19
+## Benchmark 1d global reads constant ixs ## : 810 microseconds
+## Benchmark 1d small tile constant ixs  ## : 905 microseconds
+## Benchmark 1d big tile constant ixs ## : 945 microseconds
+ixs[3] = [ -20,  0,  20
+## Benchmark 1d global reads constant ixs ## : 803 microseconds
+## Benchmark 1d small tile constant ixs  ## : 905 microseconds
+## Benchmark 1d big tile constant ixs ## : 932 microseconds
+ixs[3] = [ -21,  0,  21
+## Benchmark 1d global reads constant ixs ## : 803 microseconds
+## Benchmark 1d small tile constant ixs  ## : 908 microseconds
+## Benchmark 1d big tile constant ixs ## : 932 microseconds
+ixs[3] = [ -22,  0,  22
+## Benchmark 1d global reads constant ixs ## : 803 microseconds
+## Benchmark 1d small tile constant ixs  ## : 909 microseconds
+## Benchmark 1d big tile constant ixs ## : 932 microseconds
+ixs[3] = [ -23,  0,  23
+## Benchmark 1d global reads constant ixs ## : 803 microseconds
+## Benchmark 1d small tile constant ixs  ## : 911 microseconds
+## Benchmark 1d big tile constant ixs ## : 931 microseconds
+ixs[3] = [ -24,  0,  24
+## Benchmark 1d global reads constant ixs ## : 805 microseconds
+## Benchmark 1d small tile constant ixs  ## : 899 microseconds
+## Benchmark 1d big tile constant ixs ## : 935 microseconds
+ixs[3] = [ -25,  0,  25
+## Benchmark 1d global reads constant ixs ## : 807 microseconds
+## Benchmark 1d small tile constant ixs  ## : 914 microseconds
+## Benchmark 1d big tile constant ixs ## : 939 microseconds
+ixs[3] = [ -51,  0,  51
+## Benchmark 1d global reads constant ixs ## : 812 microseconds
+## Benchmark 1d small tile constant ixs  ## : 950 microseconds
+## Benchmark 1d big tile constant ixs ## : 949 microseconds
+ixs[3] = [ -100,  0,  100
+## Benchmark 1d global reads constant ixs ## : 808 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1010 microseconds
+## Benchmark 1d big tile constant ixs ## : 944 microseconds
+ixs[3] = [ -150,  0,  150
+## Benchmark 1d global reads constant ixs ## : 807 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1093 microseconds
+## Benchmark 1d big tile constant ixs ## : 943 microseconds
+ixs[3] = [ -200,  0,  200
+## Benchmark 1d global reads constant ixs ## : 810 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1209 microseconds
+## Benchmark 1d big tile constant ixs ## : 949 microseconds
+ixs[3] = [ -250,  0,  250
+## Benchmark 1d global reads constant ixs ## : 804 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1419 microseconds
+## Benchmark 1d big tile constant ixs ## : 946 microseconds
+ixs[3] = [ -300,  0,  300
+## Benchmark 1d global reads constant ixs ## : 811 microseconds
+## Benchmark 1d small tile constant ixs  ## : 1685 microseconds
+## Benchmark 1d big tile constant ixs ## : 956 microseconds
+ixs[3] = [ -350,  0,  350
+## Benchmark 1d global reads constant ixs ## : 816 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2127 microseconds
+## Benchmark 1d big tile constant ixs ## : 958 microseconds
+ixs[3] = [ -400,  0,  400
+## Benchmark 1d global reads constant ixs ## : 817 microseconds
+## Benchmark 1d small tile constant ixs  ## : 2959 microseconds
+## Benchmark 1d big tile constant ixs ## : 964 microseconds
+ixs[3] = [ -450,  0,  450
+## Benchmark 1d global reads constant ixs ## : 821 microseconds
+## Benchmark 1d small tile constant ixs  ## : 5344 microseconds
+## Benchmark 1d big tile constant ixs ## : 963 microseconds
+ixs[3] = [ -500,  0,  500
+## Benchmark 1d global reads constant ixs ## : 814 microseconds
+## Benchmark 1d small tile constant ixs  ## : 27433 microseconds
+## Benchmark 1d big tile constant ixs ## : 953 microseconds

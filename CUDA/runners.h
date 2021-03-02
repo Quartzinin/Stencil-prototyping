@@ -24,7 +24,7 @@
 #define GPU_RUN(call,benchmark_name, preproc, destroy) {\
     CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));\
     CUDASSERT(cudaDeviceSynchronize());\
-    cout << (benchmark_name) << endl; \
+    cout << (benchmark_name); \
     gettimeofday(&t_startpar, NULL); \
     for(unsigned x = 0; x < RUNS; x++){ \
         (call); \
@@ -37,14 +37,13 @@
     unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;\
     elapsed /= RUNS;\
     const int n_reads_writes = ixs_len + 1;\
-    const double GBperSec = len * sizeof(T) * n_reads_writes / elapsed / 1e3; \
-    printf("    mean elapsed time was : %lu microseconds\n", elapsed);\
-    printf("    mean GigaBytes per sec: %lf GiBs\n", GBperSec);\
-    if (validate(cpu_out,arr_out,len)) \
+    printf(" : mean %lu microseconds\n", elapsed, GBperSec);\
+    if (!validate(cpu_out,arr_out,len)) \
     { \
-        printf("%s\n", "    VALIDATED");\
+        printf("%s\n", "   FAILED TO VALIDATE");\
     }\
 }
+// const double GBperSec = len * sizeof(T) * n_reads_writes / elapsed / 1e3; \
 
 static int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
@@ -94,11 +93,11 @@ void measure_memset_bandwidth(const int mem_size){
 bool validate(const T* A, const T* B, unsigned int sizeAB){
     int c = 0;
     for(unsigned i = 0; i < sizeAB; i++){
-        const int va = A[i];
-        const int vb = B[i];
-        if (va != vb){
-            printf("INVALID RESULT at index %d: (expected, actual) == (%d, %d)\n",
-                    i, va, vb);
+        const T va = A[i];
+        const T vb = B[i];
+        if (fabs(va - vb) > 0.00001 || isnan(va) || isinf(va) || isnan(vb) || isinf(vb)){
+                    printf("INVALID RESULT at index %d: (expected, actual) == (%d, %d)\n",
+                            i, va, vb);
             c++;
             if(c > 20)
                 return false;

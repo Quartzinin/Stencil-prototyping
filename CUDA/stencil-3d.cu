@@ -148,6 +148,7 @@ void doTest_3D()
     {
         GPU_RUN_INIT;
 
+        /*
         if(ixs_len <= BLOCKSIZE){
             GPU_RUN(call_kernel_3d(
                         (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
@@ -162,6 +163,7 @@ void doTest_3D()
                         (big_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                     ,"## Benchmark 3d big tile ##",(void)0,(void)0);
         }
+        */
         GPU_RUN(call_kernel_3d(
                     (global_reads_3d_const<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d global read const ##",(void)0,(void)0);
