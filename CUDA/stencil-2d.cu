@@ -81,7 +81,7 @@ T* run_cpu_2d(const int2* idxs, const int y_len, const int x_len)
 template<int y_min, int y_max, int x_min, int x_max>
 void doTest_2D()
 {
-    const int RUNS = 100;
+    const int RUNS = 1000;
 
     const int y_range = (y_min + y_max + 1);
     const int x_range = (x_min + x_max + 1);
@@ -96,12 +96,13 @@ void doTest_2D()
                 cpu_ixs[q++] = make_int2(j-x_min, i-y_min);
             }
         }
-    }
+    } 
+    
     CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
 
     cout << "const int ixs[" << ixs_len << "] = [";
     for(int i=0; i < ixs_len ; i++){
-        cout << " (" << cpu_ixs[i].x << "," << cpu_ixs[i].y << ")";
+        cout << " (" << cpu_ixs[i].y << "," << cpu_ixs[i].x << ")";
         if(i == ixs_len-1)
         { cout << "]" << endl; }
         else{ cout << ", "; }
@@ -146,7 +147,7 @@ void doTest_2D()
 int main()
 {
     doTest_2D<1,1,1,1>();
-    //doTest_2D<4,2,1>();
+    doTest_2D<0,0,1,0>();
     //doTest_2D<5,2,2>();
 
     return 0;
