@@ -50,8 +50,8 @@ void stencil_2d_cpu(
 }
 #define call_small_tile_2d(kernel) {\
     const dim3 block(SQ_BLOCKSIZE,SQ_BLOCKSIZE,1);\
-    const int wasted_x = ix_min + ix_max;\
-    const int wasted_y = ix_min + ix_max;\
+    const int wasted_x = x_min + x_max;\
+    const int wasted_y = y_min + y_max;\
     const int working_block_x = SQ_BLOCKSIZE-wasted_x;\
     const int working_block_y = SQ_BLOCKSIZE-wasted_y;\
     const int BNx = CEIL_DIV(x_len, working_block_x);\
@@ -78,20 +78,22 @@ T* run_cpu_2d(const int2* idxs, const int y_len, const int x_len)
     return cpu_out;
 }
 
-template<int sq_ixs_len, int ix_min, int ix_max>
+template<int y_min, int y_max, int x_min, int x_max>
 void doTest_2D()
 {
     const int RUNS = 100;
 
-    const int ixs_len = sq_ixs_len * sq_ixs_len;
+    const int y_range = (y_min + y_max + 1);
+    const int x_range = (x_min + x_max + 1);
+    const int ixs_len = y_range * x_range;
     //const int W = D / 2;
     const int ixs_size = ixs_len*sizeof(int2);
     int2* cpu_ixs = (int2*)malloc(ixs_size);
     {
         int q = 0;
-        for(int i=0; i < sq_ixs_len; i++){
-            for(int j=0; j < sq_ixs_len; j++){
-                cpu_ixs[q++] = make_int2(j-ix_min, i-ix_min);
+        for(int i=0; i < y_range; i++){
+            for(int j=0; j < x_range; j++){
+                cpu_ixs[q++] = make_int2(j-x_min, i-y_min);
             }
         }
     }
@@ -120,22 +122,22 @@ void doTest_2D()
                     (global_reads_2d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d global read ##",(void)0,(void)0);
         GPU_RUN(call_small_tile_2d(
-                    (small_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                    (small_tile_2d<ixs_len,x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d small tile ##",(void)0,(void)0);
         GPU_RUN(call_kernel_2d(
-                    (big_tile_2d<ixs_len,ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                    (big_tile_2d<ixs_len,x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
-        if(ixs_len == (ix_min + ix_max + 1) * (ix_min + ix_max + 1)){
-            GPU_RUN(call_kernel_2d(
-                        (global_reads_2d_const<ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                    ,"## Benchmark 2d global read constant ixs ##",(void)0,(void)0);
-            GPU_RUN(call_small_tile_2d(
-                        (small_tile_2d_const<ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                    ,"## Benchmark 2d small tile constant ixs ##",(void)0,(void)0);
-            GPU_RUN(call_kernel_2d(
-                        (big_tile_2d_const<ix_min,ix_max,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                    ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
-        }
+        //if(ixs_len == (ix_min + ix_max + 1) * (ix_min + ix_max + 1)){
+        GPU_RUN(call_kernel_2d(
+                    (global_reads_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d global read constant ixs ##",(void)0,(void)0);
+        GPU_RUN(call_small_tile_2d(
+                    (small_tile_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d small tile constant ixs ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_2d(
+                    (big_tile_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
+        //}
         GPU_RUN_END;
     }
 }
@@ -143,9 +145,9 @@ void doTest_2D()
 
 int main()
 {
-    doTest_2D<3,1,1>();
-    doTest_2D<5,2,2>();
-    doTest_2D<7,3,3>();
+    doTest_2D<1,1,1,1>();
+    //doTest_2D<4,2,1>();
+    //doTest_2D<5,2,2>();
 
     return 0;
 }
