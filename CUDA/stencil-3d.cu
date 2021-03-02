@@ -77,20 +77,29 @@ void stencil_3d_cpu(
 }
 
 template<int D>
-T* run_cpu_3d(const int3* idxs, const int z_len, const int y_len, const int x_len)
+void run_cpu_3d(const int3* idxs, const int z_len, const int y_len, const int x_len, T* cpu_out)
 {
     int len = x_len*y_len*z_len;
     T* cpu_in = (T*)malloc(len*sizeof(T));
-    T* cpu_out = (T*)malloc(len*sizeof(T));
 
     for (int i = 0; i < len; ++i)
     {
         cpu_in[i] = (T)(i+1);
     }
 
-    stencil_3d_cpu<D>(cpu_in,idxs,cpu_out,z_len,y_len,x_len);
+    struct timeval t_startpar, t_endpar, t_diffpar;
+    gettimeofday(&t_startpar, NULL);
+    {
+        stencil_3d_cpu<D>(cpu_in,idxs,cpu_out,z_len,y_len,x_len);
+    }
+    gettimeofday(&t_endpar, NULL);
+    timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
+    const unsigned long elapsed = (t_diffpar.tv_sec*1e6+t_diffpar.tv_usec) / 1000;
+    const unsigned long seconds = elapsed / 1000;
+    const unsigned long microseconds = elapsed % 1000;
+    printf("cpu c 3d for 1 run : %lu.%03lu seconds\n", seconds, microseconds);
+
     free(cpu_in);
-    return cpu_out;
 }
 
 
@@ -126,15 +135,6 @@ void doTest_3D()
         cout << "Blockdim z,y,x = " << z_block << ", " << y_block << ", " << x_block << endl;
         cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (-" << z_min << "..." << z_max << ", -" << y_min << "..." << y_max << ", -" << x_min << "..." << x_max << ")" << endl;
     }
-    /*
-    cout << "const int ixs[" << ixs_len << "] = [";
-    for(int i=0; i < ixs_len ; i++){
-        cout << " (" << cpu_ixs[i].z << "," << cpu_ixs[i].y << "," << cpu_ixs[i].x << ")";
-        if(i == ixs_len-1)
-        { cout << "]" << endl; }
-        else{ cout << ", "; }
-    }
-    */
 
     const int z_len = 2 << 8; //outermost
     const int y_len = 2 << 7; //middle
@@ -143,7 +143,8 @@ void doTest_3D()
     const int len = z_len * y_len * x_len;
     cout << "{ z_len = " << z_len << ", y_len = " << y_len << ", x_len = " << x_len << ", total_len = " << len << " }" << endl;
 
-    T* cpu_out = run_cpu_3d<ixs_len>(cpu_ixs,z_len,y_len,x_len);
+    T* cpu_out = (T*)malloc(len*sizeof(T));
+    run_cpu_3d<ixs_len>(cpu_ixs,z_len,y_len,x_len, cpu_out);
 
     {
         GPU_RUN_INIT;
@@ -179,6 +180,9 @@ void doTest_3D()
 
         GPU_RUN_END;
     }
+
+    free(cpu_out);
+    free(cpu_ixs);
 }
 
 int main()

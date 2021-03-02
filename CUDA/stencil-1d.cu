@@ -52,19 +52,28 @@ void stencil_1d_cpu(
 }
 
 template<int D>
-T* run_cpu_1d(const int* idxs, const int len)
+void run_cpu_1d(const int* idxs, const int len, T* cpu_out)
 {
     T* cpu_in  = (T*)malloc(len*sizeof(T));
-    T* cpu_out = (T*)malloc(len*sizeof(T));
 
     for (int i = 0; i < len; ++i)
     {
         cpu_in[i] = (T)(i+1);
     }
 
-    stencil_1d_cpu<D>(cpu_in,idxs,cpu_out,len);
+    struct timeval t_startpar, t_endpar, t_diffpar;
+    gettimeofday(&t_startpar, NULL);
+    {
+        stencil_1d_cpu<D>(cpu_in,idxs,cpu_out,len);
+    }
+    gettimeofday(&t_endpar, NULL);
+    timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
+    const unsigned long elapsed = (t_diffpar.tv_sec*1e6+t_diffpar.tv_usec) / 1000;
+    const unsigned long seconds = elapsed / 1000;
+    const unsigned long microseconds = elapsed % 1000;
+    printf("cpu c 1d for 1 run : %lu.%03lu seconds\n", seconds, microseconds);
+
     free(cpu_in);
-    return cpu_out;
 }
 
 template<int ixs_len, int ix_min, int ix_max>
@@ -91,17 +100,15 @@ void doTest_1D()
     const int lenp = 23;
     const int len = 2 << lenp;
     cout << "{ x_len = " << len << " }" << endl;
-    T* cpu_out = run_cpu_1d<D>(cpu_ixs,len);
+    T* cpu_out = (T*)malloc(len*sizeof(T));
+    run_cpu_1d<D>(cpu_ixs,len, cpu_out);
 
-    //cout << "input[2^" << lenp << "]" << endl;
-    //cout << "ixs[" << D << "]" << endl;
     cout << "ixs[" << D << "] = [";
-    for(int i=0; i < 3 ; i++){
-        cout << " " << cpu_ixs[i];
-        if(i != D-1)
-        { cout << ", "; }
-    }
-    cout << endl;
+    cout << cpu_ixs[0] << ", ";
+    cout << cpu_ixs[1] << ", ";
+    if(D == 3){ cout << cpu_ixs[2]; }
+    else{ cout << "... , " << cpu_ixs[D-1]; }
+    cout << "]" << endl;
 
     {
         GPU_RUN_INIT;

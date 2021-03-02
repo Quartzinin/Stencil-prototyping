@@ -62,20 +62,29 @@ void stencil_2d_cpu(
 }
 
 template<int D>
-T* run_cpu_2d(const int2* idxs, const int y_len, const int x_len)
+void run_cpu_2d(const int2* idxs, const int y_len, const int x_len, T* cpu_out)
 {
     int len = y_len*x_len;
     T* cpu_in = (T*)malloc(len*sizeof(T));
-    T* cpu_out = (T*)malloc(len*sizeof(T));
 
     for (int i = 0; i < len; ++i)
     {
         cpu_in[i] = (T)(i+1);
     }
 
-    stencil_2d_cpu<D>(cpu_in,idxs,cpu_out,y_len,x_len);
+    struct timeval t_startpar, t_endpar, t_diffpar;
+    gettimeofday(&t_startpar, NULL);
+    {
+        stencil_2d_cpu<D>(cpu_in,idxs,cpu_out,y_len,x_len);
+    }
+    gettimeofday(&t_endpar, NULL);
+    timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
+    const unsigned long elapsed = (t_diffpar.tv_sec*1e6+t_diffpar.tv_usec) / 1000;
+    const unsigned long seconds = elapsed / 1000;
+    const unsigned long microseconds = elapsed % 1000;
+    printf("cpu c 2d for 1 run : %lu.%03lu seconds\n", seconds, microseconds);
+
     free(cpu_in);
-    return cpu_out;
 }
 
 template<int y_min, int y_max, int x_min, int x_max>
@@ -102,19 +111,14 @@ void doTest_2D()
 
     cout << "const int ixs[" << ixs_len << "]: ";
     cout << "y= " << y_min << "..." << y_max << ", x= " << x_min << "..." << x_max << endl;
-    /*for(int i=0; i < ixs_len ; i++){
-        cout << " (" << cpu_ixs[i].y << "," << cpu_ixs[i].x << ")";
-        if(i == ixs_len-1)
-        { cout << "]" << endl; }
-        else{ cout << ", "; }*/
-    //}
 
     const int y_len = 2 << 13;
     const int x_len = 2 << 9;
     const int len = y_len * x_len;
     cout << "{ x_len = " << x_len << ", y_len = " << y_len
          << ", total_len = " << len << " }" << endl;
-    T* cpu_out = run_cpu_2d<ixs_len>(cpu_ixs,y_len,x_len);
+    T* cpu_out = (T*)malloc(len*sizeof(T));
+    run_cpu_2d<ixs_len>(cpu_ixs,y_len,x_len, cpu_out);
 
     {
         GPU_RUN_INIT;
@@ -140,6 +144,9 @@ void doTest_2D()
                 ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
         GPU_RUN_END;
     }
+
+    free(cpu_out);
+    free(cpu_ixs);
 }
 
 
