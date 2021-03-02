@@ -97,16 +97,17 @@ void doTest_2D()
             }
         }
     } 
-    
+
     CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
 
-    cout << "const int ixs[" << ixs_len << "] = [";
-    for(int i=0; i < ixs_len ; i++){
+    cout << "const int ixs[" << ixs_len << "]: ";
+    cout << "y= " << y_min << "..." << y_max << ", x= " << x_min << "..." << x_max << endl;
+    /*for(int i=0; i < ixs_len ; i++){
         cout << " (" << cpu_ixs[i].y << "," << cpu_ixs[i].x << ")";
         if(i == ixs_len-1)
         { cout << "]" << endl; }
-        else{ cout << ", "; }
-    }
+        else{ cout << ", "; }*/
+    //}
 
     const int y_len = 2 << 12;
     const int x_len = 2 << 8;
@@ -146,9 +147,17 @@ void doTest_2D()
 
 int main()
 {
+    doTest_2D<1,1,0,0>();
+    doTest_2D<2,2,0,0>();
+    doTest_2D<3,3,0,0>();
+    doTest_2D<4,4,0,0>();
+    doTest_2D<5,5,0,0>();
+
     doTest_2D<1,1,1,1>();
-    doTest_2D<0,0,1,0>();
-    //doTest_2D<5,2,2>();
+    doTest_2D<2,2,2,2>();
+    doTest_2D<3,3,3,3>();
+    doTest_2D<4,4,4,4>();
+    doTest_2D<5,5,5,5>();
 
     return 0;
 }

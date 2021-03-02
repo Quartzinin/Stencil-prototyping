@@ -1,0 +1,290 @@
+const int ixs[3]: y= 1...1, x= 0...0
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 159 microseconds
+    mean GigaBytes per sec: 211.034000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 316 microseconds
+    mean GigaBytes per sec: 212.369000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 289 microseconds
+    mean GigaBytes per sec: 232.210000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 297 microseconds
+    mean GigaBytes per sec: 225.955000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 283 microseconds
+    mean GigaBytes per sec: 237.133000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 288 microseconds
+    mean GigaBytes per sec: 233.016000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 279 microseconds
+    mean GigaBytes per sec: 240.533000 GiBs
+    VALIDATED
+const int ixs[5]: y= 2...2, x= 0...0
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 149 microseconds
+    mean GigaBytes per sec: 225.197000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 353 microseconds
+    mean GigaBytes per sec: 285.165000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 319 microseconds
+    mean GigaBytes per sec: 315.558000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 322 microseconds
+    mean GigaBytes per sec: 312.618000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 330 microseconds
+    mean GigaBytes per sec: 305.040000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 299 microseconds
+    mean GigaBytes per sec: 336.666000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 288 microseconds
+    mean GigaBytes per sec: 349.525000 GiBs
+    VALIDATED
+const int ixs[7]: y= 3...3, x= 0...0
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 147 microseconds
+    mean GigaBytes per sec: 228.261000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 422 microseconds
+    mean GigaBytes per sec: 318.051000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 357 microseconds
+    mean GigaBytes per sec: 375.960000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 334 microseconds
+    mean GigaBytes per sec: 401.849000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 379 microseconds
+    mean GigaBytes per sec: 354.136000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 329 microseconds
+    mean GigaBytes per sec: 407.956000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 299 microseconds
+    mean GigaBytes per sec: 448.888000 GiBs
+    VALIDATED
+const int ixs[9]: y= 4...4, x= 0...0
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 149 microseconds
+    mean GigaBytes per sec: 225.197000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 463 microseconds
+    mean GigaBytes per sec: 362.358000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 392 microseconds
+    mean GigaBytes per sec: 427.990000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 364 microseconds
+    mean GigaBytes per sec: 460.912000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 419 microseconds
+    mean GigaBytes per sec: 400.410000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 351 microseconds
+    mean GigaBytes per sec: 477.983000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 320 microseconds
+    mean GigaBytes per sec: 524.288000 GiBs
+    VALIDATED
+const int ixs[11]: y= 5...5, x= 0...0
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 148 microseconds
+    mean GigaBytes per sec: 226.719000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 523 microseconds
+    mean GigaBytes per sec: 384.945000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 433 microseconds
+    mean GigaBytes per sec: 464.957000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 388 microseconds
+    mean GigaBytes per sec: 518.882000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 471 microseconds
+    mean GigaBytes per sec: 427.444000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 398 microseconds
+    mean GigaBytes per sec: 505.845000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 346 microseconds
+    mean GigaBytes per sec: 581.868000 GiBs
+    VALIDATED
+const int ixs[9]: y= 1...1, x= 1...1
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 148 microseconds
+    mean GigaBytes per sec: 226.719000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 466 microseconds
+    mean GigaBytes per sec: 360.026000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 403 microseconds
+    mean GigaBytes per sec: 416.308000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 475 microseconds
+    mean GigaBytes per sec: 353.204000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 410 microseconds
+    mean GigaBytes per sec: 409.200000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 351 microseconds
+    mean GigaBytes per sec: 477.983000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 356 microseconds
+    mean GigaBytes per sec: 471.270000 GiBs
+    VALIDATED
+const int ixs[25]: y= 2...2, x= 2...2
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 148 microseconds
+    mean GigaBytes per sec: 226.719000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 1009 microseconds
+    mean GigaBytes per sec: 432.316000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 660 microseconds
+    mean GigaBytes per sec: 660.920000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 646 microseconds
+    mean GigaBytes per sec: 675.243000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 977 microseconds
+    mean GigaBytes per sec: 446.476000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 455 microseconds
+    mean GigaBytes per sec: 958.698000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 410 microseconds
+    mean GigaBytes per sec: 1063.921000 GiBs
+    VALIDATED
+const int ixs[49]: y= 3...3, x= 3...3
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 148 microseconds
+    mean GigaBytes per sec: 226.719000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 1805 microseconds
+    mean GigaBytes per sec: 464.742000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 1189 microseconds
+    mean GigaBytes per sec: 705.517000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 908 microseconds
+    mean GigaBytes per sec: 923.855000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 1216 microseconds
+    mean GigaBytes per sec: 689.852000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 801 microseconds
+    mean GigaBytes per sec: 1047.266000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 625 microseconds
+    mean GigaBytes per sec: 1342.177000 GiBs
+    VALIDATED
+const int ixs[81]: y= 4...4, x= 4...4
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 148 microseconds
+    mean GigaBytes per sec: 226.719000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 2835 microseconds
+    mean GigaBytes per sec: 485.266000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 1833 microseconds
+    mean GigaBytes per sec: 750.535000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 1282 microseconds
+    mean GigaBytes per sec: 1073.113000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 2308 microseconds
+    mean GigaBytes per sec: 596.070000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 1271 microseconds
+    mean GigaBytes per sec: 1082.401000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 934 microseconds
+    mean GigaBytes per sec: 1472.946000 GiBs
+    VALIDATED
+const int ixs[121]: y= 5...5, x= 5...5
+{ row_len = 512, col_len = 8192, total_len = 4194304 }
+## Benchmark memcpy device to device ##
+    mean elapsed time was : 148 microseconds
+    mean GigaBytes per sec: 226.719000 GiBs
+## Benchmark 2d global read ##
+    mean elapsed time was : 4127 microseconds
+    mean GigaBytes per sec: 495.958000 GiBs
+    VALIDATED
+## Benchmark 2d small tile ##
+    mean elapsed time was : 2819 microseconds
+    mean GigaBytes per sec: 726.080000 GiBs
+    VALIDATED
+## Benchmark 2d big tile ##
+    mean elapsed time was : 1753 microseconds
+    mean GigaBytes per sec: 1167.610000 GiBs
+    VALIDATED
+## Benchmark 2d global read constant ixs ##
+    mean elapsed time was : 3328 microseconds
+    mean GigaBytes per sec: 615.030000 GiBs
+    VALIDATED
+## Benchmark 2d small tile constant ixs ##
+    mean elapsed time was : 2163 microseconds
+    mean GigaBytes per sec: 946.287000 GiBs
+    VALIDATED
+## Benchmark 2d big tile constant ixs ##
+    mean elapsed time was : 1342 microseconds
+    mean GigaBytes per sec: 1525.201000 GiBs
+    VALIDATED
