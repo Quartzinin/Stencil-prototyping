@@ -1,146 +1,104 @@
 Blockdim z,y,x = 4, 8, 32
 ixs[3] = (zr,yr,xr) = (-1...1, -0...0, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 2604 microseconds : mean 103.085000 GiBs 
-## Benchmark 3d small tile ## : mean 4163 microseconds : mean 64.481000 GiBs 
-## Benchmark 3d big tile ## : mean 2503 microseconds : mean 107.245000 GiBs 
-## Benchmark 3d global read const ## : mean 2081 microseconds : mean 128.993000 GiBs 
-## Benchmark 3d small tile const ## : mean 3764 microseconds : mean 71.316000 GiBs 
-## Benchmark 3d big tile const ## : mean 2289 microseconds : mean 117.271000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[9] = (zr,yr,xr) = (-1...1, -1...1, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 3539 microseconds : mean 189.626000 GiBs 
-## Benchmark 3d small tile ## : mean 6265 microseconds : mean 107.117000 GiBs 
-## Benchmark 3d big tile ## : mean 3618 microseconds : mean 185.486000 GiBs 
-## Benchmark 3d global read const ## : mean 3125 microseconds : mean 214.748000 GiBs 
-## Benchmark 3d small tile const ## : mean 5477 microseconds : mean 122.528000 GiBs 
-## Benchmark 3d big tile const ## : mean 2814 microseconds : mean 238.482000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[9] = (zr,yr,xr) = (-1...1, -0...0, -1...1)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 3562 microseconds : mean 188.402000 GiBs 
-## Benchmark 3d small tile ## : mean 5901 microseconds : mean 113.724000 GiBs 
-## Benchmark 3d big tile ## : mean 3614 microseconds : mean 185.691000 GiBs 
-## Benchmark 3d global read const ## : mean 2922 microseconds : mean 229.667000 GiBs 
-## Benchmark 3d small tile const ## : mean 4978 microseconds : mean 134.810000 GiBs 
-## Benchmark 3d big tile const ## : mean 2813 microseconds : mean 238.566000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[27] = (zr,yr,xr) = (-1...1, -1...1, -1...1)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 8530 microseconds : mean 220.287000 GiBs 
-## Benchmark 3d small tile ## : mean 11726 microseconds : mean 160.246000 GiBs 
-## Benchmark 3d big tile ## : mean 7338 microseconds : mean 256.070000 GiBs 
-## Benchmark 3d global read const ## : mean 5197 microseconds : mean 361.564000 GiBs 
-## Benchmark 3d small tile const ## : mean 7867 microseconds : mean 238.851000 GiBs 
-## Benchmark 3d big tile const ## : mean 4827 microseconds : mean 389.278000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 2086 microseconds
+## Benchmark 3d small tile const ## : mean 3768 microseconds
+## Benchmark 3d big tile const ## : mean 2302 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[5] = (zr,yr,xr) = (-2...2, -0...0, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 2709 microseconds : mean 148.635000 GiBs 
-## Benchmark 3d big tile ## : mean 2744 microseconds : mean 146.739000 GiBs 
-## Benchmark 3d global read const ## : mean 2451 microseconds : mean 164.281000 GiBs 
-## Benchmark 3d big tile const ## : mean 2450 microseconds : mean 164.348000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[25] = (zr,yr,xr) = (-2...2, -2...2, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 7962 microseconds : mean 219.144000 GiBs 
-## Benchmark 3d big tile ## : mean 5832 microseconds : mean 299.182000 GiBs 
-## Benchmark 3d global read const ## : mean 5627 microseconds : mean 310.081000 GiBs 
-## Benchmark 3d big tile const ## : mean 3776 microseconds : mean 462.084000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[25] = (zr,yr,xr) = (-2...2, -0...0, -2...2)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 8053 microseconds : mean 216.668000 GiBs 
-## Benchmark 3d big tile ## : mean 6015 microseconds : mean 290.079000 GiBs 
-## Benchmark 3d global read const ## : mean 5194 microseconds : mean 335.931000 GiBs 
-## Benchmark 3d big tile const ## : mean 3770 microseconds : mean 462.819000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[125] = (zr,yr,xr) = (-2...2, -2...2, -2...2)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 36606 microseconds : mean 230.992000 GiBs 
-## Benchmark 3d big tile ## : mean 21847 microseconds : mean 387.042000 GiBs 
-## Benchmark 3d global read const ## : mean 18843 microseconds : mean 448.745000 GiBs 
-## Benchmark 3d big tile const ## : mean 10692 microseconds : mean 790.845000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 2475 microseconds
+## Benchmark 3d big tile const ## : mean 2451 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[7] = (zr,yr,xr) = (-3...3, -0...0, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 3355 microseconds : mean 160.021000 GiBs 
-## Benchmark 3d big tile ## : mean 3195 microseconds : mean 168.034000 GiBs 
-## Benchmark 3d global read const ## : mean 3228 microseconds : mean 166.316000 GiBs 
-## Benchmark 3d big tile const ## : mean 2818 microseconds : mean 190.514000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[49] = (zr,yr,xr) = (-3...3, -3...3, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 15012 microseconds : mean 223.517000 GiBs 
-## Benchmark 3d big tile ## : mean 9541 microseconds : mean 351.686000 GiBs 
-## Benchmark 3d global read const ## : mean 9413 microseconds : mean 356.469000 GiBs 
-## Benchmark 3d big tile const ## : mean 5474 microseconds : mean 612.978000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[49] = (zr,yr,xr) = (-3...3, -0...0, -3...3)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 14789 microseconds : mean 226.887000 GiBs 
-## Benchmark 3d big tile ## : mean 10623 microseconds : mean 315.865000 GiBs 
-## Benchmark 3d global read const ## : mean 8704 microseconds : mean 385.505000 GiBs 
-## Benchmark 3d big tile const ## : mean 5487 microseconds : mean 611.526000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[343] = (zr,yr,xr) = (-3...3, -3...3, -3...3)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 110531 microseconds : mean 208.859000 GiBs 
-## Benchmark 3d big tile ## : mean 57054 microseconds : mean 404.624000 GiBs 
-## Benchmark 3d global read const ## : mean 49895 microseconds : mean 462.680000 GiBs 
-## Benchmark 3d big tile const ## : mean 26506 microseconds : mean 870.951000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 3207 microseconds
+## Benchmark 3d big tile const ## : mean 2814 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[9] = (zr,yr,xr) = (-4...4, -0...0, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 4085 microseconds : mean 164.281000 GiBs 
-## Benchmark 3d big tile ## : mean 3622 microseconds : mean 185.281000 GiBs 
-## Benchmark 3d global read const ## : mean 3721 microseconds : mean 180.351000 GiBs 
-## Benchmark 3d big tile const ## : mean 3091 microseconds : mean 217.110000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[81] = (zr,yr,xr) = (-4...4, -4...4, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 24396 microseconds : mean 225.566000 GiBs 
-## Benchmark 3d big tile ## : mean 13895 microseconds : mean 396.036000 GiBs 
-## Benchmark 3d global read const ## : mean 14725 microseconds : mean 373.713000 GiBs 
-## Benchmark 3d big tile const ## : mean 7533 microseconds : mean 730.509000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[81] = (zr,yr,xr) = (-4...4, -0...0, -4...4)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 24116 microseconds : mean 228.185000 GiBs 
-## Benchmark 3d big tile ## : mean 14919 microseconds : mean 368.853000 GiBs 
-## Benchmark 3d global read const ## : mean 13277 microseconds : mean 414.470000 GiBs 
-## Benchmark 3d big tile const ## : mean 7624 microseconds : mean 721.789000 GiBs 
-Blockdim z,y,x = 4, 8, 32
-ixs[729] = (zr,yr,xr) = (-4...4, -4...4, -4...4)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 228213 microseconds : mean 214.665000 GiBs 
-## Benchmark 3d big tile ## : mean 154829 microseconds : mean 316.410000 GiBs 
-## Benchmark 3d global read const ## : mean 120076 microseconds : mean 407.987000 GiBs 
-## Benchmark 3d big tile const ## : mean 48906 microseconds : mean 1001.706000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 3682 microseconds
+## Benchmark 3d big tile const ## : mean 3045 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[11] = (zr,yr,xr) = (-5...5, -0...0, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 4499 microseconds : mean 178.996000 GiBs 
-## Benchmark 3d big tile ## : mean 3909 microseconds : mean 206.013000 GiBs 
-## Benchmark 3d global read const ## : mean 4211 microseconds : mean 191.238000 GiBs 
-## Benchmark 3d big tile const ## : mean 3381 microseconds : mean 238.185000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 4224 microseconds
+## Benchmark 3d big tile const ## : mean 3385 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-1...1, -1...1, -0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 3108 microseconds
+## Benchmark 3d small tile const ## : mean 5474 microseconds
+## Benchmark 3d big tile const ## : mean 2819 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[25] = (zr,yr,xr) = (-2...2, -2...2, -0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 5631 microseconds
+## Benchmark 3d big tile const ## : mean 3768 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[49] = (zr,yr,xr) = (-3...3, -3...3, -0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 9753 microseconds
+## Benchmark 3d big tile const ## : mean 5469 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[81] = (zr,yr,xr) = (-4...4, -4...4, -0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 14738 microseconds
+## Benchmark 3d big tile const ## : mean 7465 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[121] = (zr,yr,xr) = (-5...5, -5...5, -0...0)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 35946 microseconds : mean 227.766000 GiBs 
-## Benchmark 3d big tile ## : mean 20912 microseconds : mean 391.511000 GiBs 
-## Benchmark 3d global read const ## : mean 21726 microseconds : mean 376.842000 GiBs 
-## Benchmark 3d big tile const ## : mean 11299 microseconds : mean 724.602000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 21748 microseconds
+## Benchmark 3d big tile const ## : mean 11300 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-1...1, -0...0, -1...1)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 2928 microseconds
+## Benchmark 3d small tile const ## : mean 4983 microseconds
+## Benchmark 3d big tile const ## : mean 2822 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[25] = (zr,yr,xr) = (-2...2, -0...0, -2...2)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 5220 microseconds
+## Benchmark 3d big tile const ## : mean 3773 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[49] = (zr,yr,xr) = (-3...3, -0...0, -3...3)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 8635 microseconds
+## Benchmark 3d big tile const ## : mean 5486 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[81] = (zr,yr,xr) = (-4...4, -0...0, -4...4)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 13252 microseconds
+## Benchmark 3d big tile const ## : mean 7634 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[121] = (zr,yr,xr) = (-5...5, -0...0, -5...5)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read ## : mean 35450 microseconds : mean 230.952000 GiBs 
-## Benchmark 3d big tile ## : mean 21353 microseconds : mean 383.425000 GiBs 
-## Benchmark 3d global read const ## : mean 18872 microseconds : mean 433.832000 GiBs 
-## Benchmark 3d big tile const ## : mean 10575 microseconds : mean 774.211000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 18880 microseconds
+## Benchmark 3d big tile const ## : mean 10588 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[27] = (zr,yr,xr) = (-1...1, -1...1, -1...1)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 5186 microseconds
+## Benchmark 3d small tile const ## : mean 7864 microseconds
+## Benchmark 3d big tile const ## : mean 4814 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[125] = (zr,yr,xr) = (-2...2, -2...2, -2...2)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 18991 microseconds
+## Benchmark 3d big tile const ## : mean 10710 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[343] = (zr,yr,xr) = (-3...3, -3...3, -3...3)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 47988 microseconds
+## Benchmark 3d big tile const ## : mean 24954 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[729] = (zr,yr,xr) = (-4...4, -4...4, -4...4)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 120744 microseconds
+## Benchmark 3d big tile const ## : mean 48941 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[1331] = (zr,yr,xr) = (-5...5, -5...5, -5...5)
-{ z = 512, y = 256, x = 128, total_len = 16777216 }
-## Benchmark 3d global read const ## : mean 215748 microseconds : mean 414.321000 GiBs 
-## Benchmark 3d big tile const ## : mean 90444 microseconds : mean 988.335000 GiBs 
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+## Benchmark 3d global read const ## : mean 215661 microseconds
+## Benchmark 3d big tile const ## : mean 90378 microseconds

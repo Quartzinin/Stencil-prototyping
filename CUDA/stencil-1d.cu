@@ -88,8 +88,9 @@ void doTest_1D()
     }
     CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
-    const int lenp = 22;
+    const int lenp = 23;
     const int len = 2 << lenp;
+    cout << "{ x_len = " << len << " }" << endl;
     T* cpu_out = run_cpu_1d<D>(cpu_ixs,len);
 
     //cout << "input[2^" << lenp << "]" << endl;

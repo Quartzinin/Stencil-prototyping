@@ -36,13 +36,13 @@
     timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);\
     unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;\
     elapsed /= RUNS;\
-    const int n_reads_writes = ixs_len + 1;\
-    printf(" : mean %lu microseconds\n", elapsed, GBperSec);\
+    printf(" : mean %lu microseconds\n", elapsed);\
     if (!validate(cpu_out,arr_out,len)) \
     { \
         printf("%s\n", "   FAILED TO VALIDATE");\
     }\
 }
+// const int n_reads_writes = ixs_len + 1;\
 // const double GBperSec = len * sizeof(T) * n_reads_writes / elapsed / 1e3; \
 
 static int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)

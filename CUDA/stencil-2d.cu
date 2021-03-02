@@ -97,27 +97,28 @@ void doTest_2D()
             }
         }
     }
+
     CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
 
-    cout << "const int ixs[" << ixs_len << "] = [";
-    for(int i=0; i < ixs_len ; i++){
-        cout << " (" << cpu_ixs[i].x << "," << cpu_ixs[i].y << ")";
+    cout << "const int ixs[" << ixs_len << "]: ";
+    cout << "y= " << y_min << "..." << y_max << ", x= " << x_min << "..." << x_max << endl;
+    /*for(int i=0; i < ixs_len ; i++){
+        cout << " (" << cpu_ixs[i].y << "," << cpu_ixs[i].x << ")";
         if(i == ixs_len-1)
         { cout << "]" << endl; }
-        else{ cout << ", "; }
-    }
+        else{ cout << ", "; }*/
+    //}
 
-    const int y_len = 2 << 12;
-    const int x_len = 2 << 8;
+    const int y_len = 2 << 13;
+    const int x_len = 2 << 9;
     const int len = y_len * x_len;
-    cout << "{ row_len = " << x_len << ", col_len = " << y_len
+    cout << "{ x_len = " << x_len << ", y_len = " << y_len
          << ", total_len = " << len << " }" << endl;
     T* cpu_out = run_cpu_2d<ixs_len>(cpu_ixs,y_len,x_len);
 
-    measure_memset_bandwidth(len * sizeof(T));
-
     {
         GPU_RUN_INIT;
+        /*
         GPU_RUN(call_kernel_2d(
                     (global_reads_2d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d global read ##",(void)0,(void)0);
@@ -127,7 +128,7 @@ void doTest_2D()
         GPU_RUN(call_kernel_2d(
                     (big_tile_2d<ixs_len,x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
-        //if(ixs_len == (ix_min + ix_max + 1) * (ix_min + ix_max + 1)){
+        */
         GPU_RUN(call_kernel_2d(
                     (global_reads_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d global read constant ixs ##",(void)0,(void)0);
@@ -137,7 +138,6 @@ void doTest_2D()
         GPU_RUN(call_kernel_2d(
                     (big_tile_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
-        //}
         GPU_RUN_END;
     }
 }
@@ -145,9 +145,17 @@ void doTest_2D()
 
 int main()
 {
+    doTest_2D<1,1,0,0>();
+    doTest_2D<2,2,0,0>();
+    doTest_2D<3,3,0,0>();
+    doTest_2D<4,4,0,0>();
+    doTest_2D<5,5,0,0>();
+
     doTest_2D<1,1,1,1>();
-    //doTest_2D<4,2,1>();
-    //doTest_2D<5,2,2>();
+    doTest_2D<2,2,2,2>();
+    doTest_2D<3,3,3,3>();
+    doTest_2D<4,4,4,4>();
+    doTest_2D<5,5,5,5>();
 
     return 0;
 }

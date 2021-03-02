@@ -141,7 +141,7 @@ void doTest_3D()
     const int x_len = 2 << 6; //innermost
 
     const int len = z_len * y_len * x_len;
-    cout << "{ z = " << z_len << ", y = " << y_len << ", x = " << x_len << ", total_len = " << len << " }" << endl;
+    cout << "{ z_len = " << z_len << ", y_len = " << y_len << ", x_len = " << x_len << ", total_len = " << len << " }" << endl;
 
     T* cpu_out = run_cpu_3d<ixs_len>(cpu_ixs,z_len,y_len,x_len);
 
@@ -184,28 +184,27 @@ void doTest_3D()
 int main()
 {
     doTest_3D<1,1,0,0,0,0>();
-    doTest_3D<1,1,1,1,0,0>();
-    doTest_3D<1,1,0,0,1,1>();
-    doTest_3D<1,1,1,1,1,1>();
-
     doTest_3D<2,2,0,0,0,0>();
-    doTest_3D<2,2,2,2,0,0>();
-    doTest_3D<2,2,0,0,2,2>();
-    doTest_3D<2,2,2,2,2,2>();
-
     doTest_3D<3,3,0,0,0,0>();
-    doTest_3D<3,3,3,3,0,0>();
-    doTest_3D<3,3,0,0,3,3>();
-    doTest_3D<3,3,3,3,3,3>();
-
     doTest_3D<4,4,0,0,0,0>();
-    doTest_3D<4,4,4,4,0,0>();
-    doTest_3D<4,4,0,0,4,4>();
-    doTest_3D<4,4,4,4,4,4>();
-
     doTest_3D<5,5,0,0,0,0>();
+
+    doTest_3D<1,1,1,1,0,0>();
+    doTest_3D<2,2,2,2,0,0>();
+    doTest_3D<3,3,3,3,0,0>();
+    doTest_3D<4,4,4,4,0,0>();
     doTest_3D<5,5,5,5,0,0>();
+
+    doTest_3D<1,1,0,0,1,1>();
+    doTest_3D<2,2,0,0,2,2>();
+    doTest_3D<3,3,0,0,3,3>();
+    doTest_3D<4,4,0,0,4,4>();
     doTest_3D<5,5,0,0,5,5>();
+
+    doTest_3D<1,1,1,1,1,1>();
+    doTest_3D<2,2,2,2,2,2>();
+    doTest_3D<3,3,3,3,3,3>();
+    doTest_3D<4,4,4,4,4,4>();
     doTest_3D<5,5,5,5,5,5>();
 
     return 0;
