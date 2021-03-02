@@ -116,7 +116,17 @@ void doTest_3D()
             }
         }
     }
-    CUDASSERT(cudaMemcpyToSymbol(ixs_3d, cpu_ixs, ixs_size));
+    if(ixs_len <= BLOCKSIZE){
+        CUDASSERT(cudaMemcpyToSymbol(ixs_3d, cpu_ixs, ixs_size));
+    }
+    {
+        const int x_block = SQ_BLOCKSIZE;
+        const int y_block = x_block/4;
+        const int z_block = x_block/y_block;
+        cout << "Blockdim z,y,x = " << z_block << ", " << y_block << ", " << x_block << endl;
+        cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (-" << z_min << "..." << z_max << ", -" << y_min << "..." << y_max << ", -" << x_min << "..." << x_max << ")" << endl;
+    }
+    /*
     cout << "const int ixs[" << ixs_len << "] = [";
     for(int i=0; i < ixs_len ; i++){
         cout << " (" << cpu_ixs[i].z << "," << cpu_ixs[i].y << "," << cpu_ixs[i].x << ")";
@@ -124,6 +134,7 @@ void doTest_3D()
         { cout << "]" << endl; }
         else{ cout << ", "; }
     }
+    */
 
     const int z_len = 2 << 8; //outermost
     const int y_len = 2 << 7; //middle
@@ -134,22 +145,23 @@ void doTest_3D()
 
     T* cpu_out = run_cpu_3d<ixs_len>(cpu_ixs,z_len,y_len,x_len);
 
-    measure_memset_bandwidth(len * sizeof(T));
-
     {
         GPU_RUN_INIT;
-        GPU_RUN(call_kernel_3d(
-                    (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d global read ##",(void)0,(void)0);
-        if (!(z_range > Z_BLOCK || y_range > Y_BLOCK || x_range > X_BLOCK))
-        {
-            GPU_RUN(call_small_tile_3d(
-                        (small_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                    ,"## Benchmark 3d small tile ##",(void)0,(void)0);
+
+        if(ixs_len <= BLOCKSIZE){
+            GPU_RUN(call_kernel_3d(
+                        (global_reads_3d<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                    ,"## Benchmark 3d global read ##",(void)0,(void)0);
+            if (!(z_range > Z_BLOCK || y_range > Y_BLOCK || x_range > X_BLOCK))
+            {
+                GPU_RUN(call_small_tile_3d(
+                            (small_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                        ,"## Benchmark 3d small tile ##",(void)0,(void)0);
+            }
+            GPU_RUN(call_kernel_3d(
+                        (big_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                    ,"## Benchmark 3d big tile ##",(void)0,(void)0);
         }
-        GPU_RUN(call_kernel_3d(
-                    (big_tile_3d<ixs_len,z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d big tile ##",(void)0,(void)0);
         GPU_RUN(call_kernel_3d(
                     (global_reads_3d_const<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d global read const ##",(void)0,(void)0);
@@ -169,10 +181,30 @@ void doTest_3D()
 
 int main()
 {
-    doTest_3D<0,0,0,0,1,1>();
-    doTest_3D<0,0,0,0,5,5>();
-    doTest_3D<0,1,0,1,1,1>();
+    doTest_3D<1,1,0,0,0,0>();
+    doTest_3D<1,1,1,1,0,0>();
+    doTest_3D<1,1,0,0,1,1>();
     doTest_3D<1,1,1,1,1,1>();
+
+    doTest_3D<2,2,0,0,0,0>();
+    doTest_3D<2,2,2,2,0,0>();
+    doTest_3D<2,2,0,0,2,2>();
+    doTest_3D<2,2,2,2,2,2>();
+
+    doTest_3D<3,3,0,0,0,0>();
+    doTest_3D<3,3,3,3,0,0>();
+    doTest_3D<3,3,0,0,3,3>();
+    doTest_3D<3,3,3,3,3,3>();
+
+    doTest_3D<4,4,0,0,0,0>();
+    doTest_3D<4,4,4,4,0,0>();
+    doTest_3D<4,4,0,0,4,4>();
+    doTest_3D<4,4,4,4,4,4>();
+
+    doTest_3D<5,5,0,0,0,0>();
+    doTest_3D<5,5,5,5,0,0>();
+    doTest_3D<5,5,0,0,5,5>();
+    doTest_3D<5,5,5,5,5,5>();
 
     return 0;
 }
