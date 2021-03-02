@@ -1,0 +1,404 @@
+Blockdim z,y,x = 4, 8, 32
+ixs[3] = (zr,yr,xr) = (-1...1, -0...0, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 2577 microseconds
+    mean GigaBytes per sec: 104.165000 GiBs
+    VALIDATED
+## Benchmark 3d small tile ##
+    mean elapsed time was : 4129 microseconds
+    mean GigaBytes per sec: 65.012000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 2503 microseconds
+    mean GigaBytes per sec: 107.245000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 2081 microseconds
+    mean GigaBytes per sec: 128.993000 GiBs
+    VALIDATED
+## Benchmark 3d small tile const ##
+    mean elapsed time was : 3766 microseconds
+    mean GigaBytes per sec: 71.278000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 2290 microseconds
+    mean GigaBytes per sec: 117.220000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-1...1, -1...1, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 3545 microseconds
+    mean GigaBytes per sec: 189.305000 GiBs
+    VALIDATED
+## Benchmark 3d small tile ##
+    mean elapsed time was : 6269 microseconds
+    mean GigaBytes per sec: 107.048000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 3616 microseconds
+    mean GigaBytes per sec: 185.588000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 3124 microseconds
+    mean GigaBytes per sec: 214.817000 GiBs
+    VALIDATED
+## Benchmark 3d small tile const ##
+    mean elapsed time was : 5477 microseconds
+    mean GigaBytes per sec: 122.528000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 2821 microseconds
+    mean GigaBytes per sec: 237.890000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-1...1, -0...0, -1...1)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 3569 microseconds
+    mean GigaBytes per sec: 188.032000 GiBs
+    VALIDATED
+## Benchmark 3d small tile ##
+    mean elapsed time was : 5897 microseconds
+    mean GigaBytes per sec: 113.801000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 3614 microseconds
+    mean GigaBytes per sec: 185.691000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 2925 microseconds
+    mean GigaBytes per sec: 229.432000 GiBs
+    VALIDATED
+## Benchmark 3d small tile const ##
+    mean elapsed time was : 4989 microseconds
+    mean GigaBytes per sec: 134.513000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 2812 microseconds
+    mean GigaBytes per sec: 238.651000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[27] = (zr,yr,xr) = (-1...1, -1...1, -1...1)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 8538 microseconds
+    mean GigaBytes per sec: 220.080000 GiBs
+    VALIDATED
+## Benchmark 3d small tile ##
+    mean elapsed time was : 11745 microseconds
+    mean GigaBytes per sec: 159.987000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 7343 microseconds
+    mean GigaBytes per sec: 255.896000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 5213 microseconds
+    mean GigaBytes per sec: 360.454000 GiBs
+    VALIDATED
+## Benchmark 3d small tile const ##
+    mean elapsed time was : 7867 microseconds
+    mean GigaBytes per sec: 238.851000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 4825 microseconds
+    mean GigaBytes per sec: 389.440000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[5] = (zr,yr,xr) = (-2...2, -0...0, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 2710 microseconds
+    mean GigaBytes per sec: 148.580000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 2746 microseconds
+    mean GigaBytes per sec: 146.632000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 2451 microseconds
+    mean GigaBytes per sec: 164.281000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 2449 microseconds
+    mean GigaBytes per sec: 164.415000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[25] = (zr,yr,xr) = (-2...2, -2...2, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 7966 microseconds
+    mean GigaBytes per sec: 219.034000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 5841 microseconds
+    mean GigaBytes per sec: 298.721000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 5628 microseconds
+    mean GigaBytes per sec: 310.026000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 3773 microseconds
+    mean GigaBytes per sec: 462.451000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[25] = (zr,yr,xr) = (-2...2, -0...0, -2...2)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 8060 microseconds
+    mean GigaBytes per sec: 216.480000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 6017 microseconds
+    mean GigaBytes per sec: 289.983000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 5199 microseconds
+    mean GigaBytes per sec: 335.608000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 3780 microseconds
+    mean GigaBytes per sec: 461.595000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[125] = (zr,yr,xr) = (-2...2, -2...2, -2...2)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 37216 microseconds
+    mean GigaBytes per sec: 227.206000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 21864 microseconds
+    mean GigaBytes per sec: 386.741000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 18853 microseconds
+    mean GigaBytes per sec: 448.507000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 10698 microseconds
+    mean GigaBytes per sec: 790.401000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[7] = (zr,yr,xr) = (-3...3, -0...0, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 3361 microseconds
+    mean GigaBytes per sec: 159.735000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 3196 microseconds
+    mean GigaBytes per sec: 167.982000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 3233 microseconds
+    mean GigaBytes per sec: 166.059000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 2823 microseconds
+    mean GigaBytes per sec: 190.177000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[49] = (zr,yr,xr) = (-3...3, -3...3, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 14611 microseconds
+    mean GigaBytes per sec: 229.651000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 9554 microseconds
+    mean GigaBytes per sec: 351.208000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 9421 microseconds
+    mean GigaBytes per sec: 356.166000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 5474 microseconds
+    mean GigaBytes per sec: 612.978000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[49] = (zr,yr,xr) = (-3...3, -0...0, -3...3)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 14669 microseconds
+    mean GigaBytes per sec: 228.743000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 9937 microseconds
+    mean GigaBytes per sec: 337.671000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 8709 microseconds
+    mean GigaBytes per sec: 385.284000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 5496 microseconds
+    mean GigaBytes per sec: 610.524000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[343] = (zr,yr,xr) = (-3...3, -3...3, -3...3)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 108967 microseconds
+    mean GigaBytes per sec: 211.857000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 56134 microseconds
+    mean GigaBytes per sec: 411.256000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 48030 microseconds
+    mean GigaBytes per sec: 480.646000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 24973 microseconds
+    mean GigaBytes per sec: 924.416000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-4...4, -0...0, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 3906 microseconds
+    mean GigaBytes per sec: 171.809000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 3486 microseconds
+    mean GigaBytes per sec: 192.509000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 3728 microseconds
+    mean GigaBytes per sec: 180.013000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 3093 microseconds
+    mean GigaBytes per sec: 216.970000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[81] = (zr,yr,xr) = (-4...4, -4...4, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 23806 microseconds
+    mean GigaBytes per sec: 231.157000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 13298 microseconds
+    mean GigaBytes per sec: 413.816000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 14726 microseconds
+    mean GigaBytes per sec: 373.687000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 7469 microseconds
+    mean GigaBytes per sec: 736.768000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[81] = (zr,yr,xr) = (-4...4, -0...0, -4...4)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 23818 microseconds
+    mean GigaBytes per sec: 231.040000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 14843 microseconds
+    mean GigaBytes per sec: 370.742000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 13283 microseconds
+    mean GigaBytes per sec: 414.283000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 7628 microseconds
+    mean GigaBytes per sec: 721.411000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[729] = (zr,yr,xr) = (-4...4, -4...4, -4...4)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 228504 microseconds
+    mean GigaBytes per sec: 214.392000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 154969 microseconds
+    mean GigaBytes per sec: 316.124000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 120366 microseconds
+    mean GigaBytes per sec: 407.004000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 48927 microseconds
+    mean GigaBytes per sec: 1001.276000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[11] = (zr,yr,xr) = (-5...5, -0...0, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 4505 microseconds
+    mean GigaBytes per sec: 178.758000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 3911 microseconds
+    mean GigaBytes per sec: 205.908000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 4215 microseconds
+    mean GigaBytes per sec: 191.057000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 3390 microseconds
+    mean GigaBytes per sec: 237.553000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[121] = (zr,yr,xr) = (-5...5, -5...5, -0...0)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 36061 microseconds
+    mean GigaBytes per sec: 227.039000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 20923 microseconds
+    mean GigaBytes per sec: 391.305000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 21731 microseconds
+    mean GigaBytes per sec: 376.755000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 11310 microseconds
+    mean GigaBytes per sec: 723.897000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[121] = (zr,yr,xr) = (-5...5, -0...0, -5...5)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read ##
+    mean elapsed time was : 35487 microseconds
+    mean GigaBytes per sec: 230.712000 GiBs
+    VALIDATED
+## Benchmark 3d big tile ##
+    mean elapsed time was : 21378 microseconds
+    mean GigaBytes per sec: 382.976000 GiBs
+    VALIDATED
+## Benchmark 3d global read const ##
+    mean elapsed time was : 18878 microseconds
+    mean GigaBytes per sec: 433.694000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 10592 microseconds
+    mean GigaBytes per sec: 772.968000 GiBs
+    VALIDATED
+Blockdim z,y,x = 4, 8, 32
+ixs[1331] = (zr,yr,xr) = (-5...5, -5...5, -5...5)
+{ z = 512, y = 256, x = 128, total_len = 16777216 }
+## Benchmark 3d global read const ##
+    mean elapsed time was : 217473 microseconds
+    mean GigaBytes per sec: 411.034000 GiBs
+    VALIDATED
+## Benchmark 3d big tile const ##
+    mean elapsed time was : 90326 microseconds
+    mean GigaBytes per sec: 989.626000 GiBs
+    VALIDATED
