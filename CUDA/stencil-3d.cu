@@ -133,12 +133,12 @@ void doTest_3D()
         const int y_block = x_block/4;
         const int z_block = x_block/y_block;
         cout << "Blockdim z,y,x = " << z_block << ", " << y_block << ", " << x_block << endl;
-        cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (-" << z_min << "..." << z_max << ", -" << y_min << "..." << y_max << ", -" << x_min << "..." << x_max << ")" << endl;
+        cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << -z_min << "..." << z_max << ", " << -y_min << "..." << y_max << ", -" << -x_min << "..." << x_max << ")" << endl;
     }
 
-    const int z_len = 2 << 8; //outermost
-    const int y_len = 2 << 7; //middle
-    const int x_len = 2 << 6; //innermost
+    const int z_len = 1 << 9; //outermost
+    const int y_len = 1 << 8; //middle
+    const int x_len = 1 << 7; //innermost
 
     const int len = z_len * y_len * x_len;
     cout << "{ z_len = " << z_len << ", y_len = " << y_len << ", x_len = " << x_len << ", total_len = " << len << " }" << endl;

@@ -110,10 +110,10 @@ void doTest_2D()
     CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
 
     cout << "const int ixs[" << ixs_len << "]: ";
-    cout << "y= " << y_min << "..." << y_max << ", x= " << x_min << "..." << x_max << endl;
+    cout << "y= " << -y_min << "..." << y_max << ", x= " << -x_min << "..." << x_max << endl;
 
-    const int y_len = 2 << 13;
-    const int x_len = 2 << 9;
+    const int y_len = 1 << 14;
+    const int x_len = 1 << 10;
     const int len = y_len * x_len;
     cout << "{ x_len = " << x_len << ", y_len = " << y_len
          << ", total_len = " << len << " }" << endl;

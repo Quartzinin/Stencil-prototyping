@@ -97,8 +97,8 @@ void doTest_1D()
     }
     CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
-    const int lenp = 23;
-    const int len = 2 << lenp;
+    const int lenp = 24;
+    const int len = 1 << lenp;
     cout << "{ x_len = " << len << " }" << endl;
     T* cpu_out = (T*)malloc(len*sizeof(T));
     run_cpu_1d<D>(cpu_ixs,len, cpu_out);
@@ -129,9 +129,12 @@ void doTest_1D()
         GPU_RUN(call_kernel_1d(
                     (global_read_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d global reads constant ixs ##",(void)0,(void)0);
-        GPU_RUN(call_inSharedKernel_1d(
-                    (small_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
-                ,"## Benchmark 1d small tile constant ixs  ##",(void)0,(void)0);
+        const int width = ix_min + ix_max + 1;
+        if(width < BLOCKSIZE-50){
+            GPU_RUN(call_inSharedKernel_1d(
+                        (small_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                    ,"## Benchmark 1d small tile constant ixs  ##",(void)0,(void)0);
+        }
         GPU_RUN(call_kernel_1d(
                     (big_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d big tile constant ixs ##",(void)0,(void)0);
@@ -192,32 +195,19 @@ int main()
     doTest_1D<3,8,8>();
     doTest_1D<3,9,9>();
     doTest_1D<3,10,10>();
-    doTest_1D<3,11,11>();
-    doTest_1D<3,12,12>();
-    doTest_1D<3,13,13>();
-    doTest_1D<3,14,14>();
-    doTest_1D<3,15,15>();
-    doTest_1D<3,16,16>();
-    doTest_1D<3,17,17>();
-    doTest_1D<3,18,18>();
-    doTest_1D<3,19,19>();
-    doTest_1D<3,20,20>();
-    doTest_1D<3,21,21>();
-    doTest_1D<3,22,22>();
-    doTest_1D<3,23,23>();
-    doTest_1D<3,24,24>();
-    doTest_1D<3,25,25>();
 
     doTest_1D<3,51,51>();
     doTest_1D<3,100,100>();
-    doTest_1D<3,150,150>();
     doTest_1D<3,200,200>();
-    doTest_1D<3,250,250>();
     doTest_1D<3,300,300>();
-    doTest_1D<3,350,350>();
     doTest_1D<3,400,400>();
     doTest_1D<3,450,450>();
     doTest_1D<3,500,500>();
+    doTest_1D<3,600,600>();
+    doTest_1D<3,700,700>();
+    doTest_1D<3,800,800>();
+    doTest_1D<3,900,900>();
+    doTest_1D<3,1000,1000>();
 
     return 0;
 }
