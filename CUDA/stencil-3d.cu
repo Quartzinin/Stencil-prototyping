@@ -48,26 +48,20 @@ void stencil_3d_cpu(
 }
 
 #define call_kernel_3d(kernel) {\
-    const int x_block = SQ_BLOCKSIZE; \
-    const int y_block = x_block/4; \
-    const int z_block = x_block/y_block; \
-    const dim3 block(x_block,y_block,z_block);\
-    const int BNx = CEIL_DIV(x_len, x_block);\
-    const int BNy = CEIL_DIV(y_len, y_block);\
-    const int BNz = CEIL_DIV(z_len, z_block);\
+    const dim3 block(X_BLOCK,Y_BLOCK,Z_BLOCK);\
+    const int BNx = CEIL_DIV(x_len, X_BLOCK);\
+    const int BNy = CEIL_DIV(y_len, Y_BLOCK);\
+    const int BNz = CEIL_DIV(z_len, Z_BLOCK);\
     const dim3 grid(BNx, BNy, BNz);\
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
 
 #define call_small_tile_3d(kernel) {\
-    const int x_block = X_BLOCK; \
-    const int y_block = Y_BLOCK; \
-    const int z_block = Z_BLOCK; \
-    const dim3 block(x_block,y_block,z_block);\
-    const int working_block_z = z_block - (z_min + z_max);\
-    const int working_block_y = y_block - (y_min + y_max);\
-    const int working_block_x = x_block - (x_min + x_max);\
+    const dim3 block(X_BLOCK,Y_BLOCK,Z_BLOCK);\
+    const int working_block_z = Z_BLOCK - (z_min + z_max);\
+    const int working_block_y = Y_BLOCK - (y_min + y_max);\
+    const int working_block_x = X_BLOCK - (x_min + x_max);\
     const int BNx = CEIL_DIV(x_len, working_block_x);\
     const int BNy = CEIL_DIV(y_len, working_block_y);\
     const int BNz = CEIL_DIV(z_len, working_block_z);\
@@ -129,11 +123,8 @@ void doTest_3D()
         CUDASSERT(cudaMemcpyToSymbol(ixs_3d, cpu_ixs, ixs_size));
     }
     {
-        const int x_block = SQ_BLOCKSIZE;
-        const int y_block = x_block/4;
-        const int z_block = x_block/y_block;
-        cout << "Blockdim z,y,x = " << z_block << ", " << y_block << ", " << x_block << endl;
-        cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << -z_min << "..." << z_max << ", " << -y_min << "..." << y_max << ", -" << -x_min << "..." << x_max << ")" << endl;
+        cout << "Blockdim z,y,x = " << Z_BLOCK << ", " << Y_BLOCK << ", " << X_BLOCK << endl;
+        cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << -z_min << "..." << z_max << ", " << -y_min << "..." << y_max << ", " << -x_min << "..." << x_max << ")" << endl;
     }
 
     const int z_len = 1 << 9; //outermost
