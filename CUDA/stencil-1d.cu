@@ -130,7 +130,7 @@ void doTest_1D()
                     (global_read_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d global reads constant ixs ##",(void)0,(void)0);
         const int width = ix_min + ix_max + 1;
-        if(width < BLOCKSIZE-50){
+        if(width < BLOCKSIZE-20){
             GPU_RUN(call_inSharedKernel_1d(
                         (small_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                     ,"## Benchmark 1d small tile constant ixs  ##",(void)0,(void)0);
@@ -196,7 +196,7 @@ int main()
     doTest_1D<3,9,9>();
     doTest_1D<3,10,10>();
 
-    doTest_1D<3,51,51>();
+    doTest_1D<3,50,50>();
     doTest_1D<3,100,100>();
     doTest_1D<3,200,200>();
     doTest_1D<3,300,300>();
