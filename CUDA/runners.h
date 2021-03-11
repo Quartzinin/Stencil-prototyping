@@ -3,7 +3,6 @@
 
 #include"constants.h"
 
-#define CEIL_DIV(x,d) (((x)+(d)-1)/(d))
 
 #define GPU_RUN_INIT \
     struct timeval t_startpar, t_endpar, t_diffpar;\

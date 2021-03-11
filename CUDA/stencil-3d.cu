@@ -168,6 +168,9 @@ void doTest_3D()
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d_const<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d big tile const ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_3d(
+                    (big_tile_3d_const_flat<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                ,"## Benchmark 3d big tile const flat ##",(void)0,(void)0);
 
         GPU_RUN_END;
     }
@@ -195,7 +198,6 @@ int main()
     doTest_3D<3,3,0,0,3,3>();
     doTest_3D<4,4,0,0,4,4>();
     doTest_3D<5,5,0,0,5,5>();
-
     doTest_3D<1,1,1,1,1,1>();
     doTest_3D<2,2,2,2,2,2>();
     doTest_3D<3,3,3,3,3,3>();
