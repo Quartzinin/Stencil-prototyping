@@ -13,7 +13,7 @@ template<
     int y_axis_min, int y_axis_max,
     int x_axis_min, int x_axis_max>
 __global__
-void global_reads_3d_const(
+void global_reads_3d_inlined(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned z_len, //outermost
@@ -61,7 +61,7 @@ template<
     int y_axis_min, int y_axis_max,
     int x_axis_min, int x_axis_max>
 __global__
-void small_tile_3d_const(
+void small_tile_3d_inlined(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned z_len,
@@ -126,7 +126,7 @@ template<
     int y_axis_min, int y_axis_max,
     int x_axis_min, int x_axis_max>
 __global__
-void big_tile_3d_const(
+void big_tile_3d_inlined(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned z_len,
@@ -162,18 +162,21 @@ void big_tile_3d_const(
     #pragma unroll
     for(int i = 0; i < z_iters; i++){
         const int local_z = threadIdx.z + i*Z_BLOCK;
-        const int gz = BOUND( local_z + block_offset_z - z_axis_min, max_z_idx);
-        #pragma unroll
-        for(int j = 0; j < y_iters; j++){
-            const int local_y = threadIdx.y + j*Y_BLOCK;
-            const int gy = BOUND( local_y + block_offset_y - y_axis_min, max_y_idx);
+        if(local_z < shared_size_z){
+            const int gid_z = BOUND( local_z + block_offset_z - z_axis_min, max_z_idx) * y_len;
             #pragma unroll
-            for (int k = 0; k < x_iters; k++){
-                const int local_x = threadIdx.x + k*X_BLOCK;
-                if(local_x < shared_size_x && local_y < shared_size_y && local_z < shared_size_z){
-                    const int gx = BOUND( local_x + block_offset_x - x_axis_min, max_x_idx);
-                    const int index = (gz * y_len + gy) * x_len + gx;
-                    tile[local_z][local_y][local_x] = A[index];
+            for(int j = 0; j < y_iters; j++){
+                const int local_y = threadIdx.y + j*Y_BLOCK;
+                if(local_y < shared_size_y){
+                    const int gid_zy = (gid_z + BOUND( local_y + block_offset_y - y_axis_min, max_y_idx))*x_len;
+                    #pragma unroll
+                    for (int k = 0; k < x_iters; k++){
+                        const int local_x = threadIdx.x + k*X_BLOCK;
+                        if(local_x < shared_size_x){
+                            const int gid_zyx = gid_zy + BOUND( local_x + block_offset_x - x_axis_min, max_x_idx);
+                            tile[local_z][local_y][local_x] = A[gid_zyx];
+                        }
+                    }
                 }
             }
         }
@@ -210,7 +213,7 @@ template<
     int y_axis_min, int y_axis_max,
     int x_axis_min, int x_axis_max>
 __global__
-void big_tile_3d_const_flat(
+void big_tile_3d_inlined_flat(
     const T* __restrict__ A,
     T* __restrict__ out,
     const unsigned z_len,
@@ -255,9 +258,9 @@ void big_tile_3d_const_flat(
             const int local_y = rem_z / ly_span;
             const int local_x = rem_y;
 
-            const int gx = SUBBOUND( local_x + block_offset_x, x_axis_min, max_x_idx);
-            const int gy = SUBBOUND( local_y + block_offset_y, y_axis_min, max_y_idx);
-            const int gz = SUBBOUND( local_z + block_offset_z, z_axis_min, max_z_idx);
+            const int gz = BOUND( local_z + block_offset_z - z_axis_min, max_z_idx);
+            const int gy = BOUND( local_y + block_offset_y - y_axis_min, max_y_idx);
+            const int gx = BOUND( local_x + block_offset_x - x_axis_min, max_x_idx);
 
             const int index = (gz * y_len + gy) * x_len + gx;
             tile[local_ix] = A[index];
@@ -287,6 +290,99 @@ void big_tile_3d_const_flat(
                 for(int k=0; k < x_range; k++){
                     const int x = y + threadIdx.x + k;
                     sum_acc += tile[x];
+                }
+            }
+        }
+        out[gindex] = sum_acc / (T)total_range;
+    }
+}
+
+template<
+    int z_axis_min, int z_axis_max,
+    int y_axis_min, int y_axis_max,
+    int x_axis_min, int x_axis_max>
+__global__
+void big_tile_3d_inlined_layered(
+    const T* __restrict__ A,
+    T* __restrict__ out,
+    const unsigned z_len,
+    const unsigned y_len,
+    const unsigned x_len
+    )
+{
+    const int waste_x = x_axis_min + x_axis_max;
+    const int waste_y = y_axis_min + y_axis_max;
+    const int waste_z = z_axis_min + z_axis_max;
+
+    const int block_offset_x = blockIdx.x*X_BLOCK;
+    const int block_offset_y = blockIdx.y*Y_BLOCK;
+    const int block_offset_z = blockIdx.z*Z_BLOCK;
+
+    const int max_z_idx = z_len - 1;
+    const int max_y_idx = y_len - 1;
+    const int max_x_idx = x_len - 1;
+
+    const int shared_size_z = Z_BLOCK + waste_z;
+    const int shared_size_y = Y_BLOCK + waste_y;
+    const int shared_size_x = X_BLOCK + waste_x;
+
+    __shared__ T tile[shared_size_z][shared_size_y][shared_size_x];
+
+    const int BLOCK_Xm = X_BLOCK * (Z_BLOCK / 2);
+    const int BLOCK_Ym = Y_BLOCK * (Z_BLOCK / 2);
+    //const int BLOCK_Xm = X_BLOCK;
+    //const int BLOCK_Ym = Y_BLOCK * Z_BLOCK;
+    const int x_iters = CEIL_DIV(shared_size_x, BLOCK_Xm);
+    const int y_iters = CEIL_DIV(shared_size_y, BLOCK_Ym);
+    const int blockIdxFlat = (threadIdx.z * Y_BLOCK + threadIdx.y) * X_BLOCK + threadIdx.x;
+    const int thread_y = blockIdxFlat / BLOCK_Xm;
+    const int thread_x = blockIdxFlat % BLOCK_Xm;
+
+    #pragma unroll
+    for(int local_z = 0; local_z < shared_size_z; local_z++){
+        const int gz = y_len * BOUND( local_z + block_offset_z - z_axis_min, max_z_idx);
+        #pragma unroll
+        for(int j = 0; j < y_iters; j++){
+            const int local_y = thread_y + j*BLOCK_Ym;
+            if(local_y < shared_size_y){
+                #pragma unroll
+                for (int k = 0; k < x_iters; k++){
+                    const int local_x = thread_x + k*BLOCK_Xm;
+                    if(local_x < shared_size_x){
+                        const int gy = x_len * (gz + BOUND( local_y + block_offset_y - y_axis_min, max_y_idx));
+                        const int gx = gy + BOUND( local_x + block_offset_x - x_axis_min, max_x_idx);
+
+                        //const int index = (gz * y_len + gy) * x_len + gx;
+                        tile[local_z][local_y][local_x] = A[gx];
+                    }
+                }
+            }
+        }
+    }
+    __syncthreads();
+
+    const int gidz = block_offset_z + threadIdx.z;
+    const int gidy = block_offset_y + threadIdx.y;
+    const int gidx = block_offset_x + threadIdx.x;
+    if((gidx < x_len) && (gidy < y_len) && (gidz < z_len))
+    {
+        const int gindex = (gidz * y_len + gidy) * x_len + gidx;
+        const int x_range = waste_x + 1;
+        const int y_range = waste_y + 1;
+        const int z_range = waste_z + 1;
+        const int total_range = x_range * y_range * z_range;
+
+        T sum_acc = 0;
+        #pragma unroll
+        for(int i=0; i < z_range; i++){
+            const int z = threadIdx.z + i;
+            #pragma unroll
+            for(int j=0; j < y_range; j++){
+                const int y = threadIdx.y + j;
+                #pragma unroll
+                for(int k=0; k < x_range; k++){
+                    const int x = threadIdx.x + k;
+                    sum_acc += tile[z][y][x];
                 }
             }
         }
