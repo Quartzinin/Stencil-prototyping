@@ -174,10 +174,8 @@ void big_tile_3d_inlined(
                 for (int k = 0; k < x_iters; k++){
                     const int local_x = threadIdx.x + k*X_BLOCK;
                     const int gid_zyx = gid_zy + BOUND( local_x + block_offset_x - x_axis_min, max_x_idx);
-                    if(local_z < shared_size_z)
-                        if(local_y < shared_size_y)
-                            if(local_x < shared_size_x)
-                                tile[local_z][local_y][local_x] = A[gid_zyx];
+                    if(local_z < shared_size_z && local_y < shared_size_y && local_x < shared_size_x)
+                        tile[local_z][local_y][local_x] = A[gid_zyx];
 
                 }
             }
