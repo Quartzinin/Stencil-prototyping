@@ -183,8 +183,6 @@ void big_tile_2d_const_flat(
     #pragma unroll
     for(int i = 0; i < iters; i++){
         const int local_ix = flatIndex + i*flatBlock;
-       
-
         const int local_x = local_ix % shared_size_x;
         const int local_y = (local_ix / shared_size_x);
 
