@@ -187,7 +187,7 @@ void big_tile_3d_inlined(
                 for (int k = 0; k < iters.x; k++){
                     const int local_x = threadIdx.x + k*X_BLOCK;
                     const int gid_zyx = gid_zy + BOUND((local_x + view_offset.x), max_idx.x);
-                    if((local_z < shared_size.z) && (local_y < shared_size.y) && (local_x < shared_size.x)){
+                    if(local_z < shared_size.z && local_y < shared_size.y && local_x < shared_size.x){
                         tile[local_z][local_y][local_x] = A[gid_zyx];
                     }
                 }
@@ -384,16 +384,14 @@ void big_tile_3d_inlined_layered(
             #pragma unroll
             for(int j = 0; j < y_iters; j++){
                 const int local_y = thread_y + j*BLOCK_Ym;
-                if(local_y < shared_size.y){
-                    #pragma unroll
-                    for (int k = 0; k < x_iters; k++){
-                        const int local_x = thread_x + k*BLOCK_Xm;
-                        const int gy = x_len * (gz + BOUND( local_y + view_offset.y, max_idx.y));
-                        const int gx = gy + BOUND( local_x + view_offset.x, max_idx.x);
+                #pragma unroll
+                for (int k = 0; k < x_iters; k++){
+                    const int local_x = thread_x + k*BLOCK_Xm;
+                    const int gy = x_len * (gz + BOUND( local_y + view_offset.y, max_idx.y));
+                    const int gx = gy + BOUND( local_x + view_offset.x, max_idx.x);
 
-                        if(local_x < shared_size.x){
-                            tile[local_z][local_y][local_x] = A[gx];
-                        }
+                    if(local_x < shared_size.x && local_y < shared_size.y){
+                        tile[local_z][local_y][local_x] = A[gx];
                     }
                 }
             }
