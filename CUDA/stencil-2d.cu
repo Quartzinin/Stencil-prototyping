@@ -142,6 +142,9 @@ void doTest_2D()
         GPU_RUN(call_kernel_2d(
                     (big_tile_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
                 ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_2d(
+                    (big_tile_2d_const_flat<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d big tile constant ixs flat ##",(void)0,(void)0);
         GPU_RUN_END;
     }
 

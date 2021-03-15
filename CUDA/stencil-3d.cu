@@ -171,9 +171,9 @@ void doTest_3D()
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d_inlined_flat<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d big tile inlined ixs flat ##",(void)0,(void)0);
-        GPU_RUN(call_kernel_3d(
-                    (big_tile_3d_inlined_layered<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d big tile inlined ixs layered ##",(void)0,(void)0);
+        //GPU_RUN(call_kernel_3d(
+        //            (big_tile_3d_inlined_layered<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+        //        ,"## Benchmark 3d big tile inlined ixs layered ##",(void)0,(void)0);
 
         GPU_RUN_END;
     }
