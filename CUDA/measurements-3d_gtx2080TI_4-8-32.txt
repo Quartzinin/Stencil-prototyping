@@ -1,0 +1,254 @@
+nvcc -O3 -arch=compute_35 -D_FORCE_INLINES -Wno-deprecated-gpu-targets -std=c++11 -o runproject-3d stencil-3d.cu
+./runproject-3d
+Blockdim z,y,x = 4, 8, 32
+ixs[3] = (zr,yr,xr) = (-1...1, 0...0, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 0.077 seconds
+## Benchmark 3d global read inlined ixs ## : mean 334 microseconds
+## Benchmark 3d small tile inlined ixs ## : mean 599 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 310 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 342 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 371 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[5] = (zr,yr,xr) = (-2...2, 0...0, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 0.120 seconds
+## Benchmark 3d global read inlined ixs ## : mean 293 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 322 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 338 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 414 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[7] = (zr,yr,xr) = (-3...3, 0...0, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 0.369 seconds
+## Benchmark 3d global read inlined ixs ## : mean 329 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 350 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 483 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 478 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-4...4, 0...0, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 0.736 seconds
+## Benchmark 3d global read inlined ixs ## : mean 309 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 340 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 408 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 491 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[11] = (zr,yr,xr) = (-5...5, 0...0, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 1.023 seconds
+## Benchmark 3d global read inlined ixs ## : mean 344 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 395 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 534 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 556 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-1...1, -1...1, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 0.632 seconds
+## Benchmark 3d global read inlined ixs ## : mean 296 microseconds
+## Benchmark 3d small tile inlined ixs ## : mean 638 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 355 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 364 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 385 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[25] = (zr,yr,xr) = (-2...2, -2...2, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 1.780 seconds
+## Benchmark 3d global read inlined ixs ## : mean 602 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 681 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 832 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 642 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[49] = (zr,yr,xr) = (-3...3, -3...3, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 3.583 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1192 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 947 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 937 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 767 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[81] = (zr,yr,xr) = (-4...4, -4...4, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 8.156 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1442 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 983 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 1210 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 1061 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[121] = (zr,yr,xr) = (-5...5, -5...5, 0...0)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 12.343 seconds
+## Benchmark 3d global read inlined ixs ## : mean 2068 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 1426 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 1646 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 1676 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[9] = (zr,yr,xr) = (-1...1, 0...0, -1...1)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 0.649 seconds
+## Benchmark 3d global read inlined ixs ## : mean 306 microseconds
+## Benchmark 3d small tile inlined ixs ## : mean 593 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 344 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 364 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 396 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[25] = (zr,yr,xr) = (-2...2, 0...0, -2...2)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 1.773 seconds
+## Benchmark 3d global read inlined ixs ## : mean 621 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 687 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 590 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 561 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[49] = (zr,yr,xr) = (-3...3, 0...0, -3...3)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 3.584 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1127 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 903 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 796 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 797 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[81] = (zr,yr,xr) = (-4...4, 0...0, -4...4)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 6.888 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1450 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 1117 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 1098 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 1080 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[121] = (zr,yr,xr) = (-5...5, 0...0, -5...5)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 10.068 seconds
+## Benchmark 3d global read inlined ixs ## : mean 2020 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 1343 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 1462 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 1449 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[27] = (zr,yr,xr) = (-1...1, -1...1, -1...1)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 1.917 seconds
+## Benchmark 3d global read inlined ixs ## : mean 628 microseconds
+## Benchmark 3d small tile inlined ixs ## : mean 1276 microseconds
+## Benchmark 3d big tile inlined ixs ## : mean 628 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 519 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 543 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[125] = (zr,yr,xr) = (-2...2, -2...2, -2...2)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 8.981 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1 microseconds
+INVALID RESULT at index 0: (expected, actual) == (19739.199219, 0.000000)
+INVALID RESULT at index 1: (expected, actual) == (19739.800781, 0.000000)
+INVALID RESULT at index 2: (expected, actual) == (19740.599609, 0.000000)
+INVALID RESULT at index 3: (expected, actual) == (19741.599609, 0.000000)
+INVALID RESULT at index 4: (expected, actual) == (19742.599609, 0.000000)
+INVALID RESULT at index 5: (expected, actual) == (19743.599609, 0.000000)
+INVALID RESULT at index 6: (expected, actual) == (19744.599609, 0.000000)
+INVALID RESULT at index 7: (expected, actual) == (19745.599609, 0.000000)
+INVALID RESULT at index 8: (expected, actual) == (19746.599609, 0.000000)
+INVALID RESULT at index 9: (expected, actual) == (19747.599609, 0.000000)
+INVALID RESULT at index 10: (expected, actual) == (19748.599609, 0.000000)
+INVALID RESULT at index 11: (expected, actual) == (19749.599609, 0.000000)
+INVALID RESULT at index 12: (expected, actual) == (19750.599609, 0.000000)
+INVALID RESULT at index 13: (expected, actual) == (19751.599609, 0.000000)
+INVALID RESULT at index 14: (expected, actual) == (19752.599609, 0.000000)
+INVALID RESULT at index 15: (expected, actual) == (19753.599609, 0.000000)
+INVALID RESULT at index 16: (expected, actual) == (19754.599609, 0.000000)
+INVALID RESULT at index 17: (expected, actual) == (19755.599609, 0.000000)
+INVALID RESULT at index 18: (expected, actual) == (19756.599609, 0.000000)
+INVALID RESULT at index 19: (expected, actual) == (19757.599609, 0.000000)
+INVALID RESULT at index 20: (expected, actual) == (19758.599609, 0.000000)
+   FAILED TO VALIDATE
+## Benchmark 3d big tile inlined ixs ## : mean 1823 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 1484 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 1356 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[343] = (zr,yr,xr) = (-3...3, -3...3, -3...3)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 24.357 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1 microseconds
+INVALID RESULT at index 0: (expected, actual) == (28198.427734, 0.000000)
+INVALID RESULT at index 1: (expected, actual) == (28199.000000, 0.000000)
+INVALID RESULT at index 2: (expected, actual) == (28199.714844, 0.000000)
+INVALID RESULT at index 3: (expected, actual) == (28200.572266, 0.000000)
+INVALID RESULT at index 4: (expected, actual) == (28201.572266, 0.000000)
+INVALID RESULT at index 5: (expected, actual) == (28202.572266, 0.000000)
+INVALID RESULT at index 6: (expected, actual) == (28203.572266, 0.000000)
+INVALID RESULT at index 7: (expected, actual) == (28204.572266, 0.000000)
+INVALID RESULT at index 8: (expected, actual) == (28205.572266, 0.000000)
+INVALID RESULT at index 9: (expected, actual) == (28206.572266, 0.000000)
+INVALID RESULT at index 10: (expected, actual) == (28207.572266, 0.000000)
+INVALID RESULT at index 11: (expected, actual) == (28208.572266, 0.000000)
+INVALID RESULT at index 12: (expected, actual) == (28209.572266, 0.000000)
+INVALID RESULT at index 13: (expected, actual) == (28210.572266, 0.000000)
+INVALID RESULT at index 14: (expected, actual) == (28211.572266, 0.000000)
+INVALID RESULT at index 15: (expected, actual) == (28212.572266, 0.000000)
+INVALID RESULT at index 16: (expected, actual) == (28213.572266, 0.000000)
+INVALID RESULT at index 17: (expected, actual) == (28214.572266, 0.000000)
+INVALID RESULT at index 18: (expected, actual) == (28215.572266, 0.000000)
+INVALID RESULT at index 19: (expected, actual) == (28216.572266, 0.000000)
+INVALID RESULT at index 20: (expected, actual) == (28217.572266, 0.000000)
+   FAILED TO VALIDATE
+## Benchmark 3d big tile inlined ixs ## : mean 3777 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 3297 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 3115 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[729] = (zr,yr,xr) = (-4...4, -4...4, -4...4)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 58.603 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1 microseconds
+INVALID RESULT at index 0: (expected, actual) == (36553.148438, 0.000000)
+INVALID RESULT at index 1: (expected, actual) == (36553.730469, 0.000000)
+INVALID RESULT at index 2: (expected, actual) == (36554.375000, 0.000000)
+INVALID RESULT at index 3: (expected, actual) == (36555.164062, 0.000000)
+INVALID RESULT at index 4: (expected, actual) == (36556.054688, 0.000000)
+INVALID RESULT at index 5: (expected, actual) == (36557.089844, 0.000000)
+INVALID RESULT at index 6: (expected, actual) == (36558.074219, 0.000000)
+INVALID RESULT at index 7: (expected, actual) == (36559.066406, 0.000000)
+INVALID RESULT at index 8: (expected, actual) == (36560.054688, 0.000000)
+INVALID RESULT at index 9: (expected, actual) == (36561.089844, 0.000000)
+INVALID RESULT at index 10: (expected, actual) == (36562.074219, 0.000000)
+INVALID RESULT at index 11: (expected, actual) == (36563.066406, 0.000000)
+INVALID RESULT at index 12: (expected, actual) == (36564.054688, 0.000000)
+INVALID RESULT at index 13: (expected, actual) == (36565.089844, 0.000000)
+INVALID RESULT at index 14: (expected, actual) == (36566.074219, 0.000000)
+INVALID RESULT at index 15: (expected, actual) == (36567.066406, 0.000000)
+INVALID RESULT at index 16: (expected, actual) == (36568.054688, 0.000000)
+INVALID RESULT at index 17: (expected, actual) == (36569.089844, 0.000000)
+INVALID RESULT at index 18: (expected, actual) == (36570.074219, 0.000000)
+INVALID RESULT at index 19: (expected, actual) == (36571.066406, 0.000000)
+INVALID RESULT at index 20: (expected, actual) == (36572.054688, 0.000000)
+   FAILED TO VALIDATE
+## Benchmark 3d big tile inlined ixs ## : mean 7027 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 6422 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 6197 microseconds
+Blockdim z,y,x = 4, 8, 32
+ixs[1331] = (zr,yr,xr) = (-5...5, -5...5, -5...5)
+{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
+cpu c 3d for 1 run : 102.945 seconds
+## Benchmark 3d global read inlined ixs ## : mean 1 microseconds
+INVALID RESULT at index 0: (expected, actual) == (44860.371094, 0.000000)
+INVALID RESULT at index 1: (expected, actual) == (44860.921875, 0.000000)
+INVALID RESULT at index 2: (expected, actual) == (44861.578125, 0.000000)
+INVALID RESULT at index 3: (expected, actual) == (44862.304688, 0.000000)
+INVALID RESULT at index 4: (expected, actual) == (44863.140625, 0.000000)
+INVALID RESULT at index 5: (expected, actual) == (44864.097656, 0.000000)
+INVALID RESULT at index 6: (expected, actual) == (44865.074219, 0.000000)
+INVALID RESULT at index 7: (expected, actual) == (44866.144531, 0.000000)
+INVALID RESULT at index 8: (expected, actual) == (44867.121094, 0.000000)
+INVALID RESULT at index 9: (expected, actual) == (44868.058594, 0.000000)
+INVALID RESULT at index 10: (expected, actual) == (44869.121094, 0.000000)
+INVALID RESULT at index 11: (expected, actual) == (44870.093750, 0.000000)
+INVALID RESULT at index 12: (expected, actual) == (44871.074219, 0.000000)
+INVALID RESULT at index 13: (expected, actual) == (44872.097656, 0.000000)
+INVALID RESULT at index 14: (expected, actual) == (44873.074219, 0.000000)
+INVALID RESULT at index 15: (expected, actual) == (44874.144531, 0.000000)
+INVALID RESULT at index 16: (expected, actual) == (44875.121094, 0.000000)
+INVALID RESULT at index 17: (expected, actual) == (44876.058594, 0.000000)
+INVALID RESULT at index 18: (expected, actual) == (44877.121094, 0.000000)
+INVALID RESULT at index 19: (expected, actual) == (44878.093750, 0.000000)
+INVALID RESULT at index 20: (expected, actual) == (44879.074219, 0.000000)
+   FAILED TO VALIDATE
+## Benchmark 3d big tile inlined ixs ## : mean 11756 microseconds
+## Benchmark 3d big tile inlined ixs flat ## : mean 11374 microseconds
+## Benchmark 3d big tile inlined ixs layered ## : mean 11280 microseconds
