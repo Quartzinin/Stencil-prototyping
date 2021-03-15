@@ -94,7 +94,7 @@ bool validate(const T* A, const T* B, unsigned int sizeAB){
     for(unsigned i = 0; i < sizeAB; i++){
         const T va = A[i];
         const T vb = B[i];
-        if (fabs(va - vb) > 0.00001 || isnan(va) || isinf(va) || isnan(vb) || isinf(vb)){
+        if (fabs(va - vb) > 0.00001 || std::isnan(va) || std::isinf(va) || std::isnan(vb) || std::isinf(vb)){
                     printf("INVALID RESULT at index %d: (expected, actual) == (%f, %f)\n",
                             i, va, vb);
             c++;
