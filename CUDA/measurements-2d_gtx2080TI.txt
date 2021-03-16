@@ -1,0 +1,72 @@
+nvcc -O3 -arch=compute_35 -D_FORCE_INLINES -Wno-deprecated-gpu-targets -std=c++11 -o runproject-2d stencil-2d.cu
+./runproject-2d
+const int ixs[3]: y= -1...1, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.077 seconds
+## Benchmark 2d global read constant ixs ## : mean 319 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 362 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 354 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 372 microseconds
+const int ixs[5]: y= -2...2, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.124 seconds
+## Benchmark 2d global read constant ixs ## : mean 345 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 396 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 375 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 392 microseconds
+const int ixs[7]: y= -3...3, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.170 seconds
+## Benchmark 2d global read constant ixs ## : mean 343 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 415 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 387 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 385 microseconds
+const int ixs[9]: y= -4...4, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.349 seconds
+## Benchmark 2d global read constant ixs ## : mean 370 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 458 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 403 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 402 microseconds
+const int ixs[11]: y= -5...5, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.576 seconds
+## Benchmark 2d global read constant ixs ## : mean 376 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 487 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 339 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 339 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.330 seconds
+## Benchmark 2d global read constant ixs ## : mean 293 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 350 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 353 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 344 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 1.326 seconds
+## Benchmark 2d global read constant ixs ## : mean 574 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 727 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 622 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 477 microseconds
+const int ixs[49]: y= -3...3, x= -3...3
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 2.768 seconds
+## Benchmark 2d global read constant ixs ## : mean 993 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 866 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 686 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 664 microseconds
+const int ixs[81]: y= -4...4, x= -4...4
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 4.452 seconds
+## Benchmark 2d global read constant ixs ## : mean 1420 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 1321 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 919 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 909 microseconds
+const int ixs[121]: y= -5...5, x= -5...5
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 6.715 seconds
+## Benchmark 2d global read constant ixs ## : mean 1866 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 1849 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 1233 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 1223 microseconds
