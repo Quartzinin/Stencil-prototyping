@@ -1,0 +1,70 @@
+const int ixs[3]: y= -1...1, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.065 seconds
+## Benchmark 2d global read constant ixs ## : mean 1878 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 2083 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 2057 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 2269 microseconds
+const int ixs[5]: y= -2...2, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.093 seconds
+## Benchmark 2d global read constant ixs ## : mean 1957 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 2251 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 2131 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 2328 microseconds
+const int ixs[7]: y= -3...3, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.131 seconds
+## Benchmark 2d global read constant ixs ## : mean 2353 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 2471 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 2277 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 2490 microseconds
+const int ixs[9]: y= -4...4, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.172 seconds
+## Benchmark 2d global read constant ixs ## : mean 2634 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 2656 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 2369 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 2542 microseconds
+const int ixs[11]: y= -5...5, x= 0...0
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.221 seconds
+## Benchmark 2d global read constant ixs ## : mean 2770 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 2974 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 2497 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 2618 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 0.210 seconds
+## Benchmark 2d global read constant ixs ## : mean 2582 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 2542 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 2653 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 2740 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 1.010 seconds
+## Benchmark 2d global read constant ixs ## : mean 4688 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 3799 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 3604 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 3663 microseconds
+const int ixs[49]: y= -3...3, x= -3...3
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 2.096 seconds
+## Benchmark 2d global read constant ixs ## : mean 7544 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 5876 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 4981 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 4936 microseconds
+const int ixs[81]: y= -4...4, x= -4...4
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 3.443 seconds
+## Benchmark 2d global read constant ixs ## : mean 12094 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 8187 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 7014 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 6931 microseconds
+const int ixs[121]: y= -5...5, x= -5...5
+{ x_len = 1024, y_len = 16384, total_len = 16777216 }
+cpu c 2d for 1 run : 5.162 seconds
+## Benchmark 2d global read constant ixs ## : mean 17096 microseconds
+## Benchmark 2d small tile constant ixs ## : mean 12598 microseconds
+## Benchmark 2d big tile constant ixs ## : mean 9465 microseconds
+## Benchmark 2d big tile constant ixs flat ## : mean 9465 microseconds
