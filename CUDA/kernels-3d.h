@@ -331,6 +331,127 @@ void big_tile_3d_inlined_flat(
     }
 }
 
+
+template<
+    int z_axis_min, int z_axis_max,
+    int y_axis_min, int y_axis_max,
+    int x_axis_min, int x_axis_max,
+    int BNx       , int BNy>
+__global__
+void big_tile_3d_inlined_flat_singleDim(
+    const T* __restrict__ A,
+    T* __restrict__ out,
+    const unsigned z_len,
+    const unsigned y_len,
+    const unsigned x_len
+    )
+{
+    constexpr int3 waste = {
+        int(x_axis_min + x_axis_max),
+        int(y_axis_min + y_axis_max),
+        int(z_axis_min + z_axis_max)};
+
+
+    const int BNxy = BNx*BNy;
+    const int block_index = blockIdx.x;
+
+    const int block_index_z = block_index / (BNxy);
+    const int block_index_y = (block_index % BNxy) / BNx;
+    const int block_index_x = block_index % BNx;
+
+    const int3 block_offset = {
+        int(block_index_x*X_BLOCK),
+        int(block_index_y*Y_BLOCK),
+        int(block_index_z*Z_BLOCK)};
+
+    constexpr int3 shared_size = {
+        int(X_BLOCK + waste.x),
+        int(Y_BLOCK + waste.y),
+        int(Z_BLOCK + waste.z)};
+
+    const int XY_SIZE = X_BLOCK*Y_BLOCK;
+
+    const int lid = threadIdx.x;
+    const int z = lid / (XY_SIZE);
+    const int y = (lid % XY_SIZE) / X_BLOCK;
+    const int x = lid % X_BLOCK;
+
+    constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
+    __shared__ T tile[shared_size_zyx];
+    { // reading segment
+        const int3 max_idx = {
+            int(x_len - 1),
+            int(y_len - 1),
+            int(z_len - 1)};
+        const int3 view_offset = {
+            block_offset.x - x_axis_min,
+            block_offset.y - y_axis_min,
+            block_offset.z - z_axis_min};
+
+        constexpr int blockDimFlat = BLOCKSIZE;
+        const int blockIdxFlat = (z * Y_BLOCK + y) * X_BLOCK + x;
+
+        constexpr int lz_span = shared_size.y * shared_size.x;
+        constexpr int ly_span = shared_size.x;
+
+        constexpr int iters = CEIL_DIV(shared_size_zyx, blockDimFlat);
+        #pragma unroll
+        for(int i = 0; i < iters; i++){
+            const int local_ix = (i * blockDimFlat) + blockIdxFlat;
+
+            const int rem_z = local_ix % lz_span;
+            const int rem_y = rem_z % ly_span;
+            const int local_z = local_ix / lz_span;
+            const int local_y = rem_z / ly_span;
+            const int local_x = rem_y;
+
+            const int gz = BOUND((local_z + view_offset.z), max_idx.z);
+            const int gy = BOUND((local_y + view_offset.y), max_idx.y);
+            const int gx = BOUND((local_x + view_offset.x), max_idx.x);
+
+            const int index = (gz * y_len + gy) * x_len + gx;
+            if(local_ix < shared_size_zyx){
+                tile[local_ix] = A[index];
+            }
+        }
+    }
+    __syncthreads();
+
+    { // writing segment
+        const int3 gid = {
+            int(block_offset.x + x),
+            int(block_offset.y + y),
+            int(block_offset.z + z)};
+        const int should_write = ((gid.x < x_len) && (gid.y < y_len) && (gid.z < z_len));
+        if(should_write){
+            const int gid_flat = (gid.z * y_len + gid.y) * x_len + gid.x;
+            constexpr int3 range = {
+                waste.x + 1,
+                waste.y + 1,
+                waste.z + 1};
+            constexpr int total_range = range.x * range.y * range.z;
+
+            T sum_acc = 0;
+            #pragma unroll
+            for(int i=0; i < range.z; i++){
+                const int zIdx = (z + i)*shared_size.y;
+                #pragma unroll
+                for(int j=0; j < range.y; j++){
+                    const int yIdx = (zIdx + y + j)*shared_size.x;
+                    #pragma unroll
+                    for(int k=0; k < range.x; k++){
+                        const int idx = yIdx + x + k;
+                        sum_acc += tile[idx];
+                    }
+                }
+            }
+            sum_acc /= (T)total_range;
+            out[gid_flat] = sum_acc;
+        }
+    }
+}
+
+
 template<
     int z_axis_min, int z_axis_max,
     int y_axis_min, int y_axis_max,

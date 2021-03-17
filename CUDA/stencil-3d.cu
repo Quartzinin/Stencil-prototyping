@@ -57,6 +57,13 @@ void stencil_3d_cpu(
     CUDASSERT(cudaDeviceSynchronize());\
 }
 
+#define call_kernel_3d_singleDim(kernel) {\
+    const int block = BLOCKSIZE;\
+    const int grid = (len + (block-1)) / block;\
+    kernel;\
+    CUDASSERT(cudaDeviceSynchronize());\
+}
+
 #define call_small_tile_3d(kernel) {\
     const dim3 block(X_BLOCK,Y_BLOCK,Z_BLOCK);\
     const int working_block_z = Z_BLOCK - (z_min + z_max);\
@@ -131,6 +138,9 @@ void doTest_3D()
     const int y_len = 1 << 8; //middle
     const int x_len = 1 << 7; //innermost
 
+    const int BNx_in = CEIL_DIV(x_len, X_BLOCK);\
+    const int BNy_in = CEIL_DIV(y_len, Y_BLOCK);\
+
     const int len = z_len * y_len * x_len;
     cout << "{ z_len = " << z_len << ", y_len = " << y_len << ", x_len = " << x_len << ", total_len = " << len << " }" << endl;
 
@@ -167,10 +177,14 @@ void doTest_3D()
         }
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d_inlined<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d big tile inlined ixs ##",(void)0,(void)0);
+                ,"## Benchmark 3d big tile - inlined idxs ##",(void)0,(void)0);
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d_inlined_flat<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
-                ,"## Benchmark 3d big tile inlined ixs flat ##",(void)0,(void)0);
+                ,"## Benchmark 3d big tile - inlined idxs - flat load ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_3d_singleDim(
+                    (big_tile_3d_inlined_flat_singleDim<z_min,z_max,y_min,y_max,x_min,x_max,BNx_in,BNy_in><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
+                ,"## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ##",(void)0,(void)0)
+
         //GPU_RUN(call_kernel_3d(
         //            (big_tile_3d_inlined_layered<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
         //        ,"## Benchmark 3d big tile inlined ixs layered ##",(void)0,(void)0);
