@@ -28,6 +28,7 @@
     for(unsigned x = 0; x < RUNS; x++){ \
         (call); \
     }\
+    CUDASSERT(cudaPeekAtLastError());\
     CUDASSERT(cudaDeviceSynchronize());\
     gettimeofday(&t_endpar, NULL);\
     CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, mem_size, cudaMemcpyDeviceToHost));\
@@ -106,13 +107,35 @@ bool validate(const T* A, const T* B, unsigned int sizeAB){
 }
 
 template<int D>
-T stencil_fun_cpu(const T* arr)
+inline
+T stencil_fun_cpu(const T* tmp)
 {
-    T sum_acc = 0;
-    for (int i = 0; i < D; ++i){
-        sum_acc += arr[i];
+#if 1
+    T acc = 0;
+    #pragma unroll
+    for (int j = 0; j < D; ++j)
+    {
+        acc += tmp[j];
     }
-    return sum_acc / (T)D;
+    acc /= (T(D));
+#else
+    T acc = 0;
+    #pragma unroll
+    for (int j = 0; j < D; ++j)
+    {
+        const T v = tmp[j];
+        acc -= v;
+        acc /= v;
+    }
+    #pragma unroll
+    for (int j = 0; j < D; ++j)
+    {
+        const T v = tmp[j];
+        acc -= v;
+        acc /= v;
+    }
+#endif
+    return acc;
 }
 
 #endif

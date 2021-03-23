@@ -107,7 +107,7 @@ void doTest_2D()
         }
     }
 
-    CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
+    //CUDASSERT(cudaMemcpyToSymbol(ixs_2d, cpu_ixs, ixs_size));
 
     cout << "const int ixs[" << ixs_len << "]: ";
     cout << "y= " << -y_min << "..." << y_max << ", x= " << -x_min << "..." << x_max << endl;
@@ -134,17 +134,19 @@ void doTest_2D()
                 ,"## Benchmark 2d big tile ##",(void)0,(void)0);
         */
         GPU_RUN(call_kernel_2d(
-                    (global_reads_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                ,"## Benchmark 2d global read constant ixs ##",(void)0,(void)0);
+                    (global_reads_2d_inline_reduce<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d global read inline ixs reduce ##",(void)0,(void)0);
+/*
         GPU_RUN(call_small_tile_2d(
-                    (small_tile_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                ,"## Benchmark 2d small tile constant ixs ##",(void)0,(void)0);
+                    (small_tile_2d_inline_reduce<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d small tile inline ixs reduce ##",(void)0,(void)0);
+*/
         GPU_RUN(call_kernel_2d(
-                    (big_tile_2d_const<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                ,"## Benchmark 2d big tile constant ixs ##",(void)0,(void)0);
+                    (big_tile_2d_inline_reduce<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d big tile inline ixs reduce ##",(void)0,(void)0);
         GPU_RUN(call_kernel_2d(
-                    (big_tile_2d_const_flat<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
-                ,"## Benchmark 2d big tile constant ixs flat ##",(void)0,(void)0);
+                    (big_tile_2d_inline_reduce_flat<x_min,x_max,y_min,y_max><<<grid,block>>>(gpu_array_in, gpu_array_out, x_len, y_len)))
+                ,"## Benchmark 2d big tile inline ixs reduce flat ##",(void)0,(void)0);
         GPU_RUN_END;
     }
 

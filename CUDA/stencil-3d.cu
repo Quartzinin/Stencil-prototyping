@@ -59,7 +59,10 @@ void stencil_3d_cpu(
 
 #define call_kernel_3d_singleDim(kernel) {\
     const int block = BLOCKSIZE;\
-    const int grid = (len + (block-1)) / block;\
+    const int BNx = CEIL_DIV(x_len, X_BLOCK);\
+    const int BNy = CEIL_DIV(y_len, Y_BLOCK);\
+    const int BNz = CEIL_DIV(z_len, Z_BLOCK);\
+    const int grid = BNx * BNy * BNz;\
     kernel;\
     CUDASSERT(cudaDeviceSynchronize());\
 }
@@ -126,17 +129,17 @@ void doTest_3D()
             }
         }
     }
-    if(ixs_len <= BLOCKSIZE){
-        CUDASSERT(cudaMemcpyToSymbol(ixs_3d, cpu_ixs, ixs_size));
-    }
+    //if(ixs_len <= BLOCKSIZE){
+    //    CUDASSERT(cudaMemcpyToSymbol(ixs_3d, cpu_ixs, ixs_size));
+    //}
     {
         cout << "Blockdim z,y,x = " << Z_BLOCK << ", " << Y_BLOCK << ", " << X_BLOCK << endl;
         cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << -z_min << "..." << z_max << ", " << -y_min << "..." << y_max << ", " << -x_min << "..." << x_max << ")" << endl;
     }
 
-    const int z_len = 1 << 9; //outermost
-    const int y_len = 1 << 8; //middle
-    const int x_len = 1 << 7; //innermost
+    const long z_len = (1 << 9) - 1; //outermost
+    const long y_len = (1 << 8) - 1; //middle
+    const long x_len = (1 << 7) - 1; //innermost
 
     const int BNx_in = CEIL_DIV(x_len, X_BLOCK);\
     const int BNy_in = CEIL_DIV(y_len, Y_BLOCK);\
@@ -169,12 +172,14 @@ void doTest_3D()
         GPU_RUN(call_kernel_3d(
                     (global_reads_3d_inlined<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d global read inlined ixs ##",(void)0,(void)0);
+/*
         if (!(z_range > Z_BLOCK || y_range > Y_BLOCK || x_range > X_BLOCK))
         {
             GPU_RUN(call_small_tile_3d(
                         (small_tile_3d_inlined<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                     ,"## Benchmark 3d small tile inlined ixs ##",(void)0,(void)0);
         }
+*/
         GPU_RUN(call_kernel_3d(
                     (big_tile_3d_inlined<z_min,z_max,y_min,y_max,x_min,x_max><<<grid,block>>>(gpu_array_in, gpu_array_out, z_len, y_len, x_len)))
                 ,"## Benchmark 3d big tile - inlined idxs ##",(void)0,(void)0);
@@ -198,6 +203,7 @@ void doTest_3D()
 
 int main()
 {
+/*
     doTest_3D<1,1,0,0,0,0>();
     doTest_3D<2,2,0,0,0,0>();
     doTest_3D<3,3,0,0,0,0>();
@@ -215,7 +221,7 @@ int main()
     doTest_3D<3,3,0,0,3,3>();
     doTest_3D<4,4,0,0,4,4>();
     doTest_3D<5,5,0,0,5,5>();
-
+*/
     doTest_3D<1,1,1,1,1,1>();
     doTest_3D<2,2,2,2,2,2>();
     doTest_3D<3,3,3,3,3,3>();

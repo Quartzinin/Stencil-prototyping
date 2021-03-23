@@ -14,24 +14,26 @@ using std::cout;
 using std::endl;
 
 
-template<int D>
+template<int D, int ix_min, int ix_max>
 void stencil_1d_cpu(
-    const T* start,
+    const T* A,
     const int* idxs,
     T* out,
     const int len)
 {
-    for (int i = 0; i < len; ++i)
+    const int max_ix = len-1;
+    constexpr int step = (1 + ix_max - ix_min) / (D-1);
+    T tmp[D];
+    for (int gid = 0; gid < len; ++gid)
     {
-        T arr[D];
+        #pragma unroll
         for (int j = 0; j < D; ++j)
         {
-            int idx = idxs[j];
-            int bound = min(len-1,max(0,i+idx));
-            arr[j] = start[bound];
+            tmp[j] = A[BOUND((gid + (j*step + ix_min)), max_ix)];
         }
-        T lambda_res = stencil_fun_cpu<D>(arr);
-        out[i] = lambda_res;
+
+        T res = stencil_fun_cpu<D>((const T*)(tmp));
+        out[gid] = res;
     }
 }
 
@@ -51,7 +53,7 @@ void stencil_1d_cpu(
     CUDASSERT(cudaDeviceSynchronize());\
 }
 
-template<int D>
+template<int D, int ix_min, int ix_max>
 void run_cpu_1d(const int* idxs, const int len, T* cpu_out)
 {
     T* cpu_in  = (T*)malloc(len*sizeof(T));
@@ -64,7 +66,7 @@ void run_cpu_1d(const int* idxs, const int len, T* cpu_out)
     struct timeval t_startpar, t_endpar, t_diffpar;
     gettimeofday(&t_startpar, NULL);
     {
-        stencil_1d_cpu<D>(cpu_in,idxs,cpu_out,len);
+        stencil_1d_cpu<D, ix_min, ix_max>(cpu_in,idxs,cpu_out,len);
     }
     gettimeofday(&t_endpar, NULL);
     timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
@@ -84,7 +86,7 @@ void doTest_1D()
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
     int* cpu_ixs = (int*)malloc(ixs_size);
-    const int step = (ix_min + ix_max) / (ixs_len-1);
+    const int step = (1 + ix_min + ix_max) / (ixs_len-1);
     {
         int s = -ix_min;
         for(int i=0; i < D ; i++){ cpu_ixs[i] = s; s += step; }
@@ -95,13 +97,13 @@ void doTest_1D()
         {}
         else { printf("index array contains indexes not in range\n"); exit(1);}
     }
-    CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
+    //CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
     const int lenp = 24;
     const int len = 1 << lenp;
     cout << "{ x_len = " << len << " }" << endl;
     T* cpu_out = (T*)malloc(len*sizeof(T));
-    run_cpu_1d<D>(cpu_ixs,len, cpu_out);
+    run_cpu_1d<D, (-ix_min), ix_max>(cpu_ixs,len, cpu_out);
 
     cout << "ixs[" << D << "] = [";
     cout << cpu_ixs[0] << ", ";
@@ -109,6 +111,10 @@ void doTest_1D()
     if(D == 3){ cout << cpu_ixs[2]; }
     else{ cout << "... , " << cpu_ixs[D-1]; }
     cout << "]" << endl;
+
+    const long max_ix_x = len-1;
+    const long shared_len = (ix_min + BLOCKSIZE + ix_max);
+    const long shared_size = shared_len * sizeof(T);
 
     {
         GPU_RUN_INIT;
@@ -125,19 +131,26 @@ void doTest_1D()
                     (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d big tile ##",(void)0,(void)0);
         */
-
         GPU_RUN(call_kernel_1d(
-                    (global_read_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
-                ,"## Benchmark 1d global reads constant ixs ##",(void)0,(void)0);
+                    (global_read_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                ,"## Benchmark 1d global read inline ixs reduce ##",(void)0,(void)0);
+/*
         const int width = ix_min + ix_max + 1;
         if(width < BLOCKSIZE-20){
             GPU_RUN(call_inSharedKernel_1d(
-                        (small_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
-                    ,"## Benchmark 1d small tile constant ixs  ##",(void)0,(void)0);
+                        (small_tile_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                    ,"## Benchmark 1d small tile inline ixs reduce ##",(void)0,(void)0);
         }
+*/
         GPU_RUN(call_kernel_1d(
-                    (big_tile_1d_const<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
-                ,"## Benchmark 1d big tile constant ixs ##",(void)0,(void)0);
+                    (big_tile_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
+                ,"## Benchmark 1d big tile inline ixs reduce ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_1d(
+                    (global_read_1d_inline<ixs_len,(-ix_min),ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, max_ix_x)))
+                ,"## Benchmark 1d global read inline ixs ##",(void)0,(void)0);
+        GPU_RUN(call_kernel_1d(
+                    (big_tile_1d_inline<ixs_len,(-ix_min),ix_max><<<grid,block,shared_size>>>(gpu_array_in, gpu_array_out, max_ix_x, shared_len)))
+                ,"## Benchmark 1d big tile thread inline ixs ##",(void)0,(void)0);
 
         GPU_RUN_END;
     }
@@ -149,6 +162,7 @@ void doTest_1D()
 
 int main()
 {
+
     doTest_1D<3,1,1>();
     doTest_1D<5,2,2>();
     doTest_1D<7,3,3>();
@@ -157,6 +171,7 @@ int main()
     doTest_1D<13,6,6>();
     doTest_1D<15,7,7>();
     doTest_1D<17,8,8>();
+
     doTest_1D<19,9,9>();
     doTest_1D<21,10,10>();
     doTest_1D<23,11,11>();
@@ -174,18 +189,17 @@ int main()
     doTest_1D<47,23,23>();
     doTest_1D<49,24,24>();
     doTest_1D<51,25,25>();
-
     doTest_1D<101,50,50>();
     doTest_1D<201,100,100>();
     doTest_1D<301,150,150>();
     doTest_1D<401,200,200>();
     doTest_1D<501,250,250>();
+
     doTest_1D<601,300,300>();
     doTest_1D<701,350,350>();
     doTest_1D<801,400,400>();
     doTest_1D<901,450,450>();
     doTest_1D<1001,500,500>();
-
     doTest_1D<3,2,2>();
     doTest_1D<3,3,3>();
     doTest_1D<3,4,4>();
