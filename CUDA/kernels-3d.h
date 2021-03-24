@@ -9,48 +9,95 @@
  */
 
 template<
-    long z_axis_min, long z_axis_max,
-    long y_axis_min, long y_axis_max,
-    long x_axis_min, long x_axis_max>
+    long axis_min_z, long axis_max_z,
+    long axis_min_y, long axis_max_y,
+    long axis_min_x, long axis_max_x>
 __global__
 void global_reads_3d_inlined(
     const T* __restrict__ A,
     T* __restrict__ out,
-    const long z_len,
-    const long y_len,
-    const long x_len)
+    const long3 lens)
 {
-    constexpr long3 axis_min = { long(x_axis_min),long(y_axis_min),long(z_axis_min) };
-    constexpr long3 axis_max = { long(x_axis_max),long(y_axis_max),long(z_axis_max) };
+    constexpr long3 axis_min = { axis_min_x, axis_min_y, axis_min_z };
+    constexpr long3 axis_max = { axis_max_x, axis_max_y, axis_max_z };
+    constexpr long3 range = {
+        axis_max.x + axis_min.x + 1,
+        axis_max.y + axis_min.y + 1,
+        axis_max.z + axis_min.z + 1};
+    constexpr long total_range = range.z * range.y * range.x;
+
     const long3 gid = {
         long(blockIdx.x*X_BLOCK + threadIdx.x),
         long(blockIdx.y*Y_BLOCK + threadIdx.y),
         long(blockIdx.z*Z_BLOCK + threadIdx.z)};
 
-    if (gid.x < x_len && gid.y < y_len && gid.z < z_len)
+    if (gid.x < lens.x && gid.y < lens.y && gid.z < lens.z)
     {
-        const long gindex = (gid.z*y_len + gid.y)*x_len + gid.x;
+        const long gindex = (gid.z*lens.y + gid.y)*lens.x + gid.x;
         const long3 max_idx = {
-            long(x_len - 1),
-            long(y_len - 1),
-            long(z_len - 1)};
-        constexpr long3 range = {
-            axis_max.x + axis_min.x + 1,
-            axis_max.y + axis_min.y + 1,
-            axis_max.z + axis_min.z + 1};
-        constexpr long total_range = range.z * range.y * range.x;
+            lens.x - 1L,
+            lens.y - 1L,
+            lens.z - 1L};
 
         T sum_acc = 0;
-#pragma unroll
-        for(long i=0; i < range.z; i++){
-                    const long z = BOUNDL(gid.z + (i - axis_min.z), max_idx.z);
-#pragma unroll
-            for(long j=0; j < range.y; j++){
-                    const long y = BOUNDL(gid.y + (j - axis_min.y), max_idx.y);
-#pragma unroll
-                for(long k=0; k < range.x; k++){
-                    const long x = BOUNDL(gid.x + (k - axis_min.x), max_idx.x);
-                    const long index = (z*y_len + y)*x_len + x;
+        for(long i=-axis_min_z; i <= axis_max_z; i++){
+            const long z = BOUNDL(gid.z + i, max_idx.z);
+            for(long j=-axis_min_y; j <= axis_max_y; j++){
+                const long y = BOUNDL(gid.y + j, max_idx.y);
+                for(long k=-axis_min_x; k <= axis_max_x; k++){
+                    const long x = BOUNDL(gid.x + k, max_idx.x);
+                    const long index = (z*lens.y + y)*lens.x + x;
+                    sum_acc += A[index];
+                }
+            }
+        }
+        sum_acc /= (T)total_range;
+        out[gindex] = sum_acc;
+    }
+}
+
+template<
+    long axis_min_z, long axis_max_z,
+    long axis_min_y, long axis_max_y,
+    long axis_min_x, long axis_max_x>
+__global__
+void global_reads_3d_inlined_singleDim(
+    const T* __restrict__ A,
+    T* __restrict__ out,
+    const long3 lens,
+    const long3 grid_spans)
+{
+    constexpr long3 axis_min = { axis_min_x, axis_min_y, axis_min_z };
+    constexpr long3 axis_max = { axis_max_x, axis_max_y, axis_max_z };
+    constexpr long3 range = {
+        axis_max.x + axis_min.x + 1,
+        axis_max.y + axis_min.y + 1,
+        axis_max.z + axis_min.z + 1};
+    constexpr long total_range = range.z * range.y * range.x;
+    constexpr long blockdim_flat = X_BLOCK * Y_BLOCK * Z_BLOCK;
+    const long gid_flat = blockIdx.x * blockdim_flat + threadIdx.x;
+    const long gidz = gid_flat / grid_spans.z;
+    const long rgid = gid_flat % grid_spans.z;
+    const long gidy = rgid / grid_spans.y;
+    const long gidx = rgid % grid_spans.y;
+    const long3 gid = { gidx, gidy, gidz };
+
+    if (gid.x < lens.x && gid.y < lens.y && gid.z < lens.z)
+    {
+        const long gindex = (gid.z*lens.y + gid.y)*lens.x + gid.x;
+        const long3 max_idx = {
+            lens.x - 1L,
+            lens.y - 1L,
+            lens.z - 1L};
+
+        T sum_acc = 0;
+        for(long i=-axis_min_z; i <= axis_max_z; i++){
+            for(long j=-axis_min_y; j <= axis_max_y; j++){
+                for(long k=-axis_min_x; k <= axis_max_x; k++){
+                    const long z = BOUNDL(gid.z + i, max_idx.z);
+                    const long y = BOUNDL(gid.y + j, max_idx.y);
+                    const long x = BOUNDL(gid.x + k, max_idx.x);
+                    const long index = (z*lens.y + y)*lens.x + x;
                     sum_acc += A[index];
                 }
             }
@@ -68,11 +115,11 @@ __global__
 void small_tile_3d_inlined(
     const T* __restrict__ A,
     T* __restrict__ out,
-    const long z_len,
-    const long y_len,
-    const long x_len
-    )
+    const long3 lens)
 {
+    const long z_len = lens.z;
+    const long y_len = lens.y;
+    const long x_len = lens.x;
     __shared__ T tile[Z_BLOCK][Y_BLOCK][X_BLOCK];
     constexpr long3 waste = {
         long(x_axis_min + x_axis_max),
@@ -140,11 +187,11 @@ __global__
 void big_tile_3d_inlined(
     const T* __restrict__ A,
     T* __restrict__ out,
-    const long z_len,
-    const long y_len,
-    const long x_len
-    )
+    const long3 lens)
 {
+    const long z_len = lens.z;
+    const long y_len = lens.y;
+    const long x_len = lens.x;
     constexpr long3 waste = {
         long(x_axis_min + x_axis_max),
         long(y_axis_min + y_axis_max),
@@ -231,11 +278,11 @@ __global__
 void big_tile_3d_inlined_flat(
     const T* __restrict__ A,
     T* __restrict__ out,
-    const long z_len,
-    const long y_len,
-    const long x_len
-    )
+    const long3 lens)
 {
+    const long z_len = lens.z;
+    const long y_len = lens.y;
+    const long x_len = lens.x;
     constexpr long3 waste = {
         long(x_axis_min + x_axis_max),
         long(y_axis_min + y_axis_max),
@@ -324,29 +371,28 @@ void big_tile_3d_inlined_flat(
 template<
     long z_axis_min, long z_axis_max,
     long y_axis_min, long y_axis_max,
-    long x_axis_min, long x_axis_max,
-    long BNx       , long BNy>
+    long x_axis_min, long x_axis_max>
 __global__
 void big_tile_3d_inlined_flat_singleDim(
     const T* __restrict__ A,
     T* __restrict__ out,
-    const long z_len,
-    const long y_len,
-    const long x_len
-    )
+    const long3 lens,
+    const long3 grid_spans)
 {
+    const long z_len = lens.z;
+    const long y_len = lens.y;
+    const long x_len = lens.x;
     constexpr long3 waste = {
         long(x_axis_min + x_axis_max),
         long(y_axis_min + y_axis_max),
         long(z_axis_min + z_axis_max)};
 
 
-    const long BNxy = BNx*BNy;
     const long block_index = blockIdx.x;
-
-    const long block_index_z = block_index / (BNxy);
-    const long block_index_y = (block_index % BNxy) / BNx;
-    const long block_index_x = block_index % BNx;
+    const long block_index_z = block_index / grid_spans.z;
+    const long rblock = (block_index % grid_spans.z);
+    const long block_index_y = rblock / grid_spans.y;
+    const long block_index_x = rblock % grid_spans.y;
 
     const long3 block_offset = {
         long(block_index_x*X_BLOCK),
@@ -468,11 +514,11 @@ __global__
 void big_tile_3d_inlined_layered(
     const T* __restrict__ A,
     T* __restrict__ out,
-    const long z_len,
-    const long y_len,
-    const long x_len
-    )
+    const long3 lens)
 {
+    const long z_len = lens.z;
+    const long y_len = lens.y;
+    const long x_len = lens.x;
     constexpr long3 waste = {
         long(x_axis_min + x_axis_max),
         long(y_axis_min + y_axis_max),

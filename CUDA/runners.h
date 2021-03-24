@@ -3,6 +3,8 @@
 
 #include"constants.h"
 
+#include <nvfunctional>
+
 
 #define GPU_RUN_INIT \
     struct timeval t_startpar, t_endpar, t_diffpar;\
@@ -107,7 +109,7 @@ bool validate(const T* A, const T* B, unsigned int sizeAB){
 }
 
 template<int D>
-inline
+inline __host__
 T stencil_fun_cpu(const T* tmp)
 {
 #if 1
@@ -137,5 +139,88 @@ T stencil_fun_cpu(const T* tmp)
 #endif
     return acc;
 }
+
+template<typename L>
+class Globs {
+    public :
+        struct timeval t_startpar, t_endpar, t_diffpar;
+        long RUNS;
+        long mem_size;
+        long tlen;
+        L lens;
+        T* arr_out;
+        T* gpu_array_out;
+        T* arr_in;
+        T* gpu_array_in;
+
+        __host__
+        Globs(L arrlens, const long totallen, const long runsv){
+            lens = arrlens;
+            tlen = totallen;
+            RUNS = runsv;
+            mem_size = tlen*sizeof(T);
+            const long out_start = 2*tlen;
+            const long alloc_sizes = mem_size*3;
+            arr_in = (T*)malloc(alloc_sizes);
+            for(int i=0; i<tlen; i++){ arr_in[i] = (T)(i+1); }
+            CUDASSERT(cudaMalloc((void **) &gpu_array_in, alloc_sizes));
+            arr_out = &arr_in[out_start];
+            gpu_array_out = gpu_array_in + out_start;
+            CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));
+            CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));
+            CUDASSERT(cudaDeviceSynchronize());
+        }
+        __host__
+        ~Globs(void){
+            free(arr_in);
+            CUDASSERT(cudaFree(gpu_array_in));
+        }
+        __host__
+        void reset_output(){
+            CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));
+            CUDASSERT(cudaDeviceSynchronize());
+        }
+        __host__
+        void check_output(const T* cpu_out, const bool should_print){
+            CUDASSERT(cudaMemcpy(arr_out, gpu_array_out, mem_size, cudaMemcpyDeviceToHost));
+            CUDASSERT(cudaDeviceSynchronize());
+            timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
+            unsigned long elapsed = t_diffpar.tv_sec*1e6+t_diffpar.tv_usec;
+            elapsed /= RUNS;
+            if(should_print){
+                printf(" : mean %lu microseconds\n", elapsed);
+                if (!validate(cpu_out,arr_out,tlen)){
+                    printf("%s\n", "   FAILED TO VALIDATE");
+                }
+            }
+
+        }
+        __host__
+        void do_run_cube(void (*call)(const T*, T*, const L), const T* cpu_out, const dim3 grid, const dim3 block, const bool should_print=true){
+            call<<<grid,block>>>(gpu_array_in, gpu_array_out, lens); // smoke test
+            CUDASSERT(cudaGetLastError()); // smoke test
+            reset_output();
+            gettimeofday(&t_startpar, NULL);
+            for(unsigned x = 0; x < RUNS; x++){
+                call<<<grid,block>>>(gpu_array_in, gpu_array_out, lens);
+                CUDASSERT(cudaDeviceSynchronize());
+            }
+            gettimeofday(&t_endpar, NULL);
+            check_output(cpu_out, should_print);
+        };
+        __host__
+        void do_run_singleDim(void (*call)(const T*, T*, const L, const L), const T* cpu_out, const dim3 grid, const dim3 block, const L spans, bool should_print=true){
+            call<<<grid,block>>>(gpu_array_in, gpu_array_out, lens, spans); // smoke test
+            CUDASSERT(cudaGetLastError()); // smoke test
+            reset_output();
+            gettimeofday(&t_startpar, NULL);
+            for(unsigned x = 0; x < RUNS; x++){
+                call<<<grid,block>>>(gpu_array_in, gpu_array_out, lens, spans);
+                CUDASSERT(cudaDeviceSynchronize());
+            }
+            gettimeofday(&t_endpar, NULL);
+            check_output(cpu_out, should_print);
+        };
+};
 
 #endif
