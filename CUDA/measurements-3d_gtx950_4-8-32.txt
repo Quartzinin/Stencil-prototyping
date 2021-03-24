@@ -1,164 +1,181 @@
+./runproject-3d
 Blockdim z,y,x = 4, 8, 32
 ixs[3] = (zr,yr,xr) = (-1...1, 0...0, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.067 seconds
-## Benchmark 3d global read inlined ixs ## : mean 2242 microseconds
-## Benchmark 3d small tile inlined ixs ## : mean 3778 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 2268 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 2754 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 2885 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.063 seconds
+## Benchmark 3d global read inlined ixs ## : mean 3623 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 5224 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 4032 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 4274 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 5405 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[5] = (zr,yr,xr) = (-2...2, 0...0, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.098 seconds
-## Benchmark 3d global read inlined ixs ## : mean 2502 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 2417 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 2866 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 3426 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.088 seconds
+## Benchmark 3d global read inlined ixs ## : mean 5090 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 8401 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 4247 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 4325 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 5481 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[7] = (zr,yr,xr) = (-3...3, 0...0, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.139 seconds
-## Benchmark 3d global read inlined ixs ## : mean 3184 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 2818 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 3642 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 4041 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.119 seconds
+## Benchmark 3d global read inlined ixs ## : mean 8180 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 10140 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 5060 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 5107 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 6472 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[9] = (zr,yr,xr) = (-4...4, 0...0, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.194 seconds
-## Benchmark 3d global read inlined ixs ## : mean 3693 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 3188 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 3987 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 4694 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.156 seconds
+## Benchmark 3d global read inlined ixs ## : mean 9672 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 13088 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 5132 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 5187 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 6441 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[11] = (zr,yr,xr) = (-5...5, 0...0, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.258 seconds
-## Benchmark 3d global read inlined ixs ## : mean 4193 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 3425 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 5039 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 5283 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.191 seconds
+## Benchmark 3d global read inlined ixs ## : mean 11147 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 15144 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 6128 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 8770 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 7565 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[9] = (zr,yr,xr) = (-1...1, -1...1, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.159 seconds
-## Benchmark 3d global read inlined ixs ## : mean 3049 microseconds
-## Benchmark 3d small tile inlined ixs ## : mean 5452 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 2860 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 3292 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 3274 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.161 seconds
+## Benchmark 3d global read inlined ixs ## : mean 7577 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 8852 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 7268 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 5516 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 6201 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[25] = (zr,yr,xr) = (-2...2, -2...2, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 1.381 seconds
-## Benchmark 3d global read inlined ixs ## : mean 5486 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 3801 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 5112 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 4696 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 1.589 seconds
+## Benchmark 3d global read inlined ixs ## : mean 14685 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 15994 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 8951 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 10627 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 10992 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[49] = (zr,yr,xr) = (-3...3, -3...3, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 2.822 seconds
-## Benchmark 3d global read inlined ixs ## : mean 9649 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 5679 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 8055 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 6514 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 3.263 seconds
+## Benchmark 3d global read inlined ixs ## : mean 24443 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 26063 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 13205 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 17584 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 15703 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[81] = (zr,yr,xr) = (-4...4, -4...4, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 4.740 seconds
-## Benchmark 3d global read inlined ixs ## : mean 14719 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 7659 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 10137 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 8833 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 5.480 seconds
+## Benchmark 3d global read inlined ixs ## : mean 38295 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 39385 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 16021 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 16506 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 13171 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[121] = (zr,yr,xr) = (-5...5, -5...5, 0...0)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 7.406 seconds
-## Benchmark 3d global read inlined ixs ## : mean 21563 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 11439 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 14371 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 13577 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 8.486 seconds
+## Benchmark 3d global read inlined ixs ## : mean 53548 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 54997 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 23108 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 27634 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 24730 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[9] = (zr,yr,xr) = (-1...1, 0...0, -1...1)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 0.216 seconds
-## Benchmark 3d global read inlined ixs ## : mean 2867 microseconds
-## Benchmark 3d small tile inlined ixs ## : mean 4955 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 2733 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 3351 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 3268 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 0.203 seconds
+## Benchmark 3d global read inlined ixs ## : mean 5449 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 6944 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 5387 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 7119 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 8293 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[25] = (zr,yr,xr) = (-2...2, 0...0, -2...2)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 1.495 seconds
-## Benchmark 3d global read inlined ixs ## : mean 5193 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 3693 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 5410 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 4736 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 1.592 seconds
+## Benchmark 3d global read inlined ixs ## : mean 8642 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 9952 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 6464 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 10410 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 11352 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[49] = (zr,yr,xr) = (-3...3, 0...0, -3...3)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 3.026 seconds
-## Benchmark 3d global read inlined ixs ## : mean 8638 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 5542 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 6819 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 6504 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 3.268 seconds
+## Benchmark 3d global read inlined ixs ## : mean 94794 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 14499 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 8966 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 11988 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 13042 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[81] = (zr,yr,xr) = (-4...4, 0...0, -4...4)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 4.920 seconds
-## Benchmark 3d global read inlined ixs ## : mean 13048 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 7587 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 9400 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 8941 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 5.433 seconds
+## Benchmark 3d global read inlined ixs ## : mean 18340 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 20330 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 10976 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 15974 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 17090 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[121] = (zr,yr,xr) = (-5...5, 0...0, -5...5)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 7.538 seconds
-## Benchmark 3d global read inlined ixs ## : mean 19111 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 10576 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 12583 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 11930 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 7.934 seconds
+## Benchmark 3d global read inlined ixs ## : mean 24814 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 27192 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 20699 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 21375 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 21816 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[27] = (zr,yr,xr) = (-1...1, -1...1, -1...1)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 1.576 seconds
-## Benchmark 3d global read inlined ixs ## : mean 5244 microseconds
-## Benchmark 3d small tile inlined ixs ## : mean 7834 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 4681 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 4447 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 4385 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 1.739 seconds
+## Benchmark 3d global read inlined ixs ## : mean 8618 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 10481 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 11646 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 9086 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 9698 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[125] = (zr,yr,xr) = (-2...2, -2...2, -2...2)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 7.504 seconds
-## Benchmark 3d global read inlined ixs ## : mean 18808 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 10507 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 11851 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 10691 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 8.422 seconds
+## Benchmark 3d global read inlined ixs ## : mean 24865 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 26021 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 19963 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 19199 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 19850 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[343] = (zr,yr,xr) = (-3...3, -3...3, -3...3)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 20.543 seconds
-## Benchmark 3d global read inlined ixs ## : mean 48432 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 24772 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 26066 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 24791 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 22.392 seconds
+## Benchmark 3d global read inlined ixs ## : mean 55166 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 58078 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 37332 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 38320 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 37979 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[729] = (zr,yr,xr) = (-4...4, -4...4, -4...4)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 46.882 seconds
-## Benchmark 3d global read inlined ixs ## : mean 121679 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 48826 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 49652 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 49659 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 48.713 seconds
+## Benchmark 3d global read inlined ixs ## : mean 113281 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 117968 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 62813 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 67664 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 66424 microseconds
 Blockdim z,y,x = 4, 8, 32
 ixs[1331] = (zr,yr,xr) = (-5...5, -5...5, -5...5)
-{ z_len = 512, y_len = 256, x_len = 128, total_len = 16777216 }
-cpu c 3d for 1 run : 85.370 seconds
-## Benchmark 3d global read inlined ixs ## : mean 212800 microseconds
-## Benchmark 3d big tile inlined ixs ## : mean 88919 microseconds
-## Benchmark 3d big tile inlined ixs flat ## : mean 88629 microseconds
-## Benchmark 3d big tile inlined ixs layered ## : mean 89987 microseconds
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+cpu c 3d for 1 run : 88.310 seconds
+## Benchmark 3d global read inlined ixs ## : mean 196987 microseconds
+## Benchmark 3d global read inlined ixs - singleDim block ## : mean 196603 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 111095 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load ## : mean 113868 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load - singleDim block ## : mean 110113 microseconds
