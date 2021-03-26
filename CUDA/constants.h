@@ -6,11 +6,6 @@
 #define BLOCKSIZE 1024
 #define SQ_BLOCKSIZE 32
 
-//3d blocksizes
-#define X_BLOCK 32
-#define Y_BLOCK 8
-#define Z_BLOCK 4
-
 #define BOUND(i,max_ix) (min((max_ix),max(0,(i))))
 #define BOUNDL(i,max_ix) (min((max_ix),max(0l,(i))))
 #define CEIL_DIV(x,d) (((x)+(d)-1)/(d))

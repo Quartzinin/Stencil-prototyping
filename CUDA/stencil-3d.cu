@@ -96,15 +96,8 @@ int getPhysicalBlockCount(void){
     int runningThreadsTotal = runningBlocksTotal * BLOCKSIZE;
     printf("\trunningThreadsTotal = %d\n", runningThreadsTotal);
     printf("\tphysical number of blocks = %d\n", runningBlocksTotal);
-    constexpr int3 virtual_grid = {
-        CEIL_DIV(lens.x, X_BLOCK),
-        CEIL_DIV(lens.y, Y_BLOCK),
-        CEIL_DIV(lens.z, Z_BLOCK)};
-    constexpr int virtual_grid_flat = virtual_grid.x * virtual_grid.y * virtual_grid.z;
     printf("\n");
-    cout << "Blockdim z,y,x = " << Z_BLOCK << ", " << Y_BLOCK << ", " << X_BLOCK << endl;
     cout << "{ z_len = " << lens.z << ", y_len = " << lens.y << ", x_len = " << lens.x << ", total_len = " << lens_flat << " }" << endl;
-    printf("virtual number of blocks = %d\n", virtual_grid_flat);
     printf("\n");
     printf("\n");
 
@@ -112,15 +105,16 @@ int getPhysicalBlockCount(void){
 }
 
 template<
-    const int z_min, const int z_max,
-    const int y_min, const int y_max,
-    const int x_min, const int x_max>
+    const int amin_z, const int amax_z,
+    const int amin_y, const int amax_y,
+    const int amin_x, const int amax_x,
+    const int group_size_x,  const int group_size_y, const int group_size_z>
 __host__
 void doTest_3D(const int physBlocks)
 {
-    const int z_range = (z_min + z_max + 1);
-    const int y_range = (y_min + y_max + 1);
-    const int x_range = (x_min + x_max + 1);
+    const int z_range = (amin_z + amax_z + 1);
+    const int y_range = (amin_y + amax_y + 1);
+    const int x_range = (amin_x + amax_x + 1);
 
     const int ixs_len = z_range  * y_range * x_range;
     const int ixs_size = ixs_len*sizeof(int3);
@@ -131,104 +125,146 @@ void doTest_3D(const int physBlocks)
         for(int i=0; i < z_range; i++){
             for(int j=0; j < y_range; j++){
                 for(int k=0; k < x_range; k++){
-                    cpu_ixs[q++] = make_int3(k-x_min, j-y_min, i-z_min);
+                    cpu_ixs[q++] = make_int3(k-amin_x, j-amin_y, i-amin_z);
                 }
             }
         }
     }
-    {
-        cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << -z_min << "..." << z_max << ", " << -y_min << "..." << y_max << ", " << -x_min << "..." << x_max << ")" << endl;
-    }
-
+    cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << -amin_z << "..." << amax_z << ", " << -amin_y << "..." << amax_y << ", " << -amin_x << "..." << amax_x << ")" << endl;
 
     constexpr long len = lens_flat;
 
     T* cpu_out = (T*)malloc(len*sizeof(T));
     run_cpu_3d<ixs_len>(cpu_ixs, cpu_out);
 
-    constexpr int blockDim_flat = X_BLOCK * Y_BLOCK * Z_BLOCK;
+
+    constexpr int blockDim_flat = group_size_x * group_size_y * group_size_z;
     constexpr int3 virtual_grid = {
-        CEIL_DIV(lens.x, X_BLOCK),
-        CEIL_DIV(lens.y, Y_BLOCK),
-        CEIL_DIV(lens.z, Z_BLOCK)};
-    constexpr dim3 block_3d(X_BLOCK,Y_BLOCK,Z_BLOCK);
+        CEIL_DIV(lens.x, group_size_x),
+        CEIL_DIV(lens.y, group_size_y),
+        CEIL_DIV(lens.z, group_size_z)};
+    constexpr dim3 block_3d(group_size_x,group_size_y,group_size_z);
     constexpr dim3 grid_3d(virtual_grid.x, virtual_grid.y, virtual_grid.z);
     constexpr int virtual_grid_flat = virtual_grid.x * virtual_grid.y * virtual_grid.z;
     constexpr int lens_grid = CEIL_DIV(lens_flat, blockDim_flat);
     constexpr int3 lens_spans = { 0, 0, 0 }; // void
     constexpr int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x*virtual_grid.y };
 
+
+    cout << "Blockdim z,y,x = " << group_size_z << ", " << group_size_y << ", " << group_size_x << endl;
+    printf("virtual number of blocks = %d\n", virtual_grid_flat);
     {
         {
-            cout << "## Benchmark 3d global read - inlined ixs - multiDim block ##";
-            Kernel3dPhysMultiDim kfun = global_reads_3d_inlined<z_min,z_max,y_min,y_max,x_min,x_max>;
+            cout << "## Benchmark 3d global read - inlined ixs - multiDim grid ##";
+            Kernel3dPhysMultiDim kfun = global_reads_3d_inlined
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_cube(kfun, cpu_out, grid_3d, block_3d, false); // warmup as it is first kernel
             G.do_run_cube(kfun, cpu_out, grid_3d, block_3d);
         }
         {
-            cout << "## Benchmark 3d global read - inlined ixs - singleDim block - grid span ##";
-            Kernel3dPhysSingleDim kfun = global_reads_3d_inlined_singleDim_gridSpan<z_min,z_max,y_min,y_max,x_min,x_max>;
+            cout << "## Benchmark 3d global read - inlined ixs - singleDim grid - grid span ##";
+            Kernel3dPhysSingleDim kfun = global_reads_3d_inlined_singleDim_gridSpan
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_singleDim(kfun, cpu_out, virtual_grid_flat, blockDim_flat, virtual_grid_spans);
         }
         {
-            cout << "## Benchmark 3d global read - inlined ixs - singleDim block - lens span ##";
-            Kernel3dPhysSingleDim kfun = global_reads_3d_inlined_singleDim_lensSpan<z_min,z_max,y_min,y_max,x_min,x_max>;
+            cout << "## Benchmark 3d global read - inlined ixs - singleDim grid - lens span ##";
+            Kernel3dPhysSingleDim kfun = global_reads_3d_inlined_singleDim_lensSpan
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_singleDim(kfun, cpu_out, lens_grid, blockDim_flat, lens_spans);
         }
         {
-            cout << "## Benchmark 3d big tile - inlined idxs ##";
-            Kernel3dPhysMultiDim kfun = big_tile_3d_inlined<z_min,z_max,y_min,y_max,x_min,x_max>;
+            cout << "## Benchmark 3d big tile - inlined idxs - cube load - multiDim grid ##";
+            Kernel3dPhysMultiDim kfun = big_tile_3d_inlined
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_cube(kfun, cpu_out, grid_3d, block_3d);
         }
         {
-            cout << "## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ##";
-            Kernel3dPhysMultiDim kfun = big_tile_3d_inlined_flat<z_min,z_max,y_min,y_max,x_min,x_max>;
+            cout << "## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - multiDim grid ##";
+            Kernel3dPhysMultiDim kfun = big_tile_3d_inlined_flat
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_cube(kfun, cpu_out, grid_3d, block_3d);
         }
         {
-            cout << "## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ##";
-            Kernel3dPhysSingleDim kfun = big_tile_3d_inlined_flat_singleDim<z_min,z_max,y_min,y_max,x_min,x_max>;
+            cout << "## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim grid ##";
+            Kernel3dPhysSingleDim kfun = big_tile_3d_inlined_flat_singleDim
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_singleDim(kfun, cpu_out, virtual_grid_flat, blockDim_flat, virtual_grid_spans);
         }
         {
-            cout << "## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ##";
+            cout << "## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim grid ##";
             Kernel3dVirtual kfun = virtual_addcarry_global_read_3d_inlined_grid_span_singleDim
-                <x_min,y_min,z_min
-                ,x_max,y_max,z_max
-                ,X_BLOCK,Y_BLOCK,Z_BLOCK>;
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid);
         }
         {
-            cout << "## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ##";
+            cout << "## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim grid ##";
             Kernel3dVirtual kfun = virtual_addcarry_big_tile_3d_inlined_flat_divrem_MultiDim
-                <x_min,y_min,z_min
-                ,x_max,y_max,z_max
-                ,X_BLOCK,Y_BLOCK,Z_BLOCK>;
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_virtual_MultiDim(kfun, cpu_out, physBlocks, block_3d, virtual_grid);
         }
         {
-            cout << "## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ##";
+            cout << "## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim grid ##";
             Kernel3dVirtual kfun = virtual_addcarry_big_tile_3d_inlined_flat_divrem_singleDim
-                <x_min,y_min,z_min
-                ,x_max,y_max,z_max
-                ,X_BLOCK,Y_BLOCK,Z_BLOCK>;
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid);
         }
         {
-            cout << "## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ##";
+            cout << "## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim grid ##";
             Kernel3dVirtual kfun = virtual_divrem_big_tile_3d_inlined_flat_divrem_singleDim
-                <x_min,y_min,z_min
-                ,x_max,y_max,z_max
-                ,X_BLOCK,Y_BLOCK,Z_BLOCK>;
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid);
         }
         {
-            cout << "## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ##";
+            cout << "## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim grid ##";
             Kernel3dVirtual kfun = virtual_addcarry_big_tile_3d_inlined_flat_addcarry_singleDim
-                <x_min,y_min,z_min
-                ,x_max,y_max,z_max
-                ,X_BLOCK,Y_BLOCK,Z_BLOCK>;
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z>;
             G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid);
+        }
+        {
+            constexpr int strip_x = 2;
+            constexpr int strip_y = 1;
+            constexpr int strip_z = 4;
+            constexpr int strip_size_x = group_size_x*strip_x;
+            constexpr int strip_size_y = group_size_y*strip_y;
+            constexpr int strip_size_z = group_size_z*strip_z;
+
+            constexpr int3 virtual_grid_strip = {
+                CEIL_DIV(lens.x, strip_size_x),
+                CEIL_DIV(lens.y, strip_size_y),
+                CEIL_DIV(lens.z, strip_size_z)};
+            cout << "## Benchmark 3d virtual (add/carry) - stripmined big tile, ";
+            printf("strip_size=[%d][%d][%d]f32 ", strip_size_z, strip_size_y, strip_size_x);
+            cout << "- inlined idxs - flat load (add/carry) - singleDim grid ##";
+            Kernel3dVirtual kfun = virtual_addcarry_stripmine_big_tile_3d_inlined_flat_addcarry_singleDim
+                <amin_x,amin_y,amin_z
+                ,amax_x,amax_y,amax_z
+                ,group_size_x,group_size_y,group_size_z
+                ,strip_x,strip_y,strip_z
+                >;
+            G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid_strip);
         }
     }
 
@@ -241,29 +277,33 @@ int main()
 {
     int physBlocks = getPhysicalBlockCount();
 
-    doTest_3D<1,1,0,0,0,0>(physBlocks);
-    doTest_3D<2,2,0,0,0,0>(physBlocks);
-    doTest_3D<3,3,0,0,0,0>(physBlocks);
-    doTest_3D<4,4,0,0,0,0>(physBlocks);
-    doTest_3D<5,5,0,0,0,0>(physBlocks);
+    constexpr int group_size_x = 32;
+    constexpr int group_size_y = 8;
+    constexpr int group_size_z = 4;
 
-    doTest_3D<1,1,1,1,0,0>(physBlocks);
-    doTest_3D<2,2,2,2,0,0>(physBlocks);
-    doTest_3D<3,3,3,3,0,0>(physBlocks);
-    doTest_3D<4,4,4,4,0,0>(physBlocks);
-    doTest_3D<5,5,5,5,0,0>(physBlocks);
+    doTest_3D<1,1,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<2,2,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<3,3,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<4,4,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<5,5,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
 
-    doTest_3D<1,1,0,0,1,1>(physBlocks);
-    doTest_3D<2,2,0,0,2,2>(physBlocks);
-    doTest_3D<3,3,0,0,3,3>(physBlocks);
-    doTest_3D<4,4,0,0,4,4>(physBlocks);
-    doTest_3D<5,5,0,0,5,5>(physBlocks);
+    doTest_3D<1,1,1,1,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<2,2,2,2,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<3,3,3,3,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<4,4,4,4,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<5,5,5,5,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
 
-    doTest_3D<1,1,1,1,1,1>(physBlocks);
-    doTest_3D<2,2,2,2,2,2>(physBlocks);
-    doTest_3D<3,3,3,3,3,3>(physBlocks);
-    doTest_3D<4,4,4,4,4,4>(physBlocks);
-    doTest_3D<5,5,5,5,5,5>(physBlocks);
+    doTest_3D<1,1,0,0,1,1, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<2,2,0,0,2,2, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<3,3,0,0,3,3, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<4,4,0,0,4,4, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<5,5,0,0,5,5, group_size_x,group_size_y,group_size_z>(physBlocks);
+
+    doTest_3D<1,1,1,1,1,1, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<2,2,2,2,2,2, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<3,3,3,3,3,3, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<4,4,4,4,4,4, group_size_x,group_size_y,group_size_z>(physBlocks);
+    doTest_3D<5,5,5,5,5,5, group_size_x,group_size_y,group_size_z>(physBlocks);
 
     return 0;
 }
