@@ -85,17 +85,28 @@ int getPhysicalBlockCount(void){
     cudaGetDeviceProperties(&dprop, 0);
     int maxThreadsPerSM = dprop.maxThreadsPerMultiProcessor;
     int SM_count = dprop.multiProcessorCount;
-    printf("Setting:\n");
+    printf("Device properties:\n");
     printf("\tmaxThreadsPerSM = %d\n", maxThreadsPerSM);
     printf("\tSM_count = %d\n", SM_count);
+    printf("\tmaxThreads = %d\n", SM_count * maxThreadsPerSM);
 
+    int smpb = dprop.sharedMemPerBlock;
+    int smpsm = dprop.sharedMemPerMultiprocessor;
+    printf("\tmaximum amount of shared memory per block = %d B\n", smpb);
+    printf("\tmaximum amount of shared memory per SM = %d B\n", smpsm);
+    printf("\n");
+    printf("Chosen options:\n");
+    printf("\tBlocksize = %d\n", BLOCKSIZE);
     int runningBlocksPerSM = maxThreadsPerSM / BLOCKSIZE;
     printf("\trunningBlocksPerSM = %d\n", runningBlocksPerSM);
     int runningBlocksTotal = runningBlocksPerSM * SM_count;
     printf("\trunningBlocksTotal = %d\n", runningBlocksTotal);
     int runningThreadsTotal = runningBlocksTotal * BLOCKSIZE;
     printf("\trunningThreadsTotal = %d\n", runningThreadsTotal);
-    printf("\tphysical number of blocks = %d\n", runningBlocksTotal);
+    int avail_sh_mem = min(smpb, (smpsm/runningBlocksPerSM));
+    printf("\tavailable shared memory per block = %d\n", avail_sh_mem);
+
+
     printf("\n");
     cout << "{ z_len = " << lens.z << ", y_len = " << lens.y << ", x_len = " << lens.x << ", total_len = " << lens_flat << " }" << endl;
     printf("\n");
@@ -137,7 +148,6 @@ void doTest_3D(const int physBlocks)
     T* cpu_out = (T*)malloc(len*sizeof(T));
     run_cpu_3d<ixs_len>(cpu_ixs, cpu_out);
 
-
     constexpr int blockDim_flat = group_size_x * group_size_y * group_size_z;
     constexpr int3 virtual_grid = {
         CEIL_DIV(lens.x, group_size_x),
@@ -149,7 +159,6 @@ void doTest_3D(const int physBlocks)
     constexpr int lens_grid = CEIL_DIV(lens_flat, blockDim_flat);
     constexpr int3 lens_spans = { 0, 0, 0 }; // void
     constexpr int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x*virtual_grid.y };
-
 
     cout << "Blockdim z,y,x = " << group_size_z << ", " << group_size_y << ", " << group_size_x << endl;
     printf("virtual number of blocks = %d\n", virtual_grid_flat);
@@ -244,12 +253,23 @@ void doTest_3D(const int physBlocks)
             G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid);
         }
         {
-            constexpr int strip_x = 2;
+            constexpr int strip_x = 1;
             constexpr int strip_y = 1;
-            constexpr int strip_z = 4;
+            constexpr int strip_z = 1;
             constexpr int strip_size_x = group_size_x*strip_x;
             constexpr int strip_size_y = group_size_y*strip_y;
             constexpr int strip_size_z = group_size_z*strip_z;
+
+            constexpr int sh_x = strip_size_x + amin_x + amax_x;
+            constexpr int sh_y = strip_size_y + amin_y + amax_y;
+            constexpr int sh_z = strip_size_z + amin_z + amax_z;
+            constexpr int sh_total = sh_x * sh_y * sh_z;
+            constexpr int sh_total_mem_usage = sh_total * sizeof(T);
+
+            //printf("shared memory used = %d B\n", sh_total_mem_usage);
+            constexpr int max_shared_mem = 0xc000;
+            static_assert(sh_total_mem_usage <= max_shared_mem,
+                    "Current configuration requires too much shared memory\n");
 
             constexpr int3 virtual_grid_strip = {
                 CEIL_DIV(lens.x, strip_size_x),
@@ -266,6 +286,7 @@ void doTest_3D(const int physBlocks)
                 >;
             G.do_run_virtual_singleDim(kfun, cpu_out, physBlocks, blockDim_flat, virtual_grid_strip);
         }
+
     }
 
     free(cpu_out);
@@ -280,6 +301,13 @@ int main()
     constexpr int group_size_x = 32;
     constexpr int group_size_y = 8;
     constexpr int group_size_z = 4;
+
+    const int group_size_flat = group_size_x * group_size_y * group_size_z;
+    assert(
+            32 <= group_size_flat
+        &&  group_size_flat <= 1024
+        &&  (group_size_flat % 32) == 0
+    );
 
     doTest_3D<1,1,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
     doTest_3D<2,2,0,0,0,0, group_size_x,group_size_y,group_size_z>(physBlocks);
