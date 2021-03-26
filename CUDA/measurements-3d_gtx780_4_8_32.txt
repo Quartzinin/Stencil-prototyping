@@ -1,0 +1,273 @@
+Setting:
+	maxThreadsPerSM = 2048
+	SM_count = 12
+	runningBlocksPerSM = 2
+	runningBlocksTotal = 24
+	runningThreadsTotal = 24576
+	physical number of blocks = 24
+
+Blockdim z,y,x = 4, 8, 32
+{ z_len = 511, y_len = 255, x_len = 127, total_len = 16548735 }
+virtual number of blocks = 16384
+
+
+ixs[3] = (zr,yr,xr) = (-1...1, 0...0, 0...0)
+cpu c 3d for 1 run : 0.060 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 1984 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 2995 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 4672 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2062 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 2413 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 2943 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 1986 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 2679 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 2633 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3084 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 2507 microseconds
+ixs[5] = (zr,yr,xr) = (-2...2, 0...0, 0...0)
+cpu c 3d for 1 run : 0.086 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 2792 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 3709 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 5205 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2098 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 2369 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 2809 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 2686 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 3026 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 2840 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3145 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 2461 microseconds
+ixs[7] = (zr,yr,xr) = (-3...3, 0...0, 0...0)
+cpu c 3d for 1 run : 0.344 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 3607 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 4507 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 5994 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2932 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 3293 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3883 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 3452 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 3557 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3578 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4057 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 2968 microseconds
+ixs[9] = (zr,yr,xr) = (-4...4, 0...0, 0...0)
+cpu c 3d for 1 run : 0.433 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 4489 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 5274 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 6880 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2931 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 3301 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3941 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 4322 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 3860 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3910 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4182 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 3020 microseconds
+ixs[11] = (zr,yr,xr) = (-5...5, 0...0, 0...0)
+cpu c 3d for 1 run : 0.519 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 5333 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 5971 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 7310 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 3586 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 4078 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4671 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 4938 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 4627 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4622 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 6012 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 3800 microseconds
+ixs[9] = (zr,yr,xr) = (-1...1, -1...1, 0...0)
+cpu c 3d for 1 run : 0.432 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 3471 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 4186 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 5827 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2848 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 2557 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3215 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 3296 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 3080 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3108 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3610 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 2840 microseconds
+ixs[25] = (zr,yr,xr) = (-2...2, -2...2, 0...0)
+cpu c 3d for 1 run : 1.424 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 8973 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 8186 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 9604 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 3095 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 3598 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4216 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 6680 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 4477 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4454 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4945 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 4120 microseconds
+ixs[49] = (zr,yr,xr) = (-3...3, -3...3, 0...0)
+cpu c 3d for 1 run : 2.874 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 22721 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 14974 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 16510 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 4438 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 6327 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 6578 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 11869 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 8631 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 8575 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 9086 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 6478 microseconds
+ixs[81] = (zr,yr,xr) = (-4...4, -4...4, 0...0)
+cpu c 3d for 1 run : 4.841 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 21118 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 21739 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 23157 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 4717 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 8095 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 8438 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 18979 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 11501 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 11448 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 11685 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 7456 microseconds
+ixs[121] = (zr,yr,xr) = (-5...5, -5...5, 0...0)
+cpu c 3d for 1 run : 7.233 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 31562 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 31752 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 32645 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 12349 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 14573 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 15519 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 28366 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 15418 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 15162 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 15781 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 14243 microseconds
+ixs[9] = (zr,yr,xr) = (-1...1, 0...0, -1...1)
+cpu c 3d for 1 run : 0.432 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 2591 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 3344 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 4884 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2526 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 2636 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3259 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 2412 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 2858 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 2917 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3363 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 2906 microseconds
+ixs[25] = (zr,yr,xr) = (-2...2, 0...0, -2...2)
+cpu c 3d for 1 run : 1.422 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 6461 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 4901 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 6500 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 2748 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 3891 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4491 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 4532 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 4087 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4111 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4607 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 4243 microseconds
+ixs[49] = (zr,yr,xr) = (-3...3, 0...0, -3...3)
+cpu c 3d for 1 run : 2.868 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 18553 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 9367 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 11045 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 3919 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 4272 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4848 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 6702 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 5396 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 5374 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 5509 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 5441 microseconds
+ixs[81] = (zr,yr,xr) = (-4...4, 0...0, -4...4)
+cpu c 3d for 1 run : 4.734 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 12104 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 12755 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 14088 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 4381 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 7198 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 6668 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 10001 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 9030 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 9018 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 7700 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 9075 microseconds
+ixs[121] = (zr,yr,xr) = (-5...5, 0...0, -5...5)
+cpu c 3d for 1 run : 7.011 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 16112 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 16723 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 17827 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 7183 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 9457 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 9299 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 14649 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 11811 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 11738 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 12315 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 11773 microseconds
+ixs[27] = (zr,yr,xr) = (-1...1, -1...1, -1...1)
+cpu c 3d for 1 run : 1.536 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 6536 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 5281 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 6867 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 3980 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 3165 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3620 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 5007 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 3677 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 3599 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 4010 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 3681 microseconds
+ixs[125] = (zr,yr,xr) = (-2...2, -2...2, -2...2)
+cpu c 3d for 1 run : 7.324 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 17401 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 18046 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 19718 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 7200 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 8388 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 8133 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 14832 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 10726 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 10670 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 9523 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 9287 microseconds
+ixs[343] = (zr,yr,xr) = (-3...3, -3...3, -3...3)
+cpu c 3d for 1 run : 19.868 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 35320 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 36195 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 36423 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 16596 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 18057 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 18683 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 43015 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 21403 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 21397 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 21917 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 21593 microseconds
+ixs[729] = (zr,yr,xr) = (-4...4, -4...4, -4...4)
+cpu c 3d for 1 run : 42.368 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 71811 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 77893 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 73192 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 34961 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 39124 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 40163 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 82666 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 40871 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 39699 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 39269 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 39763 microseconds
+ixs[1331] = (zr,yr,xr) = (-5...5, -5...5, -5...5)
+cpu c 3d for 1 run : 77.292 seconds
+## Benchmark 3d global read - inlined ixs - multiDim block ## : mean 133222 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - grid span ## : mean 135796 microseconds
+## Benchmark 3d global read - inlined ixs - singleDim block - lens span ## : mean 132946 microseconds
+## Benchmark 3d big tile - inlined idxs ## : mean 61312 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) ## : mean 66886 microseconds
+## Benchmark 3d big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 67513 microseconds
+## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim block ## : mean 149602 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - multiDim block ## : mean 67525 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 66832 microseconds
+## Benchmark 3d virtual (rem/div) - big tile - inlined idxs - flat load (div/rem) - singleDim block ## : mean 66986 microseconds
+## Benchmark 3d virtual (add/carry) - big tile - inlined idxs - flat load (add/carry) - singleDim block ## : mean 66960 microseconds
