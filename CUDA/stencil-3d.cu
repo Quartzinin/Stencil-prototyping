@@ -13,9 +13,9 @@ using std::endl;
 #include "kernels-3d.h"
 
 static constexpr long3 lens = {
-    ((1 << 7) - 1),
-    ((1 << 8) - 1),
-    ((1 << 9) - 1)};
+    ((1 << 8) - 3),
+    ((1 << 8) - 2),
+    ((1 << 8) - 1)};
 static constexpr long lens_flat = lens.x * lens.y * lens.z;
 static constexpr long n_runs = 100;
 static Globs
@@ -128,7 +128,7 @@ void doTest_3D(const int physBlocks)
     constexpr int virtual_grid_flat = virtual_grid.x * virtual_grid.y * virtual_grid.z;
     constexpr int lens_grid = CEIL_DIV(lens_flat, blockDim_flat);
     constexpr int3 lens_spans = { 0, 0, 0 }; // void
-    constexpr int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x*virtual_grid.y };
+    constexpr int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x * virtual_grid.y };
 
     constexpr int sh_size_x = amin_x + group_size_x + amax_x;
     constexpr int sh_size_y = amin_y + group_size_y + amax_y;
@@ -186,7 +186,7 @@ void doTest_3D(const int physBlocks)
                 <amin_x,amin_y,amin_z
                 ,amax_x,amax_y,amax_z
                 ,group_size_x,group_size_y,group_size_z>;
-            G.do_run_singleDim(kfun, cpu_out, virtual_grid_flat, blockDim_flat, virtual_grid_spans, sh_mem_size_flat);
+            G.do_run_singleDim(kfun, cpu_out, virtual_grid_flat, blockDim_flat, virtual_grid, sh_mem_size_flat);
         }
         {
             cout << "## Benchmark 3d virtual (add/carry) - global read - inlined idxs - singleDim grid ##";
@@ -276,6 +276,7 @@ int main()
             32 <= gps_flat
         &&  gps_flat <= 1024
         &&  (gps_flat % 32) == 0
+        , "not a valid block size"
     );
 
     doTest_3D<1,1,0,0,0,0, gps_x,gps_y,gps_z,1,1,8>(physBlocks);

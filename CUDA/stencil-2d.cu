@@ -252,6 +252,7 @@ int main()
             32 <= group_size_flat
         &&  group_size_flat <= 1024
         &&  (group_size_flat % 32) == 0
+        , "invalid group size"
     );
 
     cout << "{ x_len = " << lens.x << ", y_len = " << lens.y
