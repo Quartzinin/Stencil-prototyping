@@ -556,11 +556,7 @@ void virtual_addcarry_global_read_3d_inlined_grid_span_singleDim(
     T* __restrict__ out,
     const long3 lens,
     const int num_phys_groups,
-    const int iters_per_phys,
-    const int3 id_add,
-    const int3 virtual_grid,
-    const int3 virtual_grid_spans,
-    const int virtual_grid_flat_length
+    const int3 virtual_grid
     )
 {
     constexpr int3 range = {
@@ -568,6 +564,11 @@ void virtual_addcarry_global_read_3d_inlined_grid_span_singleDim(
         amax_y + amin_y + 1,
         amax_z + amin_z + 1};
     constexpr int total_range = range.x * range.y * range.z;
+
+    const int3 virtual_grid_spans = create_spans(virtual_grid);
+    const int virtual_grid_flat = product(virtual_grid);
+    const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
+    const int3 id_add = unflatten(virtual_grid_spans, num_phys_groups);
 
     const int loc_flat = threadIdx.x;
     const int loc_z = loc_flat / (group_size_x * group_size_y);
@@ -587,7 +588,7 @@ void virtual_addcarry_global_read_3d_inlined_grid_span_singleDim(
 
     int virtual_group_id_flat = blockIdx.x;
     for(int i=0; i<iters_per_phys;i++){
-        if(virtual_group_id_flat < virtual_grid_flat_length){
+        if(virtual_group_id_flat < virtual_grid_flat){
             const long gidx = long(group_id_x) * long(group_size_x) + long(loc_x);
             const long gidy = long(group_id_y) * long(group_size_y) + long(loc_y);
             const long gidz = long(group_id_z) * long(group_size_z) + long(loc_z);
@@ -642,18 +643,19 @@ void virtual_addcarry_big_tile_3d_inlined_flat_divrem_MultiDim(
     T* __restrict__ out,
     const long3 lens,
     const int num_phys_groups,
-    const int iters_per_phys,
-    const int3 id_add,
-    const int3 virtual_grid,
-    const int3 virtual_grid_spans,
-    const int virtual_grid_flat_length
+    const int3 virtual_grid
     )
 {
     constexpr int sh_size_x = amin_x + group_size_x + amax_x;
     constexpr int sh_size_y = amin_y + group_size_y + amax_y;
     constexpr int sh_size_z = amin_z + group_size_z + amax_z;
     constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
-    __shared__ T tile[sh_size_flat];
+    extern __shared__ T tile[];
+
+    const int3 virtual_grid_spans = create_spans(virtual_grid);
+    const int virtual_grid_flat = product(virtual_grid);
+    const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
+    const int3 id_add = unflatten(virtual_grid_spans, num_phys_groups);
 
     const int loc_z = threadIdx.z;
     const int loc_y = threadIdx.y;
@@ -667,7 +669,7 @@ void virtual_addcarry_big_tile_3d_inlined_flat_divrem_MultiDim(
 
     int virtual_group_id_flat = blockIdx.x;
     for(int i=0; i<iters_per_phys;i++){
-        if(virtual_group_id_flat < virtual_grid_flat_length){
+        if(virtual_group_id_flat < virtual_grid_flat){
             const long writeSet_offset_x = long(group_id_x) * group_size_x;
             const long writeSet_offset_y = long(group_id_y) * group_size_y;
             const long writeSet_offset_z = long(group_id_z) * group_size_z;
@@ -726,18 +728,19 @@ void virtual_divrem_big_tile_3d_inlined_flat_divrem_singleDim(
     T* __restrict__ out,
     const long3 lens,
     const int num_phys_groups,
-    const int iters_per_phys,
-    const int3 id_add,
-    const int3 virtual_grid,
-    const int3 virtual_grid_spans,
-    const int virtual_grid_flat_length
+    const int3 virtual_grid
     )
 {
     constexpr int sh_size_x = amin_x + group_size_x + amax_x;
     constexpr int sh_size_y = amin_y + group_size_y + amax_y;
     constexpr int sh_size_z = amin_z + group_size_z + amax_z;
     constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
-    __shared__ T tile[sh_size_flat];
+    extern __shared__ T tile[];
+
+    const int3 virtual_grid_spans = create_spans(virtual_grid);
+    const int virtual_grid_flat = product(virtual_grid);
+    const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
+    const int3 id_add = unflatten(virtual_grid_spans, num_phys_groups);
 
     const int loc_flat = threadIdx.x;
     const int loc_z = loc_flat / (group_size_x * group_size_y);
@@ -748,7 +751,7 @@ void virtual_divrem_big_tile_3d_inlined_flat_divrem_singleDim(
     const int start_id = blockIdx.x;
     for(int i=0; i<iters_per_phys;i++){
         const int virtual_group_id_flat = (i * num_phys_groups) + start_id;
-        if(virtual_group_id_flat < virtual_grid_flat_length){
+        if(virtual_group_id_flat < virtual_grid_flat){
 
             int group_id_z = virtual_group_id_flat / virtual_grid_spans.z;
             int rblock     = virtual_group_id_flat % virtual_grid_spans.z;
@@ -796,18 +799,19 @@ void virtual_addcarry_big_tile_3d_inlined_flat_divrem_singleDim(
     T* __restrict__ out,
     const long3 lens,
     const int num_phys_groups,
-    const int iters_per_phys,
-    const int3 id_add,
-    const int3 virtual_grid,
-    const int3 virtual_grid_spans,
-    const int virtual_grid_flat_length
+    const int3 virtual_grid
     )
 {
     constexpr int sh_size_x = amin_x + group_size_x + amax_x;
     constexpr int sh_size_y = amin_y + group_size_y + amax_y;
     constexpr int sh_size_z = amin_z + group_size_z + amax_z;
     constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
-    __shared__ T tile[sh_size_flat];
+    extern __shared__ T tile[];
+
+    const int3 virtual_grid_spans = create_spans(virtual_grid);
+    const int virtual_grid_flat = product(virtual_grid);
+    const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
+    const int3 id_add = unflatten(virtual_grid_spans, num_phys_groups);
 
     const int loc_flat = threadIdx.x;
     const int loc_z = loc_flat / (group_size_x * group_size_y);
@@ -822,7 +826,7 @@ void virtual_addcarry_big_tile_3d_inlined_flat_divrem_singleDim(
 
     int virtual_group_id_flat = blockIdx.x;
     for(int i=0; i<iters_per_phys;i++){
-        if(virtual_group_id_flat < virtual_grid_flat_length){
+        if(virtual_group_id_flat < virtual_grid_flat){
             const long writeSet_offset_x = long(group_id_x) * group_size_x;
             const long writeSet_offset_y = long(group_id_y) * group_size_y;
             const long writeSet_offset_z = long(group_id_z) * group_size_z;
@@ -881,18 +885,19 @@ void virtual_addcarry_big_tile_3d_inlined_flat_addcarry_singleDim(
     T* __restrict__ out,
     const long3 lens,
     const int num_phys_groups,
-    const int iters_per_phys,
-    const int3 id_add,
-    const int3 virtual_grid,
-    const int3 virtual_grid_spans,
-    const int virtual_grid_flat_length
+    const int3 virtual_grid
     )
 {
     constexpr int sh_size_x = amin_x + group_size_x + amax_x;
     constexpr int sh_size_y = amin_y + group_size_y + amax_y;
     constexpr int sh_size_z = amin_z + group_size_z + amax_z;
     constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
-    __shared__ T tile[sh_size_flat];
+    extern __shared__ T tile[];
+
+    const int3 virtual_grid_spans = create_spans(virtual_grid);
+    const int virtual_grid_flat = product(virtual_grid);
+    const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
+    const int3 id_add = unflatten(virtual_grid_spans, num_phys_groups);
 
     const int loc_flat = threadIdx.x;
     const int loc_z = loc_flat / (group_size_x * group_size_y);
@@ -907,7 +912,7 @@ void virtual_addcarry_big_tile_3d_inlined_flat_addcarry_singleDim(
 
     int virtual_group_id_flat = blockIdx.x;
     for(int i=0; i<iters_per_phys;i++){
-        if(virtual_group_id_flat < virtual_grid_flat_length){
+        if(virtual_group_id_flat < virtual_grid_flat){
             const long writeSet_offset_x = long(group_id_x) * group_size_x;
             const long writeSet_offset_y = long(group_id_y) * group_size_y;
             const long writeSet_offset_z = long(group_id_z) * group_size_z;
@@ -966,18 +971,24 @@ void virtual_addcarry_stripmine_big_tile_3d_inlined_flat_addcarry_singleDim(
     T* __restrict__ out,
     const long3 lens,
     const int num_phys_groups,
-    const int iters_per_phys,
-    const int3 strip_id_add,
-    const int3 virtual_grid,
-    const int3 virtual_grid_spans,
-    const int virtual_grid_flat_length
+    const int3 virtual_grid
     )
 {
     constexpr int sh_size_x = amin_x + strip_x*group_size_x + amax_x;
     constexpr int sh_size_y = amin_y + strip_y*group_size_y + amax_y;
     constexpr int sh_size_z = amin_z + strip_z*group_size_z + amax_z;
     constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
-    __shared__ T tile[sh_size_flat];
+    extern __shared__ T tile[];
+
+    const int3 virtual_strip = {
+        CEIL_DIV(virtual_grid.x, strip_x),
+        CEIL_DIV(virtual_grid.y, strip_y),
+        CEIL_DIV(virtual_grid.z, strip_z)};
+
+    const int3 virtual_strip_spans = create_spans(virtual_strip);
+    const int virtual_strip_flat = product(virtual_strip);
+    const int iters_per_phys = CEIL_DIV(virtual_strip_flat, num_phys_groups);
+    const int3 strip_id_add = unflatten(virtual_strip_spans, num_phys_groups);
 
     const int loc_flat = threadIdx.x;
     const int loc_z = loc_flat / (group_size_x * group_size_y);
@@ -986,12 +997,11 @@ void virtual_addcarry_stripmine_big_tile_3d_inlined_flat_addcarry_singleDim(
     const int loc_x = rloc % group_size_x;
 
     const int start_group_id_flat = blockIdx.x;
-    int strip_id_z   = start_group_id_flat / virtual_grid_spans.z;
-    const int rblock = start_group_id_flat % virtual_grid_spans.z;
-    int strip_id_y   = rblock / virtual_grid_spans.y;
-    int strip_id_x   = rblock % virtual_grid_spans.y;
+    int strip_id_z   = start_group_id_flat / virtual_strip_spans.z;
+    const int rblock = start_group_id_flat % virtual_strip_spans.z;
+    int strip_id_y   = rblock / virtual_strip_spans.y;
+    int strip_id_x   = rblock % virtual_strip_spans.y;
 
-    int strip_id_flat = start_group_id_flat;
     for(int i=0; i<iters_per_phys;i++){
         const int base_group_id_x = strip_id_x * strip_x;
         const int base_group_id_y = strip_id_y * strip_y;
@@ -1032,18 +1042,17 @@ void virtual_addcarry_stripmine_big_tile_3d_inlined_flat_addcarry_singleDim(
             }
         }
         // add
-        strip_id_flat += num_phys_groups;
         strip_id_x += strip_id_add.x;
         strip_id_y += strip_id_add.y;
         strip_id_z += strip_id_add.z;
 
         // carry
-        if(strip_id_x >= virtual_grid.x){
-            strip_id_x -= virtual_grid.x;
+        if(strip_id_x >= virtual_strip.x){
+            strip_id_x -= virtual_strip.x;
             strip_id_y += 1;
         }
-        if(strip_id_y >= virtual_grid.y){
-            strip_id_y -= virtual_grid.y;
+        if(strip_id_y >= virtual_strip.y){
+            strip_id_y -= virtual_strip.y;
             strip_id_z += 1;
         }
 

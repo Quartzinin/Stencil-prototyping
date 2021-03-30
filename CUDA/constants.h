@@ -28,4 +28,25 @@ T lambdaFun(const T* tmp){
     return acc;
 }
 
+#define MACROLIKE __device__ __host__ __forceinline__
+
+MACROLIKE long bound(long i, long max_i){ return min(max_i, max(0l, i)); }
+MACROLIKE int bound(int i, int max_i){ return min(max_i, max(0, i)); }
+MACROLIKE int divUp(int i, int d){ return (i + (d-1))/d; }
+MACROLIKE long divUp(long i, long d){ return (i + (d-1))/d; }
+
+MACROLIKE constexpr int3 create_spans(const int3 lens){ return { 1, lens.x, lens.x*lens.y }; }
+MACROLIKE constexpr int2 create_spans(const int2 lens){ return { 1, lens.x, }; }
+MACROLIKE constexpr int product(const int3 lens){ return lens.x * lens.y * lens.z; }
+MACROLIKE constexpr int product(const int2 lens){ return lens.x * lens.y; }
+MACROLIKE constexpr int2 unflatten(const int2 spans, const int ix){ return { ix % spans.y, ix / spans.y }; }
+MACROLIKE constexpr int3 unflatten(const int3 spans, const int ix){
+    const int z = ix / spans.z;
+    const int r = ix % spans.z;
+    const int y = r / spans.y;
+    const int x = r % spans.y;
+    return { x, y, z };
+}
+
+
 #endif

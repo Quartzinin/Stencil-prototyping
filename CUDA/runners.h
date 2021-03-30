@@ -3,9 +3,6 @@
 
 #include"constants.h"
 
-#include <nvfunctional>
-
-
 #define GPU_RUN_INIT \
     struct timeval t_startpar, t_endpar, t_diffpar;\
     const int mem_size = len*sizeof(T); \
@@ -141,10 +138,20 @@ T stencil_fun_cpu(const T* tmp)
 }
 
 
-using Kernel3dVirtual = void (*)(const T*, T*, const long3, const int, const int, const int3, const int3, const int3, const int);
+
+using Kernel2dVirtual = void (*)(const T*, T*, const long2, const int, const int2);
+using Kernel2dPhysMultiDim = void(*)(const T*, T*, const long2);
+using Kernel2dPhysSingleDim = void(*)(const T*, T*, const long2, const int2);
+
+using Kernel3dVirtual = void (*)(const T*, T*, const long3, const int, const int3);
 using Kernel3dPhysMultiDim = void(*)(const T*, T*, const long3);
 using Kernel3dPhysSingleDim = void(*)(const T*, T*, const long3, const int3);
-template<typename L>
+template<
+    typename L,
+    typename I,
+    typename KV,
+    typename KPMD,
+    typename KPSD>
 class Globs {
     public :
         struct timeval start_stamp, end_stamp;
@@ -213,8 +220,8 @@ class Globs {
 
         }
         __host__
-        void do_run_cube(
-                Kernel3dPhysMultiDim call
+        void do_run_multiDim(
+                KPMD call
                 , const T* cpu_out
                 , const dim3 grid
                 , const dim3 block
@@ -232,17 +239,18 @@ class Globs {
         };
         __host__
         void do_run_singleDim(
-                Kernel3dPhysSingleDim call
+                KPSD call
                 , const T* cpu_out
                 , const int grid_flat
                 , const int block_flat
-                , const int3 spans
+                , const I grid
+                , const int sh_size_bytes
                 , bool should_print=true){
             reset_output();
             long time_acc = 0;
             for(unsigned x = 0; x < RUNS; x++){
                 startTimer();
-                call<<<grid_flat,block_flat>>>(gpu_array_in, gpu_array_out, lens, spans);
+                call<<<grid_flat,block_flat, sh_size_bytes>>>(gpu_array_in, gpu_array_out, lens, grid);
                 CUDASSERT(cudaGetLastError()); // check cuda for errors
                 CUDASSERT(cudaDeviceSynchronize());
                 time_acc += endTimer();
@@ -251,67 +259,31 @@ class Globs {
         };
 
         __host__
-        void do_run_virtual_MultiDim(
-                Kernel3dVirtual call
+        void do_run_virtual( // all uses happen to be singleDim
+                KV call
                 , const T* cpu_out
                 , const int num_phys_groups
-                , const dim3 block
-                , const int3 virtual_grid
+                , const dim3 blocksize
+                , const I virtual_grid
+                , const int sh_size_bytes
                 , bool should_print=true){
             reset_output();
             long time_acc = 0;
             for(unsigned x = 0; x < RUNS; x++){
                 startTimer();
-                const int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x * virtual_grid.y };
-                const int virtual_grid_flat_length = virtual_grid.x * virtual_grid.y * virtual_grid.z;
 
-                const int iters_per_phys = CEIL_DIV(virtual_grid_flat_length, num_phys_groups);
+                //const int3 virtual_grid_spans = create_spans(virtual_grid);
+                //const int virtual_grid_flat = product(virtual_grid);
+                //const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
+                //const int id_add = unflatten(virtual_grid_spans, num_phys_groups);
 
-                const int add_z = num_phys_groups / virtual_grid_spans.z;
-                const int radd  = num_phys_groups % virtual_grid_spans.z;
-                const int add_y = radd / virtual_grid_spans.y;
-                const int add_x = radd % virtual_grid_spans.y;
-                const int3 id_add = { add_x, add_y, add_z };
-
-                call<<<num_phys_groups,block>>>(
-                        gpu_array_in, gpu_array_out,
-                        lens, num_phys_groups,
-                        iters_per_phys, id_add, virtual_grid,
-                        virtual_grid_spans, virtual_grid_flat_length);
-                CUDASSERT(cudaGetLastError()); // check cuda for errors
-                CUDASSERT(cudaDeviceSynchronize());
-                time_acc += endTimer();
-            }
-            check_output(cpu_out, should_print, time_acc);
-        };
-        __host__
-        void do_run_virtual_singleDim(
-                Kernel3dVirtual call
-                , const T* cpu_out
-                , const int num_phys_groups
-                , const int block_flat
-                , const int3 virtual_grid
-                , bool should_print=true){
-            reset_output();
-            long time_acc = 0;
-            for(unsigned x = 0; x < RUNS; x++){
-                startTimer();
-                const int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x * virtual_grid.y };
-                const int virtual_grid_flat_length = virtual_grid.x * virtual_grid.y * virtual_grid.z;
-
-                const int iters_per_phys = CEIL_DIV(virtual_grid_flat_length, num_phys_groups);
-
-                const int add_z = num_phys_groups / virtual_grid_spans.z;
-                const int radd  = num_phys_groups % virtual_grid_spans.z;
-                const int add_y = radd / virtual_grid_spans.y;
-                const int add_x = radd % virtual_grid_spans.y;
-                const int3 id_add = { add_x, add_y, add_z };
-
-                call<<<num_phys_groups,block_flat>>>(
-                        gpu_array_in, gpu_array_out,
-                        lens, num_phys_groups,
-                        iters_per_phys, id_add, virtual_grid,
-                        virtual_grid_spans, virtual_grid_flat_length);
+                //call<<<num_phys_groups,blocksize, sh_size_bytes>>>(
+                //        gpu_array_in, gpu_array_out,
+                //        lens, num_phys_groups,
+                //        iters_per_phys, id_add, virtual_grid,
+                //        virtual_grid_spans, virtual_grid_flat, strips);
+                call<<<num_phys_groups,blocksize, sh_size_bytes>>>
+                    (gpu_array_in, gpu_array_out, lens, num_phys_groups, virtual_grid);
                 CUDASSERT(cudaGetLastError()); // check cuda for errors
                 CUDASSERT(cudaDeviceSynchronize());
                 time_acc += endTimer();
@@ -319,5 +291,38 @@ class Globs {
             check_output(cpu_out, should_print, time_acc);
         };
 };
+
+int getPhysicalBlockCount(void){
+    cudaDeviceProp dprop;
+    // assume that device 0 exists and that it is the desired one.
+    cudaGetDeviceProperties(&dprop, 0);
+    int maxThreadsPerSM = dprop.maxThreadsPerMultiProcessor;
+    int SM_count = dprop.multiProcessorCount;
+    printf("Device properties:\n");
+    printf("\tmaxThreadsPerSM = %d\n", maxThreadsPerSM);
+    printf("\tSM_count = %d\n", SM_count);
+    printf("\tmaxThreads = %d\n", SM_count * maxThreadsPerSM);
+
+    int smpb = dprop.sharedMemPerBlock;
+    int smpsm = dprop.sharedMemPerMultiprocessor;
+    printf("\tmaximum amount of shared memory per block = %d B\n", smpb);
+    printf("\tmaximum amount of shared memory per SM = %d B\n", smpsm);
+    printf("\n");
+    printf("Chosen options:\n");
+    printf("\tBlocksize = %d\n", BLOCKSIZE);
+    int runningBlocksPerSM = maxThreadsPerSM / BLOCKSIZE;
+    printf("\trunningBlocksPerSM = %d\n", runningBlocksPerSM);
+    int runningBlocksTotal = runningBlocksPerSM * SM_count;
+    printf("\trunningBlocksTotal = %d\n", runningBlocksTotal);
+    int runningThreadsTotal = runningBlocksTotal * BLOCKSIZE;
+    printf("\trunningThreadsTotal = %d\n", runningThreadsTotal);
+    int avail_sh_mem = min(smpb, (smpsm/runningBlocksPerSM));
+    printf("\tavailable shared memory per block = %d\n", avail_sh_mem);
+
+    printf("\n");
+    printf("\n");
+
+    return runningBlocksTotal;
+}
 
 #endif
