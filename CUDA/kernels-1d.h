@@ -23,7 +23,6 @@ void global_read_1d_inline_reduce(
         T sum_acc = 0;
         const long step = (1 + ix_min + ix_max) / (D-1);
 
-        #pragma unroll
         for (long i = 0; i < D; ++i){
             const long loc_x = BOUNDL(gid + i*step - ix_min , max_ix);
             sum_acc += A[loc_x];
@@ -53,7 +52,6 @@ void small_tile_1d_inline_reduce(
         T sum_acc = 0;
         const long step = (1 + ix_min + ix_max) / (D-1);
 
-        #pragma unroll
         for (long i = 0; i < D; ++i){
             const long loc_x = threadIdx.x + i*step - ix_min;
             sum_acc += tile[loc_x];
@@ -95,7 +93,6 @@ void big_tile_1d_inline_reduce(
         T sum_acc = 0;
         const long step = (1 + ix_min + ix_max) / (D-1);
 
-        #pragma unroll
         for (long i = 0; i < D; ++i){
             const long loc_x = threadIdx.x + i*step;
             sum_acc += tile[loc_x];
@@ -122,7 +119,6 @@ void global_read_1d_inline(
     {
         T arr[D];
 
-        #pragma unroll
         for (long i = 0; i < D; ++i)
         {
             arr[i] = A[BOUNDL(gid + (i*step + x_min), max_ix_x)];
@@ -165,7 +161,6 @@ void big_tile_1d_inline(
         if (gid <= max_ix_x)
         {
             T arr[D];
-            #pragma unroll
             for (long i = 0; i < D; ++i)
             {
                 const long off = i*step;
