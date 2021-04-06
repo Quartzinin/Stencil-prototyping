@@ -57,10 +57,10 @@ template<int D, int ix_min, int ix_max>
 void run_cpu_1d(const int* idxs, const int len, T* cpu_out)
 {
     T* cpu_in  = (T*)malloc(len*sizeof(T));
-
+    srand(1);
     for (int i = 0; i < len; ++i)
     {
-        cpu_in[i] = (T)(i+1);
+        cpu_in[i] = (T)rand();
     }
 
     struct timeval t_startpar, t_endpar, t_diffpar;

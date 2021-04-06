@@ -63,10 +63,10 @@ __host__
 void run_cpu_3d(const int3* idxs, T* cpu_out)
 {
     T* cpu_in = (T*)malloc(lens_flat*sizeof(T));
-
+    srand(1);
     for (int i = 0; i < lens_flat; ++i)
     {
-        cpu_in[i] = (T)(i+1);
+        cpu_in[i] = (T)rand();
     }
 
     struct timeval t_startpar, t_endpar, t_diffpar;

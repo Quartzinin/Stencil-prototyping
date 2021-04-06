@@ -8,7 +8,8 @@
     const int mem_size = len*sizeof(T); \
     T* arr_in  = (T*)malloc(mem_size*2); \
     T* arr_out = arr_in + len; \
-    for(int i=0; i<len; i++){ arr_in[i] = (T)(i+1); } \
+    srand(1); \
+    for(int i=0; i<len; i++){ arr_in[i] = (T)rand(); } \
     T* gpu_array_in; \
     T* gpu_array_out; \
     CUDASSERT(cudaMalloc((void **) &gpu_array_in, 2*mem_size)); \
@@ -173,7 +174,8 @@ class Globs {
             const long out_start = 2*tlen;
             const long alloc_sizes = mem_size*3;
             arr_in = (T*)malloc(alloc_sizes);
-            for(int i=0; i<tlen; i++){ arr_in[i] = (T)(i+1); }
+            srand(1);
+            for(int i=0; i<tlen; i++){ arr_in[i] = (T)rand(); }
             CUDASSERT(cudaMalloc((void **) &gpu_array_in, alloc_sizes));
             arr_out = &arr_in[out_start];
             gpu_array_out = gpu_array_in + out_start;
