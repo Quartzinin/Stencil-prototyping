@@ -63,10 +63,10 @@ __host__
 void run_cpu_3d(const int3* idxs, T* cpu_out)
 {
     T* cpu_in = (T*)malloc(lens_flat*sizeof(T));
-
+    srand(1);
     for (int i = 0; i < lens_flat; ++i)
     {
-        cpu_in[i] = (T)(i+1);
+        cpu_in[i] = (T)rand();
     }
 
     struct timeval t_startpar, t_endpar, t_diffpar;
@@ -279,7 +279,7 @@ int main()
         , "not a valid block size"
     );
 
-    doTest_3D<1,1,0,0,0,0, gps_x,gps_y,gps_z,1,1,8>(physBlocks);
+    /*doTest_3D<1,1,0,0,0,0, gps_x,gps_y,gps_z,1,1,8>(physBlocks);
     doTest_3D<2,2,0,0,0,0, gps_x,gps_y,gps_z,1,1,8>(physBlocks);
     doTest_3D<3,3,0,0,0,0, gps_x,gps_y,gps_z,1,1,8>(physBlocks);
     doTest_3D<4,4,0,0,0,0, gps_x,gps_y,gps_z,1,1,8>(physBlocks);
@@ -302,6 +302,11 @@ int main()
     doTest_3D<3,3,3,3,3,3, gps_x,gps_y,gps_z,1,1,2>(physBlocks);
     doTest_3D<4,4,4,4,4,4, gps_x,gps_y,gps_z,1,1,2>(physBlocks);
     doTest_3D<5,5,5,5,5,5, gps_x,gps_y,gps_z,1,1,1>(physBlocks);
+    */
 
+    doTest_3D<0,1,0,1,0,1, gps_x,gps_y,gps_z,1,1,2>(physBlocks);
+    doTest_3D<1,1,0,1,0,1, gps_x,gps_y,gps_z,1,1,2>(physBlocks);
+    doTest_3D<1,1,1,1,0,1, gps_x,gps_y,gps_z,1,1,2>(physBlocks);
+    doTest_3D<1,1,1,1,1,1, gps_x,gps_y,gps_z,1,1,2>(physBlocks);
     return 0;
 }
