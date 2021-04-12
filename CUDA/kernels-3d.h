@@ -26,6 +26,8 @@ void write_from_shared_flat(
         axis_max_z + axis_min_z + 1};
     constexpr int total_range = range.x * range.y * range.z;
 
+    T vals[sh_size_flat];
+
     const long gid_x = block_offset_x + local_x;
     const long gid_y = block_offset_y + local_y;
     const long gid_z = block_offset_z + local_z;
@@ -34,17 +36,28 @@ void write_from_shared_flat(
     if(should_write){
         const long gid_flat = (gid_z * len_y + gid_y) * len_x + gid_x;
 
-        T sum_acc = 0;
         for(int i=0; i < range.z; i++){
             const int zIdx = (local_z + i)*sh_size_y;
             for(int j=0; j < range.y; j++){
                 const int yIdx = (zIdx + local_y + j)*sh_size_x;
                 for(int k=0; k < range.x; k++){
                     const int idx = yIdx + local_x + k;
-                    sum_acc += tile[idx];
+                    const int flat_idx = i*range.y*range.x + j*range.x + k;
+                    vals[flat_idx] = tile[idx];
                 }
             }
         }
+
+        T sum_acc = 0;
+        for(int i=0; i < range.z; i++){
+            for(int j=0; j < range.y; j++){
+                for(int k=0; k < range.x; k++){
+                    const int flat_idx = i*range.y*range.x + j*range.x + k;
+                    sum_acc += vals[flat_idx];
+                }
+            }
+        }
+
         sum_acc /= (T)total_range;
         out[gid_flat] = sum_acc;
     }
