@@ -8,22 +8,60 @@
  * Helper functions
  */
 template<
-    const int axis_min_x, const int axis_min_y, const int axis_min_z,
-    const int axis_max_x, const int axis_max_y, const int axis_max_z,
+    const int amin_x, const int amin_y, const int amin_z,
+    const int amax_x, const int amax_y, const int amax_z>
+__device__
+__forceinline__
+void read_write_from_global(
+    const T* A,
+    T* out,
+    const long lens_x, const long lens_y, const long lens_z,
+    const long gid_x, const long gid_y, const long gid_z)
+{
+    constexpr int3 range = {
+        amax_x - amin_x + 1,
+        amax_y - amin_y + 1,
+        amax_z - amin_z + 1};
+    constexpr int total_range = range.x * range.y * range.z;
+
+    const long gindex = (gid_z*lens_y + gid_y)*lens_x + gid_x;
+    const long max_idx_z = lens_z - 1L;
+    const long max_idx_y = lens_y - 1L;
+    const long max_idx_x = lens_x - 1L;
+
+    T sum_acc = 0;
+    for(int i=amin_z; i <= amax_z; i++){
+        for(int j=amin_y; j <= amax_y; j++){
+            for(int k=amin_x; k <= amax_x; k++){
+                const long z = BOUNDL(gid_z + i, max_idx_z);
+                const long y = BOUNDL(gid_y + j, max_idx_y);
+                const long x = BOUNDL(gid_x + k, max_idx_x);
+                const long index = (z*lens_y + y)*lens_x + x;
+                sum_acc += A[index];
+            }
+        }
+    }
+    sum_acc /= (T)total_range;
+    out[gindex] = sum_acc;
+}
+
+template<
+    const int amin_x, const int amin_y, const int amin_z,
+    const int amax_x, const int amax_y, const int amax_z,
     const int sh_size_x,  const int sh_size_y,  const int sh_size_flat>
 __device__
 __forceinline__
 void write_from_shared_flat(
     const T tile[sh_size_flat],
-    T* __restrict__ const out,
+    T* out,
     const long len_x, const long len_y, const long len_z,
     const int local_x, const int local_y, const int local_z,
     const long block_offset_x, const long block_offset_y, const long block_offset_z)
 {
     constexpr int3 range = {
-        axis_max_x + axis_min_x + 1,
-        axis_max_y + axis_min_y + 1,
-        axis_max_z + axis_min_z + 1};
+        amax_x - amin_x + 1,
+        amax_y - amin_y + 1,
+        amax_z - amin_z + 1};
     constexpr int total_range = range.x * range.y * range.z;
 
     const long gid_x = block_offset_x + local_x;
@@ -57,7 +95,7 @@ template<
 __device__
 __forceinline__
 void bigtile_cube_block_loader(
-    const T* __restrict__ A,
+    const T* A,
     T tile[],
     const long len_x, const long len_y, const long len_z,
     const int local_x, const int local_y, const int local_z,
@@ -68,9 +106,9 @@ void bigtile_cube_block_loader(
         long(len_y - 1),
         long(len_z - 1)};
     const long3 view_offset = {
-        block_offset_x - amin_x,
-        block_offset_y - amin_y,
-        block_offset_z - amin_z};
+        block_offset_x + amin_x,
+        block_offset_y + amin_y,
+        block_offset_z + amin_z};
     constexpr int3 iters = {
         CEIL_DIV(sh_size_x, group_size_x),
         CEIL_DIV(sh_size_y, group_size_y),
@@ -95,13 +133,13 @@ void bigtile_cube_block_loader(
 }
 
 template<
-    const int axis_min_x, const int axis_min_y, const int axis_min_z,
+    const int amin_x, const int amin_y, const int amin_z,
     const int sh_size_x,  const int sh_size_y,  const int sh_size_flat,
     const int group_size_x,  const int group_size_y, const int group_size_z>
 __device__
 __forceinline__
 void bigtile_flat_loader_divrem(
-    const T* __restrict__ A,
+    const T* A,
     T tile[sh_size_flat],
     const long len_x, const long len_y, const long len_z,
     const int local_flat,
@@ -116,9 +154,9 @@ void bigtile_flat_loader_divrem(
     const long max_ix_y = len_y - 1;
     const long max_ix_z = len_z - 1;
 
-    const long view_offset_x = block_offset_x - axis_min_x;
-    const long view_offset_y = block_offset_y - axis_min_y;
-    const long view_offset_z = block_offset_z - axis_min_z;
+    const long view_offset_x = block_offset_x + amin_x;
+    const long view_offset_y = block_offset_y + amin_y;
+    const long view_offset_z = block_offset_z + amin_z;
 
 
     for(int i = 0; i < iters; i++){
@@ -148,7 +186,7 @@ template<
 __device__
 __forceinline__
 void bigtile_flat_loader_addcarry(
-    const T* __restrict__ A,
+    const T* A,
     T tile[sh_size_flat],
     const long len_x, const long len_y, const long len_z,
     const int loc_flat,
@@ -163,14 +201,14 @@ void bigtile_flat_loader_addcarry(
     const long max_ix_y = len_y - 1;
     const long max_ix_z = len_z - 1;
 
-    constexpr int loader_cap_x = sh_size_x - amin_x;
-    constexpr int loader_cap_y = sh_size_y - amin_y;
+    constexpr int loader_cap_x = sh_size_x + amin_x;
+    constexpr int loader_cap_y = sh_size_y + amin_y;
 
     int local_flat = loc_flat;
-    int local_z   = (loc_flat / sh_span_z) - amin_z;
+    int local_z   = (loc_flat / sh_span_z) + amin_z;
     const int lrz = loc_flat % sh_span_z;
-    int local_y = (lrz / sh_span_y) - amin_y;
-    int local_x = (lrz % sh_span_y) - amin_x;
+    int local_y = (lrz / sh_span_y) + amin_y;
+    int local_x = (lrz % sh_span_y) + amin_x;
 
     constexpr int add_z = blockDimFlat / sh_span_z;
     constexpr int arz   = blockDimFlat % sh_span_z;
@@ -212,7 +250,7 @@ template<
 __device__
 __forceinline__
 void bigtile_flat_loader_transactionAligned(
-    const T* __restrict__ A,
+    const T* A,
     T tile[],
     const long len_x, const long len_y, const long len_z,
     const int loc_flat,
@@ -252,9 +290,9 @@ void bigtile_flat_loader_transactionAligned(
     constexpr int add_y = add__ / chunk_span_y;
     constexpr int add_x = add__ % chunk_span_y;
 
-    const long boam_z = block_offset_z - amin_z;
-    const long boam_y = block_offset_y - amin_y;
-    const long boam_x = block_offset_x - amin_x;
+    const long boam_z = block_offset_z + amin_z;
+    const long boam_y = block_offset_y + amin_y;
+    const long boam_x = block_offset_x + amin_x;
 
     for(int i = 0; i < iters; i++){
         const long gz = bound((tnx_id_z + boam_z), max_ix_z);
@@ -302,8 +340,8 @@ template<
     const int group_size_x,  const int group_size_y, const int group_size_z>
 __device__
 __forceinline__
-void bigtile_flat_nonDivering_loader(
-    const T* __restrict__ A,
+void big_tile_3d_inlined_flat_forced_coalesced_loader(
+    const T* A,
     T tile[],
     const long len_x, const long len_y, const long len_z,
     const int loc_flat,
@@ -328,9 +366,9 @@ void bigtile_flat_nonDivering_loader(
     const int warp_id = loc_flat / warp_size;
     const int lane_id = loc_flat & (32-1);
 
-    const long view_offset_z = block_offset_z - amin_z;
-    const long view_offset_y = block_offset_y - amin_y;
-    const long view_offset_x = block_offset_x - amin_x;
+    const long view_offset_z = block_offset_z + amin_z;
+    const long view_offset_y = block_offset_y + amin_y;
+    const long view_offset_x = block_offset_x + amin_x;
 
     for(int i = 0; i < iters; i++){
         const int chunk_ix = (i * warp_size) + warp_id;
@@ -363,7 +401,7 @@ template<
 __device__
 __forceinline__
 void bigtile_cube_reshape_loader(
-    const T* __restrict__ A,
+    const T* A,
     T tile[],
     const long len_x, const long len_y, const long len_z,
     const int loc_flat,
@@ -387,9 +425,9 @@ void bigtile_cube_reshape_loader(
     const int loc_x = loc_flat & (row_size-1);
     const int row_id = loc_flat / row_size;
 
-    const long view_offset_z = block_offset_z - amin_z;
-    const long view_offset_y = block_offset_y - amin_y;
-    const long view_offset_x = block_offset_x - amin_x;
+    const long view_offset_z = block_offset_z + amin_z;
+    const long view_offset_y = block_offset_y + amin_y;
+    const long view_offset_x = block_offset_x + amin_x;
 
     for(int i = 0; i < iters; i++){
         const int row_flat = (i * rows_per_iter) + row_id;
@@ -426,45 +464,21 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void global_reads_3d_inlined(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
-    constexpr int3 axis_min = { amin_x, amin_y, amin_z };
-    constexpr int3 axis_max = { amax_x, amax_y, amax_z };
-    constexpr int3 range = {
-        axis_max.x + axis_min.x + 1,
-        axis_max.y + axis_min.y + 1,
-        axis_max.z + axis_min.z + 1};
-    constexpr int total_range = range.z * range.y * range.x;
-
     const long3 gid = {
-        long(blockIdx.x*group_size_x + threadIdx.x),
-        long(blockIdx.y*group_size_y + threadIdx.y),
-        long(blockIdx.z*group_size_z + threadIdx.z)};
+        long(blockIdx.x)*group_size_x + threadIdx.x,
+        long(blockIdx.y)*group_size_y + threadIdx.y,
+        long(blockIdx.z)*group_size_z + threadIdx.z};
 
     if (gid.x < lens.x && gid.y < lens.y && gid.z < lens.z)
     {
-        const long gindex = (gid.z*lens.y + gid.y)*lens.x + gid.x;
-        const long3 max_idx = {
-            lens.x - 1L,
-            lens.y - 1L,
-            lens.z - 1L};
-
-        T sum_acc = 0;
-        for(int i=-amin_z; i <= amax_z; i++){
-            const long z = BOUNDL(gid.z + i, max_idx.z);
-            for(int j=-amin_y; j <= amax_y; j++){
-                const long y = BOUNDL(gid.y + j, max_idx.y);
-                for(int k=-amin_x; k <= amax_x; k++){
-                    const long x = BOUNDL(gid.x + k, max_idx.x);
-                    const long index = (z*lens.y + y)*lens.x + x;
-                    sum_acc += A[index];
-                }
-            }
-        }
-        sum_acc /= (T)total_range;
-        out[gindex] = sum_acc;
+        read_write_from_global
+            <amin_x,amin_y,amin_z
+            ,amax_x,amax_y,amax_z>
+            (A, out, lens.x, lens.y, lens.z, gid.x, gid.y, gid.z);
     }
 }
 
@@ -476,22 +490,22 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void global_reads_3d_inlined_WET(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
     constexpr int3 axis_min = { amin_x, amin_y, amin_z };
     constexpr int3 axis_max = { amax_x, amax_y, amax_z };
     constexpr int3 range = {
-        axis_max.x + axis_min.x + 1,
-        axis_max.y + axis_min.y + 1,
-        axis_max.z + axis_min.z + 1};
+        (axis_max.x + 1) - axis_min.x,
+        (axis_max.y + 1) - axis_min.y,
+        (axis_max.z + 1) - axis_min.z};
     constexpr int total_range = range.z * range.y * range.x;
 
     const long3 gid = {
-        long(blockIdx.x*group_size_x + threadIdx.x),
-        long(blockIdx.y*group_size_y + threadIdx.y),
-        long(blockIdx.z*group_size_z + threadIdx.z)};
+        long(blockIdx.x)*group_size_x + threadIdx.x,
+        long(blockIdx.y)*group_size_y + threadIdx.y,
+        long(blockIdx.z)*group_size_z + threadIdx.z};
 
     long gindex;
     long max_idx_x;
@@ -510,18 +524,18 @@ void global_reads_3d_inlined_WET(
         max_idx_z = lens.z - 1L;
 
         sum_acc = 0;
-        for(i=-amin_z; i <= amax_z; i++){
+        for(i=amin_z; i <= amax_z; i++){
             tmp = gid.z + i;
             z = max(tmp,0L);
             z = min(z,max_idx_z);
             z *= lens.y;
-            for(j=-amin_y; j <= amax_y; j++){
+            for(j=amin_y; j <= amax_y; j++){
                 tmp = gid.y + j;
                 y = max(tmp,0L);
                 y = min(y,max_idx_y);
                 y += z;
                 y *= lens.x;
-               for(k=-amin_x; k <= amax_x; k++){
+               for(k=amin_x; k <= amax_x; k++){
                     tmp = gid.x + k;
                     x = max(tmp,0L);
                     x = min(x,max_idx_x);
@@ -543,19 +557,11 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void global_reads_3d_inlined_singleDim_gridSpan(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int3 grid_spans)
 {
-    constexpr int3 axis_min = { amin_x, amin_y, amin_z };
-    constexpr int3 axis_max = { amax_x, amax_y, amax_z };
-    constexpr int3 range = {
-        axis_max.x + axis_min.x + 1,
-        axis_max.y + axis_min.y + 1,
-        axis_max.z + axis_min.z + 1};
-    constexpr int total_range = range.z * range.y * range.x;
-
     const int group_id_flat = blockIdx.x;
 
     const int group_id_z = group_id_flat / grid_spans.z;
@@ -568,33 +574,16 @@ void global_reads_3d_inlined_singleDim_gridSpan(
     const int locy = lrz / group_size_x;
     const int locx = lrz % group_size_x;
 
-    const long gidz = long(group_id_z) * group_size_z + long(locz);
-    const long gidy = long(group_id_y) * group_size_y + long(locy);
-    const long gidx = long(group_id_x) * group_size_x + long(locx);
-    const long3 gid = { gidx, gidy, gidz };
+    const long gidz = long(group_id_z) * group_size_z + locz;
+    const long gidy = long(group_id_y) * group_size_y + locy;
+    const long gidx = long(group_id_x) * group_size_x + locx;
 
-    if (gid.x < lens.x && gid.y < lens.y && gid.z < lens.z)
+    if (gidx < lens.x && gidy < lens.y && gidz < lens.z)
     {
-        const long gindex = (gid.z*lens.y + gid.y)*lens.x + gid.x;
-        const long3 max_idx = {
-            lens.x - 1L,
-            lens.y - 1L,
-            lens.z - 1L};
-
-        T sum_acc = 0;
-        for(int i=-amin_z; i <= amax_z; i++){
-            for(int j=-amin_y; j <= amax_y; j++){
-                for(int k=-amin_x; k <= amax_x; k++){
-                    const long z = BOUNDL(gid.z + i, max_idx.z);
-                    const long y = BOUNDL(gid.y + j, max_idx.y);
-                    const long x = BOUNDL(gid.x + k, max_idx.x);
-                    const long index = (z*lens.y + y)*lens.x + x;
-                    sum_acc += A[index];
-                }
-            }
-        }
-        sum_acc /= (T)total_range;
-        out[gindex] = sum_acc;
+        read_write_from_global
+            <amin_x,amin_y,amin_z
+            ,amax_x,amax_y,amax_z>
+            (A, out, lens.x, lens.y, lens.z, gidx, gidy, gidz);
     }
 }
 
@@ -606,49 +595,28 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void global_reads_3d_inlined_singleDim_lensSpan(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int3 place_holder)
 {
     const long3 lens_spans = { 1, lens.x, lens.x*lens.y };
-    constexpr int3 axis_min = { amin_x, amin_y, amin_z };
-    constexpr int3 axis_max = { amax_x, amax_y, amax_z };
-    constexpr int3 range = {
-        axis_max.x + axis_min.x + 1,
-        axis_max.y + axis_min.y + 1,
-        axis_max.z + axis_min.z + 1};
-    constexpr int total_range = range.z * range.y * range.x;
+
     constexpr int blockdim_flat = group_size_x * group_size_y * group_size_z;
-    const long gid_flat = blockIdx.x * blockdim_flat + threadIdx.x;
+
+    const long group_id_flat = blockIdx.x;
+    const long gid_flat = group_id_flat * blockdim_flat + threadIdx.x;
     const long gidz = gid_flat / lens_spans.z;
-    const long rgid = gid_flat % lens_spans.z;
-    const long gidy = rgid / lens_spans.y;
-    const long gidx = rgid % lens_spans.y;
-    const long3 gid = { gidx, gidy, gidz };
+    const long gid_ = gid_flat % lens_spans.z;
+    const long gidy = gid_ / lens_spans.y;
+    const long gidx = gid_ % lens_spans.y;
 
-    if (gid.x < lens.x && gid.y < lens.y && gid.z < lens.z)
+    if (gidx < lens.x && gidy < lens.y && gidz < lens.z)
     {
-        const long gindex = (gid.z*lens.y + gid.y)*lens.x + gid.x;
-        const long3 max_idx = {
-            lens.x - 1L,
-            lens.y - 1L,
-            lens.z - 1L};
-
-        T sum_acc = 0;
-        for(int i=-amin_z; i <= amax_z; i++){
-            for(int j=-amin_y; j <= amax_y; j++){
-                for(int k=-amin_x; k <= amax_x; k++){
-                    const long z = BOUNDL(gid.z + i, max_idx.z);
-                    const long y = BOUNDL(gid.y + j, max_idx.y);
-                    const long x = BOUNDL(gid.x + k, max_idx.x);
-                    const long index = (z*lens.y + y)*lens.x + x;
-                    sum_acc += A[index];
-                }
-            }
-        }
-        sum_acc /= (T)total_range;
-        out[gindex] = sum_acc;
+        read_write_from_global
+            <amin_x,amin_y,amin_z
+            ,amax_x,amax_y,amax_z>
+            (A, out, lens.x, lens.y, lens.z, gidx, gidy, gidz);
     }
 }
 
@@ -660,14 +628,15 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void big_tile_3d_inlined(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
+    extern __shared__ T tile[];
     constexpr int3 waste = {
-        int(amin_x + amax_x),
-        int(amin_y + amax_y),
-        int(amin_z + amax_z)};
+        int(-amin_x + amax_x),
+        int(-amin_y + amax_y),
+        int(-amin_z + amax_z)};
     const long3 block_offset = {
         long(blockIdx.x*group_size_x),
         long(blockIdx.y*group_size_y),
@@ -679,8 +648,6 @@ void big_tile_3d_inlined(
 
     constexpr int shared_size_zyx = product(shared_size);
     const int3 local = { int(threadIdx.x),int(threadIdx.y),int(threadIdx.z) };
-
-    __shared__ T tile[shared_size_zyx];
 
     bigtile_cube_block_loader
         <amin_x,amin_y,amin_z
@@ -711,16 +678,16 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void big_tile_3d_inlined_flat(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
+    extern __shared__ T tile[];
     constexpr int3 shared_size = {
-        int(group_size_x + (amin_x + amax_x)),
-        int(group_size_y + (amin_y + amax_y)),
-        int(group_size_z + (amin_z + amax_z))};
+        int(group_size_x + (-amin_x + amax_x)),
+        int(group_size_y + (-amin_y + amax_y)),
+        int(group_size_z + (-amin_z + amax_z))};
     constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
-    __shared__ T tile[shared_size_zyx];
 
     const long block_offset_x = blockIdx.x * group_size_x;
     const long block_offset_y = blockIdx.y * group_size_y;
@@ -758,16 +725,16 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void big_tile_3d_inlined_trx_align(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
+    extern __shared__ T tile[];
     constexpr int3 shared_size = {
-        int(group_size_x + (amin_x + amax_x)),
-        int(group_size_y + (amin_y + amax_y)),
-        int(group_size_z + (amin_z + amax_z))};
+        int(group_size_x + (-amin_x + amax_x)),
+        int(group_size_y + (-amin_y + amax_y)),
+        int(group_size_z + (-amin_z + amax_z))};
     constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
-    __shared__ T tile[shared_size_zyx];
 
     const long block_offset_x = blockIdx.x * group_size_x;
     const long block_offset_y = blockIdx.y * group_size_y;
@@ -804,17 +771,17 @@ template
 >
 __global__
 __launch_bounds__(BLOCKSIZE)
-void big_tile_3d_inlined_flat_nonDiverging(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+void big_tile_3d_inlined_flat_forced_coalesced(
+    const T* A,
+    T* out,
     const long3 lens)
 {
+    extern __shared__ T tile[];
     constexpr int3 shared_size = {
-        int(group_size_x + (amin_x + amax_x)),
-        int(group_size_y + (amin_y + amax_y)),
-        int(group_size_z + (amin_z + amax_z))};
+        int(group_size_x + (-amin_x + amax_x)),
+        int(group_size_y + (-amin_y + amax_y)),
+        int(group_size_z + (-amin_z + amax_z))};
     constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
-    __shared__ T tile[shared_size_zyx];
 
     const long block_offset_x = blockIdx.x * group_size_x;
     const long block_offset_y = blockIdx.y * group_size_y;
@@ -823,7 +790,7 @@ void big_tile_3d_inlined_flat_nonDiverging(
     const int3 local = { int(threadIdx.x), int(threadIdx.y), int(threadIdx.z) };
     const int local_flat = (threadIdx.z * group_size_y + threadIdx.y) * group_size_x + threadIdx.x;
 
-    bigtile_flat_nonDivering_loader
+    big_tile_3d_inlined_flat_forced_coalesced_loader
         <amin_x,amin_y,amin_z
         ,shared_size.x,shared_size.y,shared_size.z
         ,group_size_x,group_size_y,group_size_z>
@@ -852,16 +819,16 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void big_tile_3d_inlined_cube_reshape(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
+    extern __shared__ T tile[];
     constexpr int3 shared_size = {
-        int(group_size_x + (amin_x + amax_x)),
-        int(group_size_y + (amin_y + amax_y)),
-        int(group_size_z + (amin_z + amax_z))};
+        int(group_size_x + (-amin_x + amax_x)),
+        int(group_size_y + (-amin_y + amax_y)),
+        int(group_size_z + (-amin_z + amax_z))};
     constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
-    __shared__ T tile[shared_size_zyx];
 
     const long block_offset_x = blockIdx.x * group_size_x;
     const long block_offset_y = blockIdx.y * group_size_y;
@@ -900,17 +867,17 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void big_tile_3d_inlined_flat_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int3 grid)
 {
-    constexpr int3 shared_size = {
-        int(group_size_x + (amin_x + amax_x)),
-        int(group_size_y + (amin_y + amax_y)),
-        int(group_size_z + (amin_z + amax_z))};
-    constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
     extern __shared__ T tile[];
+    constexpr int3 shared_size = {
+        int(group_size_x + (-amin_x + amax_x)),
+        int(group_size_y + (-amin_y + amax_y)),
+        int(group_size_z + (-amin_z + amax_z))};
+    constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
 
     const int grid_spans_z = grid.x * grid.y;
     const int grid_spans_y = grid.x;
@@ -953,6 +920,66 @@ void big_tile_3d_inlined_flat_singleDim(
 
 }
 
+template
+< const int amin_x, const int amin_y, const int amin_z
+, const int amax_x, const int amax_y, const int amax_z
+, const int group_size_x,  const int group_size_y, const int group_size_z
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void big_tile_3d_inlined_flat_addcarry_singleDim(
+    const T* A,
+    T* out,
+    const long3 lens,
+    const int3 grid)
+{
+    extern __shared__ T tile[];
+    constexpr int3 shared_size = {
+        int(group_size_x + (-amin_x + amax_x)),
+        int(group_size_y + (-amin_y + amax_y)),
+        int(group_size_z + (-amin_z + amax_z))};
+    constexpr int shared_size_zyx = shared_size.z * shared_size.y * shared_size.x;
+
+    const int grid_spans_z = grid.x * grid.y;
+    const int grid_spans_y = grid.x;
+    const int block_index_z = blockIdx.x / grid_spans_z;
+    const int rblock        = blockIdx.x % grid_spans_z;
+    const int block_index_y = rblock / grid_spans_y;
+    const int block_index_x = rblock % grid_spans_y;
+
+    const long block_offset_x = block_index_x * group_size_x;
+    const long block_offset_y = block_index_y * group_size_y;
+    const long block_offset_z = block_index_z * group_size_z;
+
+    constexpr int zb_span = group_size_x*group_size_y;
+    constexpr int yb_span = group_size_x;
+    const int loc_flat = threadIdx.x;
+    const int loc_z = loc_flat / zb_span;
+    const int rloc  = loc_flat % zb_span;
+    const int loc_y = rloc / yb_span;
+    const int loc_x = rloc % yb_span;
+
+    bigtile_flat_loader_addcarry
+        <amin_x,amin_y,amin_z
+        ,shared_size.x,shared_size.y,shared_size_zyx
+        ,group_size_x,group_size_y,group_size_z>
+        (A, tile
+         , lens.x, lens.y, lens.z
+         , loc_flat
+         , block_offset_x, block_offset_y, block_offset_z);
+
+    __syncthreads();
+
+    write_from_shared_flat
+        <amin_x,amin_y,amin_z
+        ,amax_x,amax_y,amax_z
+        ,shared_size.x,shared_size.y,shared_size_zyx>
+        (tile, out,
+         lens.x, lens.y, lens.z,
+         loc_x,loc_y,loc_z,
+         block_offset_x,block_offset_y,block_offset_z);
+
+}
 
 template
 < const int amin_x, const int amin_y, const int amin_z
@@ -963,17 +990,17 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void stripmine_big_tile_3d_inlined_flat_addcarry_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int3 strip_grid
     )
 {
-    constexpr int sh_size_x = amin_x + strip_x*group_size_x + amax_x;
-    constexpr int sh_size_y = amin_y + strip_y*group_size_y + amax_y;
-    constexpr int sh_size_z = amin_z + strip_z*group_size_z + amax_z;
-    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
     extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + strip_x*group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + strip_y*group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + strip_z*group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
 
     constexpr long strip_id_scaler_x = strip_x * group_size_x;
     constexpr long strip_id_scaler_y = strip_y * group_size_y;
@@ -1030,9 +1057,85 @@ void stripmine_big_tile_3d_inlined_flat_addcarry_singleDim(
             }
         }
     }
-
 }
 
+template
+< const int amin_x, const int amin_y, const int amin_z
+, const int amax_x, const int amax_y, const int amax_z
+, const int group_size_x,  const int group_size_y, const int group_size_z
+, const int strip_x, const int strip_y, const int strip_z
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void stripmine_big_tile_3d_inlined_cube_singleDim(
+    const T* A,
+    T* out,
+    const long3 lens,
+    const int3 strip_grid
+    )
+{
+    extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + strip_x*group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + strip_y*group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + strip_z*group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
+
+    constexpr long strip_id_scaler_x = strip_x * group_size_x;
+    constexpr long strip_id_scaler_y = strip_y * group_size_y;
+    constexpr long strip_id_scaler_z = strip_z * group_size_z;
+
+    const int strip_grid_spans_z = strip_grid.x * strip_grid.y;
+    const int strip_grid_spans_y = strip_grid.x;
+
+    const long strip_id_flat = blockIdx.x;
+    const long strip_id_z = strip_id_flat / strip_grid_spans_z;
+    const long strip_id__ = strip_id_flat % strip_grid_spans_z;
+    const long strip_id_y = strip_id__ / strip_grid_spans_y;
+    const long strip_id_x = strip_id__ % strip_grid_spans_y;
+
+    constexpr int grp_span_z = group_size_x*group_size_y;
+    constexpr int grp_span_y = group_size_x;
+    const int loc_flat = threadIdx.x;
+    const int loc_z = loc_flat / grp_span_z;
+    const int loc__ = loc_flat % grp_span_z;
+    const int loc_y = loc__ / grp_span_y;
+    const int loc_x = loc__ % grp_span_y;
+
+    const long block_offset_x = strip_id_x * strip_id_scaler_x;
+    const long block_offset_y = strip_id_y * strip_id_scaler_y;
+    const long block_offset_z = strip_id_z * strip_id_scaler_z;
+
+    bigtile_cube_block_loader
+        <amin_x,amin_y,amin_z
+        ,sh_size_x,sh_size_y,sh_size_z
+        ,group_size_x,group_size_y,group_size_z>
+        (A, tile
+         , lens.x, lens.y, lens.z
+         , loc_x, loc_y, loc_z
+         , block_offset_x, block_offset_y, block_offset_z);
+
+    // the tile has to be fully done being loaded before we start reading
+    __syncthreads();
+    for(int i__ = 0; i__ < strip_z; i__++){
+        for(int j__ = 0; j__ < strip_y; j__++){
+            for(int k__ = 0; k__ < strip_x; k__++){
+                // tile_offsets implicitly also handle the change in group_id
+                const int tile_offset_x = loc_x + (k__ * group_size_x);
+                const int tile_offset_y = loc_y + (j__ * group_size_y);
+                const int tile_offset_z = loc_z + (i__ * group_size_z);
+
+                write_from_shared_flat
+                    <amin_x,amin_y,amin_z
+                    ,amax_x,amax_y,amax_z
+                    ,sh_size_x,sh_size_y,sh_size_flat>
+                    (tile, out,
+                     lens.x, lens.y, lens.z,
+                     tile_offset_x,tile_offset_y,tile_offset_z,
+                     block_offset_x, block_offset_y, block_offset_z);
+            }
+        }
+    }
+}
 
 /*******************************************************************************
  * Versions where the indices are inlined and we are provided a
@@ -1049,17 +1152,17 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void virtual_addcarry_global_read_3d_inlined_grid_span_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int num_phys_groups,
     const int3 virtual_grid
     )
 {
     constexpr int3 range = {
-        amax_x + amin_x + 1,
-        amax_y + amin_y + 1,
-        amax_z + amin_z + 1};
+        amax_x - amin_x + 1,
+        amax_y - amin_y + 1,
+        amax_z - amin_z + 1};
     constexpr int total_range = range.x * range.y * range.z;
 
     const int3 virtual_grid_spans = create_spans(virtual_grid);
@@ -1099,9 +1202,9 @@ void virtual_addcarry_global_read_3d_inlined_grid_span_singleDim(
                 const long gindex = (gidz * lens.y + gidy)*lens.x + gidx;
 
                 T sum_acc = 0;
-                for(int i=-amin_z; i <= amax_z; i++){
-                    for(int j=-amin_y; j <= amax_y; j++){
-                        for(int k=-amin_x; k <= amax_x; k++){
+                for(int i=amin_z; i <= amax_z; i++){
+                    for(int j=amin_y; j <= amax_y; j++){
+                        for(int k=amin_x; k <= amax_x; k++){
                             const long z = BOUNDL(gidz + i, max_idx.z);
                             const long y = BOUNDL(gidy + j, max_idx.y);
                             const long x = BOUNDL(gidx + k, max_idx.x);
@@ -1141,18 +1244,18 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void virtual_addcarry_big_tile_3d_inlined_flat_divrem_MultiDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int num_phys_groups,
     const int3 virtual_grid
     )
 {
-    constexpr int sh_size_x = amin_x + group_size_x + amax_x;
-    constexpr int sh_size_y = amin_y + group_size_y + amax_y;
-    constexpr int sh_size_z = amin_z + group_size_z + amax_z;
-    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
     extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
 
     const int3 virtual_grid_spans = create_spans(virtual_grid);
     const int virtual_grid_flat = product(virtual_grid);
@@ -1231,18 +1334,18 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void virtual_divrem_big_tile_3d_inlined_flat_divrem_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int num_phys_groups,
     const int3 virtual_grid
     )
 {
-    constexpr int sh_size_x = amin_x + group_size_x + amax_x;
-    constexpr int sh_size_y = amin_y + group_size_y + amax_y;
-    constexpr int sh_size_z = amin_z + group_size_z + amax_z;
-    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
     extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
 
     const int3 virtual_grid_spans = create_spans(virtual_grid);
     const int virtual_grid_flat = product(virtual_grid);
@@ -1301,18 +1404,18 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void virtual_addcarry_big_tile_3d_inlined_flat_divrem_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int num_phys_groups,
     const int3 virtual_grid
     )
 {
-    constexpr int sh_size_x = amin_x + group_size_x + amax_x;
-    constexpr int sh_size_y = amin_y + group_size_y + amax_y;
-    constexpr int sh_size_z = amin_z + group_size_z + amax_z;
-    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
     extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
 
     const int3 virtual_grid_spans = create_spans(virtual_grid);
     const int virtual_grid_flat = product(virtual_grid);
@@ -1392,18 +1495,18 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void virtual_addcarry_big_tile_3d_inlined_flat_addcarry_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int num_phys_groups,
     const int3 virtual_grid
     )
 {
-    constexpr int sh_size_x = amin_x + group_size_x + amax_x;
-    constexpr int sh_size_y = amin_y + group_size_y + amax_y;
-    constexpr int sh_size_z = amin_z + group_size_z + amax_z;
-    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
     extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
 
     const int3 virtual_grid_spans = create_spans(virtual_grid);
     const int virtual_grid_flat = product(virtual_grid);
@@ -1483,29 +1586,24 @@ template
 __global__
 __launch_bounds__(BLOCKSIZE)
 void virtual_addcarry_stripmine_big_tile_3d_inlined_flat_addcarry_singleDim(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens,
     const int num_phys_groups,
     const int3 virtual_strip
     )
 {
-    constexpr int sh_size_x = amin_x + strip_x*group_size_x + amax_x;
-    constexpr int sh_size_y = amin_y + strip_y*group_size_y + amax_y;
-    constexpr int sh_size_z = amin_z + strip_z*group_size_z + amax_z;
-    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
     extern __shared__ T tile[];
+    constexpr int sh_size_x = -amin_x + strip_x*group_size_x + amax_x;
+    constexpr int sh_size_y = -amin_y + strip_y*group_size_y + amax_y;
+    constexpr int sh_size_z = -amin_z + strip_z*group_size_z + amax_z;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y * sh_size_z;
 
     constexpr long strip_id_scaler_x = strip_x * group_size_x;
     constexpr long strip_id_scaler_y = strip_y * group_size_y;
     constexpr long strip_id_scaler_z = strip_z * group_size_z;
 
     //--
-    //const int3 virtual_strip = {
-    //    divUp(virtual_grid.x, strip_x),
-    //    divUp(virtual_grid.y, strip_y),
-    //    divUp(virtual_grid.z, strip_z)};
-
     const int virtual_strip_spans_z = virtual_strip.x *  virtual_strip.y;
     const int virtual_strip_spans_y = virtual_strip.x;
     const int virtual_strip_flat = product(virtual_strip);
@@ -1593,9 +1691,10 @@ template<
     long y_axis_min, long y_axis_max,
     long x_axis_min, long x_axis_max>
 __global__
+__launch_bounds__(BLOCKSIZE)
 void big_tile_3d_inlined_layered(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
     const long z_len = lens.z;
@@ -1688,9 +1787,10 @@ template<
     long y_axis_min, long y_axis_max,
     long x_axis_min, long x_axis_max>
 __global__
+__launch_bounds__(BLOCKSIZE)
 void small_tile_3d_inlined(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long3 lens)
 {
     const long z_len = lens.z;
@@ -1778,9 +1878,10 @@ inline T stencil_fun_inline_ix_3d(const T arr[z_l][y_l][x_l], const long z_off, 
 
 template<long D>
 __global__
+__launch_bounds__(BLOCKSIZE)
 void global_reads_3d(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long z_len, //outermost
     const long y_len, //middle
     const long x_len) //innermost
@@ -1814,10 +1915,10 @@ template<long ixs_len,
     long z_axis_min, long z_axis_max,
     long y_axis_min, long y_axis_max,
     long x_axis_min, long x_axis_max>
-__global__
+__global__\n__launch_bounds__(BLOCKSIZE)
 void small_tile_3d(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long z_len,
     const long y_len,
     const long x_len
@@ -1862,10 +1963,10 @@ template<long ixs_len,
     long z_axis_min, long z_axis_max,
     long y_axis_min, long y_axis_max,
     long x_axis_min, long x_axis_max>
-__global__
+__global__\n__launch_bounds__(BLOCKSIZE)
 void big_tile_3d(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long z_len,
     const long y_len,
     const long x_len
