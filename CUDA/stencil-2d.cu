@@ -148,8 +148,8 @@ void doTest_2D(const int physBlocks)
                 <amin_x,amin_y
                 ,amax_x,amax_y
                 ,group_size_x,group_size_y>;
-            G.do_run_multiDim(kfun, cpu_out, multiDim_grid, multiDim_block, false); // warmup as it is the first kernel
-            G.do_run_multiDim(kfun, cpu_out, multiDim_grid, multiDim_block);
+            G.do_run_multiDim(kfun, cpu_out, multiDim_grid, multiDim_block, 1, false); // warmup as it is the first kernel
+            G.do_run_multiDim(kfun, cpu_out, multiDim_grid, multiDim_block, 1);
         }
         {
             cout << "## Benchmark 2d global read - inlined ixs - singleDim grid ##";

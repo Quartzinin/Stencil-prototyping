@@ -30,10 +30,8 @@ T lambdaFun(const T* tmp){
 
 #define MACROLIKE __device__ __host__ __forceinline__
 
-MACROLIKE long bound(long i, long max_i){ return min(max_i, max(0l, i)); }
-MACROLIKE int bound(int i, int max_i){ return min(max_i, max(0, i)); }
-MACROLIKE int divUp(int i, int d){ return (i + (d-1))/d; }
-MACROLIKE long divUp(long i, long d){ return (i + (d-1))/d; }
+template<typename L> MACROLIKE constexpr L bound(L i, L max_i){ return min(max_i, max(L(0), i)); }
+template<typename L> MACROLIKE constexpr L divUp(L i, L d){ return (i + (d- (L(1))))/d; }
 
 MACROLIKE constexpr int3 create_spans(const int3 lens){ return { 1, lens.x, lens.x*lens.y }; }
 MACROLIKE constexpr int2 create_spans(const int2 lens){ return { 1, lens.x, }; }

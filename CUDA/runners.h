@@ -227,12 +227,13 @@ class Globs {
                 , const T* cpu_out
                 , const dim3 grid
                 , const dim3 block
+                , const int sh_size_bytes
                 , const bool should_print=true){
             reset_output();
             long time_acc = 0;
             for(unsigned x = 0; x < RUNS; x++){
                 startTimer();
-                call<<<grid,block>>>(gpu_array_in, gpu_array_out, lens);
+                call<<<grid,block,sh_size_bytes>>>(gpu_array_in, gpu_array_out, lens);
                 CUDASSERT(cudaGetLastError()); // check cuda for errors
                 CUDASSERT(cudaDeviceSynchronize());
                 time_acc += endTimer();
@@ -274,16 +275,6 @@ class Globs {
             for(unsigned x = 0; x < RUNS; x++){
                 startTimer();
 
-                //const int3 virtual_grid_spans = create_spans(virtual_grid);
-                //const int virtual_grid_flat = product(virtual_grid);
-                //const int iters_per_phys = CEIL_DIV(virtual_grid_flat, num_phys_groups);
-                //const int id_add = unflatten(virtual_grid_spans, num_phys_groups);
-
-                //call<<<num_phys_groups,blocksize, sh_size_bytes>>>(
-                //        gpu_array_in, gpu_array_out,
-                //        lens, num_phys_groups,
-                //        iters_per_phys, id_add, virtual_grid,
-                //        virtual_grid_spans, virtual_grid_flat, strips);
                 call<<<num_phys_groups,blocksize, sh_size_bytes>>>
                     (gpu_array_in, gpu_array_out, lens, num_phys_groups, virtual_grid);
                 CUDASSERT(cudaGetLastError()); // check cuda for errors
