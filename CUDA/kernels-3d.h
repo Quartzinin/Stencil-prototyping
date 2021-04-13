@@ -64,7 +64,7 @@ void write_from_shared_flat(
         amax_z - amin_z + 1};
     constexpr int total_range = range.x * range.y * range.z;
 
-    T vals[sh_size_flat];
+    T vals[total_range];
 
     const long gid_x = block_offset_x + local_x;
     const long gid_y = block_offset_y + local_y;
