@@ -581,15 +581,14 @@ void global_reads_3d_inlined_singleDim_gridSpan(
     const int grz        = group_id_flat % grid_spans.z;
     const int group_id_y = grz / grid_spans.y;
     const int group_id_x = grz % grid_spans.y;
-
     const int locz = threadIdx.x / (group_size_x * group_size_y);
     const int lrz =  threadIdx.x % (group_size_x * group_size_y);
     const int locy = lrz / group_size_x;
     const int locx = lrz % group_size_x;
 
-    const long gidz = long(group_id_z) * group_size_z + locz;
-    const long gidy = long(group_id_y) * group_size_y + locy;
-    const long gidx = long(group_id_x) * group_size_x + locx;
+    const long gidz = long(group_id_z) * long(group_size_z) + long(locz);
+    const long gidy = long(group_id_y) * long(group_size_y) + long(locy);
+    const long gidx = long(group_id_x) * long(group_size_x) + long(locx);
 
     if (gidx < lens.x && gidy < lens.y && gidz < lens.z)
     {
@@ -615,7 +614,7 @@ void global_reads_3d_inlined_singleDim_lensSpan(
 {
     const long3 lens_spans = { 1, lens.x, lens.x*lens.y };
 
-    constexpr int blockdim_flat = group_size_x * group_size_y * group_size_z;
+    constexpr long blockdim_flat = group_size_x * group_size_y * group_size_z;
 
     const long group_id_flat = blockIdx.x;
     const long gid_flat = group_id_flat * blockdim_flat + threadIdx.x;
