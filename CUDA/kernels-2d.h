@@ -26,8 +26,8 @@ void write_from_shared_flat(
         amax_y + amin_y + 1};
     constexpr int total_range = range.x * range.y;
 
-    const long gid_x = block_offsets.x + locals.x;
-    const long gid_y = block_offsets.y + locals.y;
+    const long gid_x = block_offsets.x + long(locals.x);
+    const long gid_y = block_offsets.y + long(locals.y);
 
     T vals[total_range];
 
@@ -125,8 +125,8 @@ void bigtile_flat_loader_divrem(
     const long max_ix_x = lens.x - 1;
     const long max_ix_y = lens.y - 1;
 
-    const long view_offset_x = block_offsets.x - amin_x;
-    const long view_offset_y = block_offsets.y - amin_y;
+    const long view_offset_x = block_offsets.x - long(amin_x);
+    const long view_offset_y = block_offsets.y - long(amin_y);
 
     for(int i = 0; i < iters; i++){
         const int local_ix = (i * blockDimFlat) + local_flat;
@@ -168,12 +168,12 @@ void bigtile_cube_loader(
 
     for(int i = 0; i < y_iters; i++){
         const int local_y = locals.y + i*group_size_y;
-        const long gy = BOUNDL( long(local_y) + block_offsets.y - long(amin_y), max_y_ix)
+        const long gy = bound( long(local_y) + block_offsets.y - long(amin_y), max_y_ix)
                      * lens.x;
 
         for(int j = 0; j < x_iters; j++){
             const int local_x = locals.x + j*group_size_x;
-            const long gx = BOUNDL( long(local_x) + block_offsets.x - long(amin_x), max_x_ix);
+            const long gx = bound( long(local_x) + block_offsets.x - long(amin_x), max_x_ix);
             if(local_x < sh_size_x && local_y < sh_size_y){
                 tile2d[local_y][local_x] = A[gx + gy];
             }
@@ -200,8 +200,8 @@ void bigtile_flat_loader_addcarry(
     const long max_ix_x = lens.x - 1;
     const long max_ix_y = lens.y - 1;
 
-    const long view_offset_x = block_offsets.x - amin_x;
-    const long view_offset_y = block_offsets.y - amin_y;
+    const long view_offset_x = block_offsets.x - long(amin_x);
+    const long view_offset_y = block_offsets.y - long(amin_y);
 
     int local_flat = loc_flat;
     int local_y = loc_flat / sh_size_x;
@@ -211,8 +211,8 @@ void bigtile_flat_loader_addcarry(
     const int add_x = blockDimFlat % sh_size_x;
 
     for(int i = 0; i < iters; i++){
-        const long gy = bound((local_y + view_offset_y), max_ix_y);
-        const long gx = bound((local_x + view_offset_x), max_ix_x);
+        const long gy = bound((long(local_y) + view_offset_y), max_ix_y);
+        const long gx = bound((long(local_x) + view_offset_x), max_ix_x);
 
         const long index = gy * lens.x + gx;
         if(local_flat < sh_size_flat){
@@ -626,8 +626,8 @@ void big_tile_2d_inlined_flat_addcarry_singleDim(
     int group_id_x = blockIdx.x % grid.x;
 
     const long2 writeSet_offset = {
-        long(group_id_x) * group_size_x,
-        long(group_id_y) * group_size_y};
+        long(group_id_x) * long(group_size_x),
+        long(group_id_y) * long(group_size_y)};
 
     bigtile_flat_loader_addcarry
         <amin_x,amin_y
