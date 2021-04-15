@@ -160,6 +160,22 @@ void doTest_2D(const int physBlocks)
             G.do_run_singleDim(kfun, cpu_out, singleDim_grid_flat, singleDim_block, singleDim_grid, 1);
         }
         {
+            cout << "## Benchmark 2d big tile - inlined idxs - cube2d load - singleDim grid ##";
+            Kernel2dPhysSingleDim kfun = big_tile_2d_inlined_cube_singleDim 
+                <amin_x,amin_y
+                ,amax_x,amax_y
+                ,group_size_x,group_size_y>;
+            G.do_run_singleDim(kfun, cpu_out, singleDim_grid_flat, singleDim_block, singleDim_grid, std_sh_size_bytes);
+        }
+        {
+            cout << "## Benchmark 2d big tile - inlined idxs - flat load (div/rem) - singleDim grid ##";
+            Kernel2dPhysSingleDim kfun = big_tile_2d_inlined_flat_divrem_singleDim
+                <amin_x,amin_y
+                ,amax_x,amax_y
+                ,group_size_x,group_size_y>;
+            G.do_run_singleDim(kfun, cpu_out, singleDim_grid_flat, singleDim_block, singleDim_grid, std_sh_size_bytes);
+        }
+        {
             cout << "## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ##";
             Kernel2dPhysSingleDim kfun = big_tile_2d_inlined_flat_addcarry_singleDim
                 <amin_x,amin_y
@@ -244,8 +260,8 @@ int main()
     int physBlocks = getPhysicalBlockCount();
 
     // group sizes
-    constexpr int gps_x = 1 << 5;
-    constexpr int gps_y = 1 << 5;
+    constexpr int gps_x = 32;
+    constexpr int gps_y = 8;
 
     constexpr int group_size_flat = gps_x * gps_y;
     static_assert(
@@ -259,18 +275,23 @@ int main()
          << ", total_len = " << lens_flat << " }" << endl;
     cout << "Blockdim y,x = " << gps_y << ", " << gps_x << endl;
 
-    doTest_2D<1,1,0,0, gps_x,gps_y,1,4>(physBlocks);
+    /*doTest_2D<1,1,0,0, gps_x,gps_y,1,4>(physBlocks);
     doTest_2D<2,2,0,0, gps_x,gps_y,1,4>(physBlocks);
     doTest_2D<3,3,0,0, gps_x,gps_y,1,4>(physBlocks);
     doTest_2D<4,4,0,0, gps_x,gps_y,1,4>(physBlocks);
     doTest_2D<5,5,0,0, gps_x,gps_y,1,4>(physBlocks);
-
+    */
+    doTest_2D<0,1,0,1, gps_x,gps_y,3,3>(physBlocks);
+    doTest_2D<1,1,0,1, gps_x,gps_y,3,3>(physBlocks);
     doTest_2D<1,1,1,1, gps_x,gps_y,3,3>(physBlocks);
-    doTest_2D<2,2,2,2, gps_x,gps_y,3,3>(physBlocks);
+    doTest_2D<1,2,1,1, gps_x,gps_y,3,3>(physBlocks);
+    doTest_2D<1,2,1,2, gps_x,gps_y,3,3>(physBlocks);
+    doTest_2D<2,2,1,1, gps_x,gps_y,1,4>(physBlocks);
+    /*doTest_2D<2,2,2,2, gps_x,gps_y,3,3>(physBlocks);
     doTest_2D<3,3,3,3, gps_x,gps_y,3,2>(physBlocks);
     doTest_2D<4,4,4,4, gps_x,gps_y,3,2>(physBlocks);
     doTest_2D<5,5,5,5, gps_x,gps_y,3,2>(physBlocks);
-
+    */
     return 0;
 }
 

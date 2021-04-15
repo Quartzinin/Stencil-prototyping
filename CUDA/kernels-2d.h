@@ -29,17 +29,76 @@ void write_from_shared_flat(
     const long gid_x = block_offsets.x + locals.x;
     const long gid_y = block_offsets.y + locals.y;
 
+    T vals[total_range];
+
     const bool should_write = ((gid_x < lens.x) && (gid_y < lens.y));
     if(should_write){
         const long gid_flat = gid_y * lens.x + gid_x;
 
-        T sum_acc = 0;
         for(int j=0; j < range.y; j++){
             const int y = locals.y + j;
             for(int k=0; k < range.x; k++){
+                const int idx = j*range.x + k;
                 const int x = locals.x + k;
                 const int index = y*sh_size_x + x;
-                sum_acc += tile[index];
+                vals[idx] = tile[long(index)];
+            }
+        }
+
+        T sum_acc = 0;
+        for(int j=0; j < range.y; j++){
+            for(int k=0; k < range.x; k++){
+                const int idx = j*range.x + k;
+                sum_acc += vals[idx];
+            }
+        }
+        sum_acc /= (T)total_range;
+        out[gid_flat] = sum_acc;
+    }
+}
+
+template<
+    const int amin_x, const int amin_y,
+    const int amax_x, const int amax_y
+    , const int sh_size_x,  const int sh_size_y
+    >
+__device__
+__forceinline__
+void write_from_shared_cube(
+    const T tile2d[sh_size_y][sh_size_x],
+    T* __restrict__ const out,
+    const long2 lens,
+    const int2 locals,
+    const long2 block_offsets)
+{
+    constexpr int2 range = {
+        amax_x + amin_x + 1,
+        amax_y + amin_y + 1};
+    constexpr int total_range = range.x * range.y;
+
+    const long gid_x = block_offsets.x + long(locals.x);
+    const long gid_y = block_offsets.y + long(locals.y);
+
+    T vals[total_range];
+
+    const bool should_write = ((gid_x < lens.x) && (gid_y < lens.y));
+    if(should_write){
+        const long gid_flat = gid_y * lens.x + gid_x;
+
+        for(int j=0; j < range.y; j++){
+            for(int k=0; k < range.x; k++){
+                const int idx = j*range.x + k;
+                const int y = locals.y + j;
+                const int x = locals.x + k;
+                vals[idx] = tile2d[y][x];
+            }
+        }
+
+        T sum_acc = 0;
+        for(int j=0; j < range.y; j++){
+            for(int k=0; k < range.x; k++){
+                const int idx = j*range.x + k;
+                sum_acc += vals[idx];
             }
         }
         sum_acc /= (T)total_range;
@@ -76,12 +135,48 @@ void bigtile_flat_loader_divrem(
         const int local_y = local_ix / sh_size_x;
         const int local_x = local_ix % sh_size_x;
 
-        const long gy = BOUNDL((local_y + view_offset_y), max_ix_y);
-        const long gx = BOUNDL((local_x + view_offset_x), max_ix_x);
+        const long gy = BOUNDL((long(local_y) + view_offset_y), max_ix_y);
+        const long gx = BOUNDL((long(local_x) + view_offset_x), max_ix_x);
 
         const long index = gy * lens.x + gx;
         if(local_ix < sh_size_flat){
-            tile[local_ix] = A[index];
+            tile[long(local_ix)] = A[index];
+        }
+    }
+}
+
+
+
+template<
+    const int amin_x, const int amin_y,
+    const int sh_size_x, const int sh_size_y,
+    const int group_size_x,  const int group_size_y>
+__device__
+__forceinline__
+void bigtile_cube_loader(
+    const T* __restrict__ A,
+    T tile2d[sh_size_y][sh_size_x],
+    const long2 lens,
+    const int2 locals,
+    const long2 block_offsets)
+{
+    const long max_x_ix = lens.x - 1;
+    const long max_y_ix = lens.y - 1;
+
+    const int x_iters = divUp(sh_size_x,group_size_x);
+    const int y_iters = divUp(sh_size_y,group_size_y);
+
+    for(int i = 0; i < y_iters; i++){
+        const int local_y = locals.y + i*group_size_y;
+        const long gy = BOUNDL( long(local_y) + block_offsets.y - long(amin_y), max_y_ix)
+                     * lens.x;
+
+        for(int j = 0; j < x_iters; j++){
+            const int local_x = locals.x + j*group_size_x;
+            const long gx = BOUNDL( long(local_x) + block_offsets.x - long(amin_x), max_x_ix);
+            if(local_x < sh_size_x && local_y < sh_size_y){
+                tile2d[local_y][local_x] = A[gx + gy];
+            }
         }
     }
 }
@@ -412,6 +507,104 @@ template
 >
 __global__
 __launch_bounds__(BLOCKSIZE)
+void big_tile_2d_inlined_flat_divrem_singleDim(
+    const T* __restrict__ A,
+    T* __restrict__ out,
+    const long2 lens,
+    const int2 grid
+    )
+{
+    constexpr int sh_size_x = amin_x + group_size_x + amax_x;
+    constexpr int sh_size_y = amin_y + group_size_y + amax_y;
+    constexpr int sh_size_flat = sh_size_x * sh_size_y;
+    extern __shared__ T tile[];
+
+    const int loc_flat = threadIdx.x;
+    const int loc_y = loc_flat / group_size_x;
+    const int loc_x = loc_flat % group_size_x;
+    const int2 locals = { loc_x, loc_y };
+
+    int group_id_y = blockIdx.x / grid.x;
+    int group_id_x = blockIdx.x % grid.x;
+
+    const long2 writeSet_offset = {
+        long(group_id_x) * long(group_size_x),
+        long(group_id_y) * long(group_size_y)};
+
+    bigtile_flat_loader_divrem
+        <amin_x,amin_y
+        ,sh_size_x,sh_size_flat
+        ,group_size_x,group_size_y>
+        (A, tile, lens, loc_flat, writeSet_offset);
+
+    __syncthreads();
+
+    write_from_shared_flat
+        <amin_x,amin_y
+        ,amax_x,amax_y
+        ,sh_size_x,sh_size_flat>
+        (tile, out, lens, locals, writeSet_offset);
+
+}
+
+template
+< const int amin_x, const int amin_y
+, const int amax_x, const int amax_y
+, const int group_size_x,  const int group_size_y
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void big_tile_2d_inlined_cube_singleDim(
+    const T* __restrict__ A,
+    T* __restrict__ out,
+    const long2 lens,
+    const int2 grid
+    )
+{
+    const int waste_x = amin_x + amax_x;
+    const int waste_y = amin_y + amax_y;
+    const int sh_size_x = group_size_x + waste_x;
+    const int sh_size_y = group_size_y + waste_y;
+
+    __shared__ T tile2d[sh_size_y][sh_size_x];
+
+    const int loc_flat = threadIdx.x;
+    const int loc_y = loc_flat / group_size_x;
+    const int loc_x = loc_flat % group_size_x;
+    const int2 locals = { loc_x, loc_y };
+
+    int group_id_y = blockIdx.x / grid.x;
+    int group_id_x = blockIdx.x % grid.x;
+
+    const long2 writeSet_offset = {
+        long(group_id_x) * long(group_size_x),
+        long(group_id_y) * long(group_size_y)};
+
+    bigtile_cube_loader
+        <amin_x,amin_y
+        ,sh_size_x,sh_size_y
+        ,group_size_x,group_size_y>
+        (A, tile2d, lens, locals, writeSet_offset);
+
+    __syncthreads();
+
+
+    write_from_shared_cube
+        <amin_x,amin_y
+        ,amax_x,amax_y
+        ,sh_size_x,sh_size_y>
+        (tile2d, out, lens, locals, writeSet_offset);
+
+}
+
+
+template
+< const int amin_x, const int amin_y
+, const int amax_x, const int amax_y
+, const int group_size_x,  const int group_size_y
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
 void big_tile_2d_inlined_flat_addcarry_singleDim(
     const T* __restrict__ A,
     T* __restrict__ out,
@@ -488,8 +681,8 @@ void virtual_addcarry_big_tile_2d_inlined_flat_addcarry_singleDim(
     int virtual_group_id_flat = blockIdx.x;
     for(int i=0; i<iters_per_phys;i++){
         const long2 writeSet_offset = {
-                long(group_id_x) * group_size_x,
-                long(group_id_y) * group_size_y};
+                long(group_id_x) * long(group_size_x),
+                long(group_id_y) * long(group_size_y)};
 
         bigtile_flat_loader_addcarry
             <amin_x,amin_y
@@ -568,8 +761,8 @@ void virtual_addcarry_stripmine_big_tile_2d_inlined_flat_addcarry_singleDim(
         const int base_group_id_y = strip_id_y * strips.y;
 
         const long2 base_block_offset = {
-            long(base_group_id_x) * group_size_x,
-            long(base_group_id_y) * group_size_y};
+            long(base_group_id_x) * long(group_size_x),
+            long(base_group_id_y) * long(group_size_y)};
 
         bigtile_flat_loader_addcarry
             <amin_x,amin_y

@@ -393,7 +393,7 @@ int main()
     doTest_3D<0,1,0,1,0,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
     doTest_3D<-1,1,0,1,0,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
     doTest_3D<-1,1,-1,1,0,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
-    doTest_3D<-1,1,-1,1,-1,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
+    doTest_3D<-1,1,-1,1,-1,4, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
     /*doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-3,3,-3,3,-3,3, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-4,4,-4,4,-4,4, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
