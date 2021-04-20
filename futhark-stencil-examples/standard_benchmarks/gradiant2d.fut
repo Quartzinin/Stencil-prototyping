@@ -31,7 +31,7 @@ let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
         )
 
 let single_iteration_stencil_5points arr =
-  let ixs = [(-1, 0),( 0,-1),( 0, 0),( 0, 1),( 0, 1)] in
+  let ixs = [(-1, 0),( 0,-1),( 0, 0),( 0, 1),( 1, 0)] in
   let f _ v = gradiant_5point (v[0] ,v[1] ,v[2] ,v[3] ,v[4]) in
   let empty = map (map (const ())) arr in
   stencil_2d ixs f empty arr
