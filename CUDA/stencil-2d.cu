@@ -214,9 +214,6 @@ void doTest_2D(const int physBlocks)
             constexpr int max_shared_mem = 0xc000;
             static_assert(sh_total_mem_usage <= max_shared_mem,
                     "Current configuration requires too much shared memory\n");
-            cout << "## Benchmark 2d virtual (add/carry) - stripmined big tile, ";
-            printf("strip_size=[%d][%d]f32 ", strip_size_y, strip_size_x);
-            cout << "- inlined idxs - flat load (add/carry) - singleDim grid ##";
 
             {
             cout << "## Benchmark 2d big tile - inlined idxs - stripmined: ";
@@ -231,6 +228,10 @@ void doTest_2D(const int physBlocks)
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
             }
 
+
+            cout << "## Benchmark 2d virtual (add/carry) - stripmined big tile, ";
+            printf("strip_size=[%d][%d]f32 ", strip_size_y, strip_size_x);
+            cout << "- inlined idxs - flat load (add/carry) - singleDim grid ##";
             Kernel2dVirtual kfun = virtual_addcarry_stripmine_big_tile_2d_inlined_flat_addcarry_singleDim
                 <amin_x,amin_y
                 ,amax_x,amax_y
