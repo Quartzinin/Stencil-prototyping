@@ -346,9 +346,9 @@ int main()
 {
     int physBlocks = getPhysicalBlockCount();
 
-    constexpr int gps_x = 1 << 5;
-    constexpr int gps_y = 1 << 3;
-    constexpr int gps_z = 1 << 2;
+    constexpr int gps_x = 32;
+    constexpr int gps_y = 8;
+    constexpr int gps_z = 4;
 
     constexpr int gps_flat = gps_x * gps_y * gps_z;
     static_assert(
@@ -359,6 +359,7 @@ int main()
     );
 
     // small test samples.
+    /*
     doTest_3D<0,1,0,1,0,1, gps_x,gps_y,gps_z,1,1,1>(physBlocks);
     doTest_3D<-1,1,0,1,0,1, gps_x,gps_y,gps_z,1,1,1>(physBlocks);
     doTest_3D<-1,1,0,1,0,1, gps_x,gps_y,gps_z,1,1,1>(physBlocks);
@@ -387,13 +388,16 @@ int main()
     doTest_3D<-3,3,0,0,-3,3, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-4,4,0,0,-4,4, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-5,5,0,0,-5,5, gps_x,gps_y,gps_z,0,0,0>(physBlocks);
-
+    */
     // all axis are in use
-    doTest_3D<-1,1,-1,1,-1,1, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
-    doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
+    doTest_3D<0,1,0,1,0,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
+    doTest_3D<-1,1,0,1,0,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
+    doTest_3D<-1,1,-1,1,0,1, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
+    doTest_3D<-1,1,-1,1,-1,4, gps_x,gps_y,gps_z,0,0,2>(physBlocks);
+    /*doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-3,3,-3,3,-3,3, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-4,4,-4,4,-4,4, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-5,5,-5,5,-5,5, gps_x,gps_y,gps_z,0,0,0>(physBlocks);
-
+    */
     return 0;
 }
