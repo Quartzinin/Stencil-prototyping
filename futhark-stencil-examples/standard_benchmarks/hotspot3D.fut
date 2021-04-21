@@ -4,12 +4,12 @@
 -- ==
 -- entry: bench_maps
 -- random input { [8][512][512]f32 [8][512][512]f32 }
--- random input { [128][512][512]f32 [8][512][512]f32 }
+-- random input { [128][512][512]f32 [128][512][512]f32 }
 
 -- ==
 -- entry: bench_stencil
 -- random input { [8][512][512]f32 [8][512][512]f32 }
--- random input { [128][512][512]f32 [8][512][512]f32 }
+-- random input { [128][512][512]f32 [128][512][512]f32 }
 
 -- constants
 let amb_temp: f32 = 80.0
