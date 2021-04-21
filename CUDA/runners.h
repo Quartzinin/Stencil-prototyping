@@ -138,7 +138,9 @@ T stencil_fun_cpu(const T* tmp)
     return acc;
 }
 
-
+using Kernel1dVirtual = void (*)(const T*, T*, const long, const int, const int);
+using Kernel1dPhysMultiDim = void(*)(const T*, T*, const long);
+using Kernel1dPhysSingleDim = void(*)(const T*, T*, const long, const int);
 
 using Kernel2dVirtual = void (*)(const T*, T*, const long2, const int, const int2);
 using Kernel2dPhysMultiDim = void(*)(const T*, T*, const long2);

@@ -14,19 +14,6 @@
 //__constant__ int2 ixs_2d[BLOCKSIZE];
 //__constant__ int3 ixs_3d[BLOCKSIZE];
 
-template<long D>
-__device__
-__forceinline__
-T lambdaFun(const T* tmp){
-    T acc = 0;
-    #pragma unroll
-    for (long j = 0; j < D; ++j)
-    {
-        acc += tmp[j];
-    }
-    acc /= T(D);
-    return acc;
-}
 
 #define MACROLIKE __device__ __host__ __forceinline__
 

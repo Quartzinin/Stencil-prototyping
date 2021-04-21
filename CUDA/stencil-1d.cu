@@ -13,6 +13,15 @@ using namespace std;
 using std::cout;
 using std::endl;
 
+static constexpr long n_runs = 100;
+static constexpr long lens = (1 << 24) - 1;
+
+static Globs
+    <long,long
+    ,Kernel1dVirtual
+    ,Kernel1dPhysMultiDim
+    ,Kernel1dPhysSingleDim
+    > G(lens, lens, n_runs);
 
 template<int D, int ix_min, int ix_max>
 void stencil_1d_cpu(
@@ -78,10 +87,9 @@ void run_cpu_1d(const int* idxs, const int len, T* cpu_out)
     free(cpu_in);
 }
 
-template<int ixs_len, int ix_min, int ix_max>
+template<int ixs_len, int gps_x, int ix_min, int ix_max>
 void doTest_1D()
 {
-    const int RUNS = 100;
 
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
@@ -99,8 +107,7 @@ void doTest_1D()
     }
     //CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
-    const int lenp = 24;
-    const int len = 1 << lenp;
+    const int len = lens;
     cout << "{ x_len = " << len << " }" << endl;
     T* cpu_out = (T*)malloc(len*sizeof(T));
     run_cpu_1d<D, (-ix_min), ix_max>(cpu_ixs,len, cpu_out);
@@ -112,14 +119,36 @@ void doTest_1D()
     else{ cout << "... , " << cpu_ixs[D-1]; }
     cout << "]" << endl;
 
-    const long max_ix_x = len-1;
     const long shared_len = (ix_min + BLOCKSIZE + ix_max);
     const long shared_size = shared_len * sizeof(T);
 
+    constexpr int singleDim_block = gps_x;
+    constexpr int singleDim_grid = CEIL_DIV(len, singleDim_block); // the flattening happens in the before the kernel call.
+
     {
-        GPU_RUN_INIT;
 
+        {
+            cout << "## Benchmark 1d global read inline ixs reduce ##";
+            Kernel1dPhysMultiDim kfun = global_read_1d_inline_reduce
+                <ixs_len,ix_min,ix_max>;
+            G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
+            G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
+        }
+        {
 
+            cout << "## Benchmark 1d big tile inline ixs reduce ##";
+            Kernel1dPhysMultiDim kfun = big_tile_1d_inline_reduce
+                <ix_min,ix_max,gps_x>;
+            G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, shared_size);
+        }
+        /*{
+            cout << "## Benchmark 2d global read - inlined ixs - singleDim grid ##";
+            Kernel2dPhysSingleDim kfun = global_reads_2d_inline_singleDim
+                <amin_x,amin_y
+                ,amax_x,amax_y
+                ,group_size_x,group_size_y>;
+            G.do_run_singleDim(kfun, cpu_out, singleDim_grid_flat, singleDim_block, singleDim_grid, 1);
+        }*/
         /*
         GPU_RUN(call_kernel_1d(
                     (inlinedIndexes_1d_const_ixs<ixs_len><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
@@ -131,17 +160,22 @@ void doTest_1D()
                     (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d big tile ##",(void)0,(void)0);
         */
+        
+        /* THIS
         GPU_RUN(call_kernel_1d(
                     (global_read_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d global read inline ixs reduce ##",(void)0,(void)0);
-/*
+
+        */
+/*          
         const int width = ix_min + ix_max + 1;
         if(width < BLOCKSIZE-20){
             GPU_RUN(call_inSharedKernel_1d(
                         (small_tile_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                     ,"## Benchmark 1d small tile inline ixs reduce ##",(void)0,(void)0);
         }
-*/
+*/      
+        /* THIS
         GPU_RUN(call_kernel_1d(
                     (big_tile_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d big tile inline ixs reduce ##",(void)0,(void)0);
@@ -153,7 +187,8 @@ void doTest_1D()
                 ,"## Benchmark 1d big tile thread inline ixs ##",(void)0,(void)0);
 
         GPU_RUN_END;
-    }
+        */
+    }   
 
     free(cpu_out);
     free(cpu_ixs);
@@ -163,37 +198,38 @@ void doTest_1D()
 int main()
 {
 
-    doTest_1D<3,1,1>();
-    doTest_1D<5,2,2>();
-    doTest_1D<7,3,3>();
-    doTest_1D<9,4,4>();
-    doTest_1D<11,5,5>();
-    doTest_1D<13,6,6>();
-    doTest_1D<15,7,7>();
-    doTest_1D<17,8,8>();
-
-    doTest_1D<19,9,9>();
-    doTest_1D<21,10,10>();
-    doTest_1D<23,11,11>();
-    doTest_1D<25,12,12>();
-    doTest_1D<27,13,13>();
-    doTest_1D<29,14,14>();
-    doTest_1D<31,15,15>();
-    doTest_1D<33,16,16>();
-    doTest_1D<35,17,17>();
-    doTest_1D<37,18,18>();
-    doTest_1D<39,19,19>();
-    doTest_1D<41,20,20>();
-    doTest_1D<43,21,21>();
-    doTest_1D<45,22,22>();
-    doTest_1D<47,23,23>();
-    doTest_1D<49,24,24>();
-    doTest_1D<51,25,25>();
-    doTest_1D<101,50,50>();
-    doTest_1D<201,100,100>();
-    doTest_1D<301,150,150>();
-    doTest_1D<401,200,200>();
-    doTest_1D<501,250,250>();
+    const int gps_x = 1024;
+    doTest_1D<3,gps_x,1,1>();
+    doTest_1D<5,gps_x,2,2>();
+    doTest_1D<7,gps_x,3,3>();
+    doTest_1D<9,gps_x,4,4>();
+    doTest_1D<11,gps_x,5,5>();
+    doTest_1D<13,gps_x,6,6>();
+    doTest_1D<15,gps_x,7,7>();
+    doTest_1D<17,gps_x,8,8>();
+    /*
+    doTest_1D<19,gps_x,9,9>();
+    doTest_1D<21,gps_x,10,10>();
+    doTest_1D<23,gps_x,11,11>();
+    doTest_1D<25,gps_x,12,12>();
+    doTest_1D<27,gps_x,13,13>();
+    doTest_1D<29,gps_x,14,14>();
+    doTest_1D<31,gps_x,15,15>();
+    doTest_1D<33,gps_x,16,16>();
+    doTest_1D<35,gps_x,17,17>();
+    doTest_1D<37,gps_x,18,18>();
+    doTest_1D<39,gps_x,19,19>();
+    doTest_1D<41,gps_x,20,20>();
+    doTest_1D<43,gps_x,21,21>();
+    doTest_1D<45,gps_x,22,22>();
+    doTest_1D<47,gps_x,23,23>();
+    doTest_1D<49,gps_x,24,24>();
+    doTest_1D<51,gps_x,25,25>();
+    doTest_1D<101,gps_x,50,50>();
+    doTest_1D<201,gps_x,100,100>();
+    doTest_1D<301,gps_x,150,150>();
+    doTest_1D<401,gps_x,200,200>();
+    doTest_1D<501,gps_x,250,250>();
 
     doTest_1D<601,300,300>();
     doTest_1D<701,350,350>();
@@ -222,7 +258,7 @@ int main()
     doTest_1D<3,800,800>();
     doTest_1D<3,900,900>();
     doTest_1D<3,1000,1000>();
-
+    */
     return 0;
 }
 
