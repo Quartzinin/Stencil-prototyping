@@ -1,0 +1,103 @@
+Compiling ./gaussian2d.fut...
+Compiling ./gradiant2d.fut...
+Compiling ./gaussian2d_rev.fut...
+Compiling ./heat3D.fut...
+Compiling ./hotspot2D.fut...
+Compiling ./hotspot3D.fut...
+Compiling ./jacobi2d.fut...
+Compiling ./jacobi3d.fut...
+Compiling ./poisson.fut...
+Compiling ./srad.fut...
+Reporting average runtime of 30 runs for each dataset.
+[1m
+./gaussian2d.fut:bench_25p_maps:
+[0m[4096][4096]f32:      41784μs (RSD: 0.063; min:  -3%; max: +18%)
+[8192][8192]f32:     160529μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./gaussian2d.fut:bench_25p_stencil:
+[0m[4096][4096]f32:       3954μs (RSD: 0.003; min:  -1%; max:  +1%)
+[8192][8192]f32:      15707μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./gaussian2d_rev.fut:bench_25p_maps:
+[0m[4096][4096]f32:      41297μs (RSD: 0.000; min:  -0%; max:  +0%)
+[8192][8192]f32:     161909μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./gaussian2d_rev.fut:bench_25p_stencil:
+[0m[4096][4096]f32:       3960μs (RSD: 0.002; min:  -0%; max:  +0%)
+[8192][8192]f32:      15706μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./gradiant2d.fut:bench_5p_maps:
+[0m[4096][4096]f32:       4252μs (RSD: 0.001; min:  -0%; max:  +1%)
+[8192][8192]f32:      16840μs (RSD: 0.002; min:  -0%; max:  +1%)
+[1m
+./gradiant2d.fut:bench_5p_stencil:
+[0m[4096][4096]f32:        455μs (RSD: 0.004; min:  -1%; max:  +1%)
+[8192][8192]f32:       1770μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./heat3D.fut:bench_maps:
+[0m[256][256][256]f32:      35776μs (RSD: 0.001; min:  -0%; max:  +0%)
+[512][512][512]f32:     285740μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./heat3D.fut:bench_stencil:
+[0m[256][256][256]f32:       6966μs (RSD: 0.001; min:  -0%; max:  +0%)
+[512][512][512]f32:      55442μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot2D.fut:bench_maps:
+[0m[8192][8192]f32 [8192][8192]f32:      96914μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot2D.fut:bench_stencil:
+[0m[8192][8192]f32 [8192][8192]f32:      15790μs (RSD: 0.001; min:  -0%; max:  +1%)
+[1m
+./hotspot3D.fut:bench_maps:
+[0m[8][512][512]f32 [8][512][512]f32:           4591μs (RSD: 0.002; min:  -0%; max:  +0%)
+[128][512][512]f32 [128][512][512]f32:      72315μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot3D.fut:bench_stencil:
+[0m[8][512][512]f32 [8][512][512]f32:           5818μs (RSD: 0.000; min:  -0%; max:  +0%)
+[128][512][512]f32 [128][512][512]f32:      14208μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./jacobi2d.fut:bench_5p_maps:
+[0m[4096][4096]f32:      21986μs (RSD: 0.001; min:  -0%; max:  +0%)
+[8192][8192]f32:      87676μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi2d.fut:bench_5p_stencil:
+[0m[4096][4096]f32:       3651μs (RSD: 0.002; min:  -1%; max:  +1%)
+[8192][8192]f32:      14448μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./jacobi2d.fut:bench_9p_maps:
+[0m[4096][4096]f32:      31297μs (RSD: 0.001; min:  -0%; max:  +0%)
+[8192][8192]f32:     124954μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi2d.fut:bench_9p_stencil:
+[0m[4096][4096]f32:       3774μs (RSD: 0.002; min:  -1%; max:  +1%)
+[8192][8192]f32:      14969μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./jacobi3d.fut:bench_7p_maps:
+[0m[256][256][256]f32:      35336μs (RSD: 0.000; min:  -0%; max:  +0%)
+[512][512][512]f32:     281832μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d.fut:bench_7p_stencil:
+[0m[256][256][256]f32:       6940μs (RSD: 0.001; min:  -0%; max:  +0%)
+[512][512][512]f32:      55244μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d.fut:bench_13p_maps:
+[0m[256][256][256]f32:      52089μs (RSD: 0.000; min:  -0%; max:  +0%)
+[512][512][512]f32:     416144μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d.fut:bench_13p_stencil:
+[0m[256][256][256]f32:      11504μs (RSD: 0.001; min:  -0%; max:  +0%)
+[512][512][512]f32:      91607μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./poisson.fut:bench_maps:
+[0m[256][256][256]f32:      42266μs (RSD: 0.000; min:  -0%; max:  +0%)
+[512][512][512]f32:     337775μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./poisson.fut:bench_stencil:
+[0m[256][256][256]f32:       7077μs (RSD: 0.002; min:  -0%; max:  +1%)
+[512][512][512]f32:      56321μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./srad.fut:bench_maps:
+[0m[458][504]u8:       2074μs (RSD: 0.004; min:  -1%; max:  +1%)
+[1m
+./srad.fut:bench_stencils:
+[0m[458][504]u8:        652μs (RSD: 0.012; min:  -2%; max:  +2%)
