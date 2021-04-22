@@ -67,7 +67,7 @@ void write_from_shared_flat(
     }
 }
 
-template<long D, long ix_min, long ix_max, int group_size>
+template<long ix_min, long ix_max, int group_size>
 __global__
 __launch_bounds__(BLOCKSIZE)
 void global_read_1d_inline(
@@ -97,7 +97,7 @@ void global_read_1d_inline(
     }
 }
 
-template<long D, long ix_min, long ix_max, int group_size>
+template<long ix_min, long ix_max, int group_size>
 __global__
 __launch_bounds__(BLOCKSIZE)
 void small_tile_1d_inline(

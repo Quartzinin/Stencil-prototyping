@@ -134,7 +134,7 @@ void doTest_1D()
         {
             cout << "## Benchmark 1d global read inline ixs ##";
             Kernel1dPhysMultiDim kfun = global_read_1d_inline
-                <ixs_len,ix_min,ix_max,gps_x>;
+                <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
         }
@@ -148,7 +148,7 @@ void doTest_1D()
         {
             cout << "## Benchmark 1d small tile inline ixs ##";
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
-                <D,ix_min,ix_max,gps_x>;
+                <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
         }
 
