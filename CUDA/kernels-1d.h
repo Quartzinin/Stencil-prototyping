@@ -21,7 +21,7 @@ void write_from_shared_flat(
     const int locals,
     const long block_offsets)
 {
-    constexpr int range = amax_x - amin_x + 1;
+    constexpr int range = (amax_x - amin_x) + 1;
 
     const long gid_x = block_offsets + long(locals);
 
@@ -45,7 +45,7 @@ void write_from_shared_flat(
 
 template<long D, long ix_min, long ix_max>
 __global__
-void global_read_1d_inline_reduce(
+void global_read_1d_inline(
     const T* __restrict__ A,
     T* __restrict__ out,
     const long nx
@@ -53,51 +53,62 @@ void global_read_1d_inline_reduce(
 {
     const long gid = blockIdx.x*BLOCKSIZE + threadIdx.x;
     const long max_ix = nx - 1;
+    T vals[D];
+
     if (gid < nx)
     {
         T sum_acc = 0;
-        const long step = (1 + ix_min + ix_max) / (D-1);
+        const long step = (1 + (ix_max - ix_min)) / (D-1);
 
         for (long i = 0; i < D; ++i){
-            const long loc_x = BOUNDL(gid + i*step - ix_min , max_ix);
-            sum_acc += A[loc_x];
+            const long loc_x = BOUNDL(gid + i*step + ix_min , max_ix);
+            vals[i] = A[loc_x];
         }
+
+        for (long i = 0; i < D; ++i){
+            sum_acc += vals[i];
+        } 
         out[gid] = sum_acc/D;
     }
 }
 
-template<long D, long ix_min, long ix_max>
+template<long D, long ix_min, long ix_max, int group_size>
 __global__
-void small_tile_1d_inline_reduce(
+void small_tile_1d_inline(
     const T* __restrict__ A,
     T* __restrict__ out,
     const long nx
     )
 {
-    const long wasted = ix_min + ix_max;
-    const long offset = (BLOCKSIZE-wasted)*blockIdx.x;
-    const long gid = offset + threadIdx.x - ix_min;
+    const long wasted = ix_max - ix_min;
+    const long offset = (group_size-wasted)*blockIdx.x;
+    const long gid = offset + threadIdx.x + ix_min;
     const long max_ix = nx - 1;
-    __shared__ T tile[BLOCKSIZE];
+    extern __shared__ T tile[];
     tile[threadIdx.x] = A[BOUNDL(gid, max_ix)];
     __syncthreads();
-
-    if ((0 <= gid && gid < nx) && (ix_min <= threadIdx.x && threadIdx.x < BLOCKSIZE-ix_max))
+    T vals[D];
+    if ((0 <= gid && gid < nx) && (-ix_min <= threadIdx.x && threadIdx.x < group_size-ix_max))
     {
         T sum_acc = 0;
-        const long step = (1 + ix_min + ix_max) / (D-1);
+        const long step = (1 + (ix_max - ix_min)) / (D-1);
 
         for (long i = 0; i < D; ++i){
-            const long loc_x = threadIdx.x + i*step - ix_min;
-            sum_acc += tile[loc_x];
+            const long loc_x = threadIdx.x + i*step + ix_min;
+            vals[i] = tile[loc_x];
         }
+
+        for (long i = 0; i < D; ++i){
+            sum_acc += vals[i];
+        } 
+
         out[gid] = sum_acc/D;
     }
 }
 
 template<int amin_x, int amax_x, int group_size>
 __global__
-void big_tile_1d_inline_reduce(
+void big_tile_1d_inline(
     const T* __restrict__ A,
     T* __restrict__ out,
     const long nx
@@ -108,7 +119,7 @@ void big_tile_1d_inline_reduce(
     const long max_ix = nx - 1;
     extern __shared__ T tile[];
 
-    const long left_most = block_offset - long(amin_x);
+    const long left_most = block_offset + long(amin_x);
     const int x_iters = divUp(shared_size,group_size);
 
     for (int i = 0; i < x_iters; i++)

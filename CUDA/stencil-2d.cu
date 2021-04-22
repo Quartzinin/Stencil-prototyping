@@ -284,7 +284,7 @@ int main()
 
     // group sizes
     constexpr int gps_x = 32;
-    constexpr int gps_y = 8;
+    constexpr int gps_y = 32;
 
     constexpr int group_size_flat = gps_x * gps_y;
     static_assert(
