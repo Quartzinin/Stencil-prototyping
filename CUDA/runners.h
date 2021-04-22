@@ -227,8 +227,8 @@ class Globs {
         void do_run_multiDim(
                 KPMD call
                 , const T* cpu_out
-                , const dim3 grid
-                , const dim3 block
+                , const int grid
+                , const int block
                 , const int sh_size_bytes
                 , const bool should_print=true){
             reset_output();

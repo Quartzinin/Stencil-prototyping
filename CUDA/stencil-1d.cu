@@ -87,7 +87,7 @@ void run_cpu_1d(const int* idxs, const int len, T* cpu_out)
     free(cpu_in);
 }
 
-template<int ixs_len, int gps_x, int ix_min, int ix_max>
+template<int ixs_len, int gps_x, int ix_min, int ix_max, int strip_pow_x>
 void doTest_1D()
 {
 
@@ -107,7 +107,7 @@ void doTest_1D()
     }
     //CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
-    const int len = lens;
+    const long len = lens;
     cout << "{ x_len = " << len << " }" << endl;
     T* cpu_out = (T*)malloc(len*sizeof(T));
     run_cpu_1d<D, ix_min, ix_max>(cpu_ixs,len, cpu_out);
@@ -134,7 +134,7 @@ void doTest_1D()
         {
             cout << "## Benchmark 1d global read inline ixs ##";
             Kernel1dPhysMultiDim kfun = global_read_1d_inline
-                <ixs_len,ix_min,ix_max>;
+                <ixs_len,ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
         }
@@ -150,6 +150,34 @@ void doTest_1D()
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
                 <D,ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
+        }
+
+        {
+
+            constexpr int strip_x = 1 << strip_pow_x;
+
+            constexpr int strip_size_x = gps_x*strip_x;
+
+            constexpr int sh_x = strip_size_x + (ix_max - ix_min);
+            constexpr int sh_total = sh_x;
+            constexpr int sh_total_mem_usage = sh_total * sizeof(T);
+            const int strip_grid = int(divUp(len, long(strip_size_x)));
+            const int strip_grid_flat = strip_grid;
+            constexpr int max_shared_mem = 0xc000;
+            static_assert(sh_total_mem_usage <= max_shared_mem,
+                    "Current configuration requires too much shared memory\n");
+
+            {
+                cout << "## Benchmark 1d big tile - inlined idxs - stripmined: ";
+                printf("strip_size=[%d]f32 \n", strip_size_x);
+                Kernel1dPhysMultiDim kfun = stripmine_big_tile_1d_inlined
+                    <ix_min
+                    ,ix_max
+                    ,gps_x
+                    ,strip_x
+                    >;
+                G.do_run_multiDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, 1);
+            }
         }
         /*{
             cout << "## Benchmark 2d global read - inlined ixs - singleDim grid ##";
@@ -208,15 +236,15 @@ void doTest_1D()
 int main()
 {
 
-    const int gps_x = 1024;
-    doTest_1D<3,gps_x,-1,1>();
-    doTest_1D<5,gps_x,-2,2>();
-    doTest_1D<7,gps_x,-3,3>();
-    doTest_1D<9,gps_x,-4,4>();
-    doTest_1D<11,gps_x,-5,5>();
-    doTest_1D<13,gps_x,-6,6>();
-    doTest_1D<15,gps_x,-7,7>();
-    doTest_1D<17,gps_x,-8,8>();
+    constexpr int gps_x = 1024;
+    doTest_1D<3,gps_x,-1,1,1>();
+    doTest_1D<5,gps_x,-2,2,1>();
+    doTest_1D<7,gps_x,-3,3,1>();
+    doTest_1D<9,gps_x,-4,4,1>();
+    doTest_1D<11,gps_x,-5,5,1>();
+    doTest_1D<13,gps_x,-6,6,1>();
+    doTest_1D<15,gps_x,-7,7,1>();
+    doTest_1D<17,gps_x,-8,8,1>();
     /*
     doTest_1D<19,gps_x,9,9>();
     doTest_1D<21,gps_x,10,10>();

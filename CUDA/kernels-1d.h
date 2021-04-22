@@ -8,6 +8,30 @@
  * inlined indices using a provided associative and commutative operator with a neutral element.
  */
 
+template<int amin_x, int sh_size_flat, int group_size>
+__device__
+__forceinline__
+void bigtile_flat_loader(
+    const T* A,
+    T tile[sh_size_flat],
+    const long lens,
+    const int locals,
+    const long block_offset)
+{
+    const long max_ix = lens - 1;
+    const int x_iters = divUp(sh_size_flat,group_size);
+
+    for (int i = 0; i < x_iters; i++)
+    {
+        const int local_x = locals + i*group_size;
+        const long gx = long(local_x) + block_offset + long(amin_x);
+        if (local_x < sh_size_flat)
+        {
+            tile[local_x] = A[BOUNDL(gx, max_ix)];
+        }
+    }
+}
+
 template<
     const int amin_x, const int amax_x
     ,const int sh_size_flat
@@ -16,7 +40,7 @@ __device__
 __forceinline__
 void write_from_shared_flat(
     const T tile[],
-    T* __restrict__ const out,
+    T* const out,
     const long lens,
     const int locals,
     const long block_offsets)
@@ -43,94 +67,93 @@ void write_from_shared_flat(
     }
 }
 
-template<long D, long ix_min, long ix_max>
+template<long D, long ix_min, long ix_max, int group_size>
 __global__
+__launch_bounds__(BLOCKSIZE)
 void global_read_1d_inline(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long nx
     )
 {
-    const long gid = blockIdx.x*BLOCKSIZE + threadIdx.x;
+    const long gid = long(blockIdx.x)*long(group_size) + long(threadIdx.x);
     const long max_ix = nx - 1;
-    T vals[D];
+    const int range = (ix_max - ix_min) + 1;
+    T vals[range];
 
     if (gid < nx)
     {
         T sum_acc = 0;
-        const long step = (1 + (ix_max - ix_min)) / (D-1);
 
-        for (long i = 0; i < D; ++i){
-            const long loc_x = BOUNDL(gid + i*step + ix_min , max_ix);
+        for (int i = 0; i < range; ++i){
+            const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
             vals[i] = A[loc_x];
         }
 
-        for (long i = 0; i < D; ++i){
+        for (int i = 0; i < range; ++i){
             sum_acc += vals[i];
         } 
-        out[gid] = sum_acc/D;
+        out[gid] = sum_acc/(T)range;
     }
 }
 
 template<long D, long ix_min, long ix_max, int group_size>
 __global__
+__launch_bounds__(BLOCKSIZE)
 void small_tile_1d_inline(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long nx
     )
 {
-    const long wasted = ix_max - ix_min;
-    const long offset = (group_size-wasted)*blockIdx.x;
-    const long gid = offset + threadIdx.x + ix_min;
+    const int wasted = ix_max - ix_min;
+    const long offset = long(group_size-wasted)*long(blockIdx.x);
+    const long gid = offset + long(threadIdx.x + ix_min);
     const long max_ix = nx - 1;
+    const int range = wasted + 1;
     extern __shared__ T tile[];
-    tile[threadIdx.x] = A[BOUNDL(gid, max_ix)];
+    tile[long(threadIdx.x)] = A[BOUNDL(gid, max_ix)];
     __syncthreads();
-    T vals[D];
+    T vals[range];
     if ((0 <= gid && gid < nx) && (-ix_min <= threadIdx.x && threadIdx.x < group_size-ix_max))
     {
         T sum_acc = 0;
-        const long step = (1 + (ix_max - ix_min)) / (D-1);
 
-        for (long i = 0; i < D; ++i){
-            const long loc_x = threadIdx.x + i*step + ix_min;
-            vals[i] = tile[loc_x];
+        for (int i = 0; i < range; ++i){
+            const int loc_x = threadIdx.x + i + ix_min;
+            vals[i] = tile[long(loc_x)];
         }
 
-        for (long i = 0; i < D; ++i){
+        for (int i = 0; i < range; ++i){
             sum_acc += vals[i];
         } 
 
-        out[gid] = sum_acc/D;
+        out[gid] = sum_acc/(T)range;
     }
 }
 
 template<int amin_x, int amax_x, int group_size>
 __global__
+__launch_bounds__(BLOCKSIZE)
 void big_tile_1d_inline(
-    const T* __restrict__ A,
-    T* __restrict__ out,
+    const T* A,
+    T* out,
     const long nx
     )
 {
-    const long block_offset = blockIdx.x*group_size;
+    const long block_offset = long(blockIdx.x)*long(group_size);
     const int shared_size = group_size + (amax_x - amin_x);
-    const long max_ix = nx - 1;
     extern __shared__ T tile[];
 
-    const long left_most = block_offset + long(amin_x);
-    const int x_iters = divUp(shared_size,group_size);
+    bigtile_flat_loader
+        <amin_x
+        ,shared_size
+        ,group_size>
+        (A, tile
+         , nx
+         , threadIdx.x
+         , block_offset);
 
-    for (int i = 0; i < x_iters; i++)
-    {
-        const int local_x = threadIdx.x + i*group_size;
-        const long gx = local_x + left_most;
-        if (local_x < shared_size)
-        {
-            tile[local_x] = A[BOUNDL(gx, max_ix)];
-        }
-    }
     __syncthreads();
 
     write_from_shared_flat<amin_x,
@@ -138,6 +161,53 @@ void big_tile_1d_inline(
                            shared_size>
         (tile,out,nx,threadIdx.x,block_offset);
 }
+
+template
+< const int amin_x, const int amax_x
+, const int group_size_x
+, const int strip_x
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void stripmine_big_tile_1d_inlined(
+    const T* A,
+    T* out,
+    const long lens
+    )
+{
+    constexpr int sh_size_x = strip_x*group_size_x + (amax_x - amin_x);
+    constexpr int sh_size_flat = sh_size_x;
+    __shared__ T tile[sh_size_flat];
+    constexpr long strip_id_scaler_x = strip_x * group_size_x;
+
+    const long strip_id_flat = blockIdx.x;
+
+    const int loc_flat = threadIdx.x;
+
+    const long block_offset_x = strip_id_flat * strip_id_scaler_x;
+
+    bigtile_flat_loader
+        <amin_x
+        ,sh_size_flat
+        ,group_size_x>
+        (A, tile
+         , lens
+         , loc_flat
+         , block_offset_x);
+    
+    // the tile has to be fully done being loaded before we start reading
+    __syncthreads();
+    for(int k__ = 0; k__ < strip_x; k__++){
+        // tile_offsets implicitly also handle the change in group_id
+        const int tile_offset_x = loc_flat + (k__ * group_size_x);
+
+        write_from_shared_flat<amin_x,
+                           amax_x,
+                           sh_size_flat>
+        (tile,out,lens,tile_offset_x,block_offset_x);
+    }
+}
+
 
 /*
  * Inlined indices but provided the elements to the lambda function using a local array.
