@@ -13,7 +13,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-static constexpr long n_runs = 100;
+static constexpr long n_runs = 1000;
 static constexpr long lens = (1 << 24) - 1;
 
 static Globs
@@ -31,14 +31,13 @@ void stencil_1d_cpu(
     const int len)
 {
     const int max_ix = len-1;
-    constexpr int step = (1 + ix_max - ix_min) / (D-1);
     T tmp[D];
     for (int gid = 0; gid < len; ++gid)
     {
         #pragma unroll
         for (int j = 0; j < D; ++j)
         {
-            tmp[j] = A[BOUND((gid + (j*step + ix_min)), max_ix)];
+            tmp[j] = A[BOUND((gid + (j + ix_min)), max_ix)];
         }
 
         T res = stencil_fun_cpu<D>((const T*)(tmp));
@@ -94,7 +93,7 @@ void doTest_1D()
     const int D = ixs_len;
     const int ixs_size = D*sizeof(int);
     int* cpu_ixs = (int*)malloc(ixs_size);
-    const int step = (1 + (ix_max - ix_min)) / (ixs_len-1);
+    const int step = 1;
     {
         int s = ix_min;
         for(int i=0; i < D ; i++){ cpu_ixs[i] = s; s += step; }
@@ -135,10 +134,11 @@ void doTest_1D()
             cout << "## Benchmark 1d global read inline ixs ##";
             Kernel1dPhysMultiDim kfun = global_read_1d_inline
                 <ix_min,ix_max,gps_x>;
-            G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
+            //G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
         }
-        {
+        
+        /*{
             cout << "## Benchmark 1d big tile inline ixs ##";
             Kernel1dPhysMultiDim kfun = big_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
@@ -150,7 +150,7 @@ void doTest_1D()
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
-        }
+        }*/
 
         {
 
@@ -171,6 +171,17 @@ void doTest_1D()
                 cout << "## Benchmark 1d big tile - inlined idxs - stripmined: ";
                 printf("strip_size=[%d]f32 \n", strip_size_x);
                 Kernel1dPhysStripDim kfun = stripmine_big_tile_1d_inlined
+                    <ix_min
+                    ,ix_max
+                    ,gps_x
+                    ,strip_x
+                    >;
+                G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
+            }
+            {
+                cout << "## Benchmark 1d global read unrolled/stripmined - inlined idxs: ";
+                printf("strip_size=[%d]f32 \n", strip_size_x);
+                Kernel1dPhysStripDim kfun = global_read_1d_inline_strip
                     <ix_min
                     ,ix_max
                     ,gps_x
@@ -237,14 +248,17 @@ int main()
 {
 
     constexpr int gps_x = 256;
-    doTest_1D<3,gps_x,-1,1,3>();
-    doTest_1D<5,gps_x,-2,2,3>();
-    doTest_1D<7,gps_x,-3,3,3>();
-    doTest_1D<9,gps_x,-4,4,3>();
-    doTest_1D<11,gps_x,-5,5,3>();
-    doTest_1D<13,gps_x,-6,6,3>();
-    doTest_1D<15,gps_x,-7,7,3>();
-    doTest_1D<17,gps_x,-8,8,3>();
+    //doTest_1D<1,gps_x,0,0,2>();
+    doTest_1D<2,gps_x,0,1,2>();
+    doTest_1D<3,gps_x,-1,1,2>();
+    doTest_1D<5,gps_x,-2,2,2>();
+    //doTest_1D<7,gps_x,-3,3,3>();
+    //doTest_1D<9,gps_x,-4,4,3>();
+    //doTest_1D<11,gps_x,-5,5,3>();
+    //doTest_1D<13,gps_x,-6,6,3>();
+    //doTest_1D<15,gps_x,-7,7,3>();
+    //doTest_1D<17,gps_x,-8,8,3>();
+    //doTest_1D<25,gps_x,-12,12,0>();
     /*
     doTest_1D<19,gps_x,9,9>();
     doTest_1D<21,gps_x,10,10>();

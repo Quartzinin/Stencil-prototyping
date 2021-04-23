@@ -80,20 +80,58 @@ void global_read_1d_inline(
     const long max_ix = nx - 1;
     const int range = (ix_max - ix_min) + 1;
     T vals[range];
-
-    if (gid < nx)
+    const bool should_write = gid < nx;
+    if (should_write)
     {
-        T sum_acc = 0;
-
+        #pragma unroll
         for (int i = 0; i < range; ++i){
             const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
             vals[i] = A[loc_x];
         }
 
+        T sum_acc = 0;
+        #pragma unroll
         for (int i = 0; i < range; ++i){
             sum_acc += vals[i];
         } 
         out[gid] = sum_acc/(T)range;
+    }
+}
+
+template<long ix_min, long ix_max, int group_size, int strip_x>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void global_read_1d_inline_strip(
+    const T* A,
+    T* out,
+    const long nx
+    )
+{
+    const long max_ix = nx - 1;
+    const int range = (ix_max - ix_min) + 1;
+    const int strip_length = group_size*strip_x;
+    const long start_gid_offset = long(blockIdx.x)*long(strip_length) + long(threadIdx.x); 
+    #pragma unroll
+    for (int x__ = 0; x__ < strip_x; ++x__)
+    {
+        T vals[range];
+        const long gid = start_gid_offset + long(x__*group_size);
+        const bool should_write = gid < nx;
+        if (should_write)
+        {
+            #pragma unroll
+            for (int i = 0; i < range; ++i){
+                const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
+                vals[i] = A[loc_x];
+            }
+
+            T sum_acc = 0;
+            #pragma unroll
+            for (int i = 0; i < range; ++i){
+                sum_acc += vals[i];
+            } 
+            out[gid] = sum_acc/(T)range;
+        }
     }
 }
 
@@ -197,6 +235,7 @@ void stripmine_big_tile_1d_inlined(
     
     // the tile has to be fully done being loaded before we start reading
     __syncthreads();
+    #pragma unroll 1
     for(int k__ = 0; k__ < strip_x; k__++){
         // tile_offsets implicitly also handle the change in group_id
         const int tile_offset_x = loc_flat + (k__ * group_size_x);
