@@ -1,0 +1,263 @@
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.046 seconds
+ixs[3] = [-1, 0, 1]
+## Benchmark 1d global read inline ixs ## : mean 971 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 968 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 916 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 975 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.106 seconds
+ixs[5] = [-2, -1, ... , 2]
+## Benchmark 1d global read inline ixs ## : mean 1136 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 961 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 926 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 973 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.191 seconds
+ixs[7] = [-3, -2, ... , 3]
+## Benchmark 1d global read inline ixs ## : mean 1400 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 996 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 939 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1003 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.094 seconds
+ixs[9] = [-4, -3, ... , 4]
+## Benchmark 1d global read inline ixs ## : mean 1771 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1043 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 987 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1046 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.218 seconds
+ixs[11] = [-5, -4, ... , 5]
+## Benchmark 1d global read inline ixs ## : mean 2201 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1086 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1031 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1097 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.229 seconds
+ixs[13] = [-6, -5, ... , 6]
+## Benchmark 1d global read inline ixs ## : mean 2659 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1147 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1099 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1148 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.207 seconds
+ixs[15] = [-7, -6, ... , 7]
+## Benchmark 1d global read inline ixs ## : mean 2978 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1195 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1190 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1197 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.251 seconds
+ixs[17] = [-8, -7, ... , 8]
+## Benchmark 1d global read inline ixs ## : mean 3459 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1257 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1263 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1272 microseconds
+
+
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.046 seconds
+ixs[3] = [-1, 0, 1]
+## Benchmark 1d global read inline ixs ## : mean 964 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 967 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 910 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 717 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.049 seconds
+ixs[5] = [-2, -1, ... , 2]
+## Benchmark 1d global read inline ixs ## : mean 1128 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 961 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 927 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 729 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.070 seconds
+ixs[7] = [-3, -2, ... , 3]
+## Benchmark 1d global read inline ixs ## : mean 1394 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 992 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 942 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 777 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.097 seconds
+ixs[9] = [-4, -3, ... , 4]
+## Benchmark 1d global read inline ixs ## : mean 1765 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1038 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 989 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 838 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.132 seconds
+ixs[11] = [-5, -4, ... , 5]
+## Benchmark 1d global read inline ixs ## : mean 2200 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1095 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1056 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 923 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.139 seconds
+ixs[13] = [-6, -5, ... , 6]
+## Benchmark 1d global read inline ixs ## : mean 2677 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1140 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1106 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 1000 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.143 seconds
+ixs[15] = [-7, -6, ... , 7]
+## Benchmark 1d global read inline ixs ## : mean 2973 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1191 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1207 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 1091 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.217 seconds
+ixs[17] = [-8, -7, ... , 8]
+## Benchmark 1d global read inline ixs ## : mean 3459 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1256 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1261 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[512]f32 
+ : mean 1142 microseconds
+
+
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.046 seconds
+ixs[3] = [-1, 0, 1]
+## Benchmark 1d global read inline ixs ## : mean 964 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 965 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 909 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 603 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.051 seconds
+ixs[5] = [-2, -1, ... , 2]
+## Benchmark 1d global read inline ixs ## : mean 1128 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 965 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 926 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 651 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.074 seconds
+ixs[7] = [-3, -2, ... , 3]
+## Benchmark 1d global read inline ixs ## : mean 1394 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 991 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 942 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 709 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.094 seconds
+ixs[9] = [-4, -3, ... , 4]
+## Benchmark 1d global read inline ixs ## : mean 1765 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1041 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 991 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 794 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.128 seconds
+ixs[11] = [-5, -4, ... , 5]
+## Benchmark 1d global read inline ixs ## : mean 2195 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1099 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1034 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 875 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.137 seconds
+ixs[13] = [-6, -5, ... , 6]
+## Benchmark 1d global read inline ixs ## : mean 2671 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1140 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1100 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 955 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.144 seconds
+ixs[15] = [-7, -6, ... , 7]
+## Benchmark 1d global read inline ixs ## : mean 2973 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1190 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1202 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1054 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.218 seconds
+ixs[17] = [-8, -7, ... , 8]
+## Benchmark 1d global read inline ixs ## : mean 3458 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1256 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1262 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1135 microseconds
+
+
+
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.046 seconds
+ixs[3] = [-1, 0, 1]
+## Benchmark 1d global read inline ixs ## : mean 918 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 964 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 909 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 720 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.050 seconds
+ixs[5] = [-2, -1, ... , 2]
+## Benchmark 1d global read inline ixs ## : mean 1128 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 965 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 927 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 763 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.073 seconds
+ixs[7] = [-3, -2, ... , 3]
+## Benchmark 1d global read inline ixs ## : mean 1393 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 998 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 942 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 841 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.095 seconds
+ixs[9] = [-4, -3, ... , 4]
+## Benchmark 1d global read inline ixs ## : mean 1766 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1039 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 994 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 904 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.130 seconds
+ixs[11] = [-5, -4, ... , 5]
+## Benchmark 1d global read inline ixs ## : mean 2201 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1088 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1034 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 971 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.136 seconds
+ixs[13] = [-6, -5, ... , 6]
+## Benchmark 1d global read inline ixs ## : mean 2664 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1142 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1101 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 1039 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.143 seconds
+ixs[15] = [-7, -6, ... , 7]
+## Benchmark 1d global read inline ixs ## : mean 2973 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1196 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1191 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 1138 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.216 seconds
+ixs[17] = [-8, -7, ... , 8]
+## Benchmark 1d global read inline ixs ## : mean 3458 microseconds
+## Benchmark 1d big tile inline ixs ## : mean 1256 microseconds
+## Benchmark 1d small tile inline ixs ## : mean 1262 microseconds
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[2048]f32 
+ : mean 1221 microseconds
