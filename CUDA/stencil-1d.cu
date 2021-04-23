@@ -253,13 +253,13 @@ int main()
     doTest_1D<3,gps_x,-1,1,2>();
     doTest_1D<5,256,-2,2,2>();
     doTest_1D<5,1024,-2,2,2>();
-    doTest_1D<7,gps_x,-3,3,3>();
-    doTest_1D<9,gps_x,-4,4,3>();
-    doTest_1D<11,gps_x,-5,5,3>();
-    doTest_1D<13,gps_x,-6,6,3>();
-    doTest_1D<15,gps_x,-7,7,3>();
-    doTest_1D<17,gps_x,-8,8,3>();
-    doTest_1D<25,gps_x,-12,12,0>();
+    doTest_1D<7,gps_x,-3,3,2>();
+    doTest_1D<9,gps_x,-4,4,2>();
+    doTest_1D<11,gps_x,-5,5,2>();
+    doTest_1D<13,gps_x,-6,6,2>();
+    doTest_1D<15,gps_x,-7,7,2>();
+    doTest_1D<17,gps_x,-8,8,2>();
+    doTest_1D<25,gps_x,-12,12,2>();
     /*
     doTest_1D<19,gps_x,9,9>();
     doTest_1D<21,gps_x,10,10>();
