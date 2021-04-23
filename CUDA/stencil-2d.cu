@@ -304,12 +304,12 @@ int main()
     doTest_2D<4,4,0,0, gps_x,gps_y,1,4>(physBlocks);
     doTest_2D<5,5,0,0, gps_x,gps_y,1,4>(physBlocks);
     */
-    doTest_2D<0,1,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-1,1,-1,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-1,2,-1,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-1,2,-1,2, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-2,2,-1,1, gps_x,gps_y,1,1>(physBlocks);
+    doTest_2D<0,1,0,1, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D<-1,1,0,1, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,1, gps_x,gps_y,0,0>(physBlocks);
     /*doTest_2D<2,2,2,2, gps_x,gps_y,3,3>(physBlocks);
     doTest_2D<3,3,3,3, gps_x,gps_y,3,2>(physBlocks);
     doTest_2D<4,4,4,4, gps_x,gps_y,3,2>(physBlocks);

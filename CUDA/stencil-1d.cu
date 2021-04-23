@@ -20,7 +20,7 @@ static Globs
     <long,long
     ,Kernel1dVirtual
     ,Kernel1dPhysMultiDim
-    ,Kernel1dPhysSingleDim
+    ,Kernel1dPhysStripDim
     > G(lens, lens, n_runs);
 
 template<int D, int ix_min, int ix_max>
@@ -170,13 +170,13 @@ void doTest_1D()
             {
                 cout << "## Benchmark 1d big tile - inlined idxs - stripmined: ";
                 printf("strip_size=[%d]f32 \n", strip_size_x);
-                Kernel1dPhysMultiDim kfun = stripmine_big_tile_1d_inlined
+                Kernel1dPhysStripDim kfun = stripmine_big_tile_1d_inlined
                     <ix_min
                     ,ix_max
                     ,gps_x
                     ,strip_x
                     >;
-                G.do_run_multiDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, 1);
+                G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
             }
         }
         /*{
@@ -236,15 +236,15 @@ void doTest_1D()
 int main()
 {
 
-    constexpr int gps_x = 1024;
-    doTest_1D<3,gps_x,-1,1,1>();
-    doTest_1D<5,gps_x,-2,2,1>();
-    doTest_1D<7,gps_x,-3,3,1>();
-    doTest_1D<9,gps_x,-4,4,1>();
-    doTest_1D<11,gps_x,-5,5,1>();
-    doTest_1D<13,gps_x,-6,6,1>();
-    doTest_1D<15,gps_x,-7,7,1>();
-    doTest_1D<17,gps_x,-8,8,1>();
+    constexpr int gps_x = 256;
+    doTest_1D<3,gps_x,-1,1,3>();
+    doTest_1D<5,gps_x,-2,2,3>();
+    doTest_1D<7,gps_x,-3,3,3>();
+    doTest_1D<9,gps_x,-4,4,3>();
+    doTest_1D<11,gps_x,-5,5,3>();
+    doTest_1D<13,gps_x,-6,6,3>();
+    doTest_1D<15,gps_x,-7,7,3>();
+    doTest_1D<17,gps_x,-8,8,3>();
     /*
     doTest_1D<19,gps_x,9,9>();
     doTest_1D<21,gps_x,10,10>();
