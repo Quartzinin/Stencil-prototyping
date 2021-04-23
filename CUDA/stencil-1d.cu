@@ -13,7 +13,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-static constexpr long n_runs = 1000;
+static constexpr long n_runs = 100;
 static constexpr long lens = (1 << 24) - 1;
 
 static Globs
@@ -138,7 +138,7 @@ void doTest_1D()
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
         }
         
-        /*{
+        {
             cout << "## Benchmark 1d big tile inline ixs ##";
             Kernel1dPhysMultiDim kfun = big_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
@@ -150,7 +150,7 @@ void doTest_1D()
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
-        }*/
+        }
 
         {
 
@@ -248,17 +248,18 @@ int main()
 {
 
     constexpr int gps_x = 256;
-    //doTest_1D<1,gps_x,0,0,2>();
+    doTest_1D<1,gps_x,0,0,2>();
     doTest_1D<2,gps_x,0,1,2>();
     doTest_1D<3,gps_x,-1,1,2>();
-    doTest_1D<5,gps_x,-2,2,2>();
-    //doTest_1D<7,gps_x,-3,3,3>();
-    //doTest_1D<9,gps_x,-4,4,3>();
-    //doTest_1D<11,gps_x,-5,5,3>();
-    //doTest_1D<13,gps_x,-6,6,3>();
-    //doTest_1D<15,gps_x,-7,7,3>();
-    //doTest_1D<17,gps_x,-8,8,3>();
-    //doTest_1D<25,gps_x,-12,12,0>();
+    doTest_1D<5,256,-2,2,2>();
+    doTest_1D<5,1024,-2,2,2>();
+    doTest_1D<7,gps_x,-3,3,3>();
+    doTest_1D<9,gps_x,-4,4,3>();
+    doTest_1D<11,gps_x,-5,5,3>();
+    doTest_1D<13,gps_x,-6,6,3>();
+    doTest_1D<15,gps_x,-7,7,3>();
+    doTest_1D<17,gps_x,-8,8,3>();
+    doTest_1D<25,gps_x,-12,12,0>();
     /*
     doTest_1D<19,gps_x,9,9>();
     doTest_1D<21,gps_x,10,10>();
