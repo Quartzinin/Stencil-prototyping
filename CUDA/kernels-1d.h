@@ -83,14 +83,12 @@ void global_read_1d_inline(
     const bool should_write = gid < nx;
     if (should_write)
     {
-        #pragma unroll
         for (int i = 0; i < range; ++i){
             const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
             vals[i] = A[loc_x];
         }
 
         T sum_acc = 0;
-        #pragma unroll
         for (int i = 0; i < range; ++i){
             sum_acc += vals[i];
         } 
@@ -111,7 +109,6 @@ void global_read_1d_inline_strip(
     const int range = (ix_max - ix_min) + 1;
     const int strip_length = group_size*strip_x;
     const long start_gid_offset = long(blockIdx.x)*long(strip_length) + long(threadIdx.x); 
-    #pragma unroll
     for (int x__ = 0; x__ < strip_x; ++x__)
     {
         T vals[range];
@@ -119,14 +116,12 @@ void global_read_1d_inline_strip(
         const bool should_write = gid < nx;
         if (should_write)
         {
-            #pragma unroll
             for (int i = 0; i < range; ++i){
                 const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
                 vals[i] = A[loc_x];
             }
 
             T sum_acc = 0;
-            #pragma unroll
             for (int i = 0; i < range; ++i){
                 sum_acc += vals[i];
             } 
@@ -235,7 +230,6 @@ void stripmine_big_tile_1d_inlined(
     
     // the tile has to be fully done being loaded before we start reading
     __syncthreads();
-    #pragma unroll 1
     for(int k__ = 0; k__ < strip_x; k__++){
         // tile_offsets implicitly also handle the change in group_id
         const int tile_offset_x = loc_flat + (k__ * group_size_x);
