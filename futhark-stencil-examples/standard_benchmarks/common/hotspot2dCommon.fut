@@ -1,13 +1,5 @@
 -- code and comments based on
 -- https://github.com/diku-dk/futhark-benchmarks/blob/master/rodinia/hotspot/hotspot.fut
---
--- ==
--- entry: bench_maps
--- random input { [8192][8192]f32 [8192][8192]f32 }
-
--- ==
--- entry: bench_stencil
--- random input { [8192][8192]f32 [8192][8192]f32 }
 
 -- constants
 let amb_temp: f32 = 80.0
@@ -40,7 +32,7 @@ let single_iteration_maps [len_y][len_x]
   let bound r c =
     let br = i64.min (i64.max 0 r) (len_y-1)
     let bc = i64.min (i64.max 0 c) (len_x-1)
-    in temp[br,bc]
+    in #[unsafe] temp[br,bc]
   in tabulate_2d len_y len_x (\r c ->
         let C_pow = power[r,c]
         let N = bound (r-1) (c  )
@@ -78,5 +70,7 @@ let compute_tran_temp [len_y][len_x]
   in iterate num_iterations single_iter temp
 
 let num_iterations: i32 = 5
-entry bench_maps    = compute_tran_temp num_iterations single_iteration_maps
-entry bench_stencil = compute_tran_temp num_iterations single_iteration_stencil
+module hotspot2dCommon = {
+  let bench_maps    = compute_tran_temp num_iterations single_iteration_maps
+  let bench_stencil = compute_tran_temp num_iterations single_iteration_stencil
+}

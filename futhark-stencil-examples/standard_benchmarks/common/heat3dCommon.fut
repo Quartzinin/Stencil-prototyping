@@ -1,15 +1,3 @@
---
--- ==
--- entry: bench_maps
--- random input { [256][256][256]f32 }
--- random input { [512][512][512]f32 }
-
--- ==
--- entry: bench_stencil
--- random input { [256][256][256]f32 }
--- random input { [512][512][512]f32 }
-
-
 let updater B N W C E S T : f32
   = 0.125*(T - 2.0 * C + B)
   + 0.125*(S - 2.0 * C + N)
@@ -23,7 +11,7 @@ let single_iteration_maps [len_z][len_y][len_x]
     let bz = i64.min (i64.max 0 z) (len_z-1)
     let by = i64.min (i64.max 0 y) (len_y-1)
     let bx = i64.min (i64.max 0 x) (len_x-1)
-    in arr[bz,by,bx]
+    in #[unsafe] arr[bz,by,bx]
   in tabulate_3d len_z len_y len_x (\z y x ->
         let B = bound (z-1) (y  ) (x  )
         let N = bound (z  ) (y-1) (x  )
@@ -49,5 +37,7 @@ let compute_tran_temp [len_z][len_y][len_x]
   : [len_z][len_y][len_x]f32 =
   iterate num_iterations f arr
 
-entry bench_maps    = compute_tran_temp single_iteration_maps
-entry bench_stencil = compute_tran_temp single_iteration_stencil
+module heat3dCommon = {
+    let bench_maps    = compute_tran_temp single_iteration_maps
+    let bench_stencil = compute_tran_temp single_iteration_stencil
+}

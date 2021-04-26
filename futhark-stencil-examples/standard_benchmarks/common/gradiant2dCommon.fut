@@ -1,13 +1,3 @@
--- ==
--- entry: bench_5p_maps
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
--- ==
--- entry: bench_5p_stencil
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
 let avoid_div_zero: f32 = 0.0001
 let gradiant_5point ((N,W,C,E,S): (f32,f32,f32,f32,f32)) : f32 =
     let ns = let tmp = C-N in tmp*tmp in
@@ -20,7 +10,7 @@ let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
   let bound y x =
     let by = i64.min (i64.max 0 y) (Ny-1)
     let bx = i64.min (i64.max 0 x) (Nx-1)
-    in arr[by,bx]
+    in #[unsafe] arr[by,bx]
   in tabulate_2d Ny Nx (\y x ->
         let N = bound (y-1) (x  )
         let W = bound (y  ) (x-1)
@@ -36,5 +26,7 @@ let single_iteration_stencil_5points arr =
   let empty = map (map (const ())) arr in
   stencil_2d ixs f empty arr
 
-entry bench_5p_maps    = single_iteration_maps_5points
-entry bench_5p_stencil = single_iteration_stencil_5points
+module gradiantCommon = {
+    let bench_5p_maps    = single_iteration_maps_5points
+    let bench_5p_stencil = single_iteration_stencil_5points
+}

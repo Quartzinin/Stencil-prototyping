@@ -1,14 +1,6 @@
 -- code and comments based on
 -- https://github.com/diku-dk/futhark-benchmarks/blob/master/rodinia/srad/srad.fut
 --
--- ==
--- entry: bench_maps
--- random input { [458][504]u8 }
-
--- ==
--- entry: bench_stencils
--- random input { [458][504]u8 }
-
 let stencil_body_fun1
     (std_dev: f32)
     ((N, W, C, E, S): (f32,f32,f32,f32,f32))
@@ -48,7 +40,7 @@ let update_fun_maps [len_y][len_x]
   let bound arr r c =
     let br = i64.min (i64.max 0 r) (len_y-1)
     let bc = i64.min (i64.max 0 c) (len_x-1)
-    in arr[br,bc]
+    in #[unsafe] arr[br,bc]
   let tmp_image = tabulate_2d len_y len_x (\r c->
         let N = bound image (r-1) (c  )
         let W = bound image (r  ) (c-1)
@@ -98,6 +90,8 @@ let do_srad [len_y][len_x] (niter: i32) (lambda: f32) f (image: [len_y][len_x]u8
 
 let lambda: f32 = 0.5
 let niter: i32 = 10
-entry bench_maps = do_srad niter lambda update_fun_maps
-entry bench_stencils = do_srad niter lambda update_fun_stencil
+module sradCommon = {
+  let bench_maps = do_srad niter lambda update_fun_maps
+  let bench_stencil = do_srad niter lambda update_fun_stencil
+}
 

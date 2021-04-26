@@ -1,25 +1,5 @@
 -- code is based on
 -- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
---
--- ==
--- entry: bench_5p_maps
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
--- ==
--- entry: bench_5p_stencil
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
--- ==
--- entry: bench_9p_maps
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
--- ==
--- entry: bench_9p_stencil
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
 
 let mean_5points
     (p: (f32,f32,f32,f32,f32))
@@ -32,7 +12,7 @@ let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
   let bound y x =
     let by = i64.min (i64.max 0 y) (Ny-1)
     let bx = i64.min (i64.max 0 x) (Nx-1)
-    in arr[by,bx]
+    in #[unsafe] arr[by,bx]
   in tabulate_2d Ny Nx (\y x ->
         let n = bound (y-1) (x  )
         let w = bound (y  ) (x-1)
@@ -52,7 +32,7 @@ let single_iteration_maps_9points [Ny][Nx] (arr:[Ny][Nx]f32) =
   let bound y x =
     let by = i64.min (i64.max 0 y) (Ny-1)
     let bx = i64.min (i64.max 0 x) (Nx-1)
-    in arr[by,bx]
+    in #[unsafe] arr[by,bx]
   in tabulate_2d Ny Nx (\y x ->
         let n1 = bound (y-2) (x  )
         let n2 = bound (y-1) (x  )
@@ -79,7 +59,9 @@ let compute_iters [Ny][Nx] f (arr:[Ny][Nx]f32)
   : [Ny][Nx]f32 =
   iterate num_iterations f arr
 
-entry bench_5p_maps    = compute_iters single_iteration_maps_5points
-entry bench_5p_stencil = compute_iters single_iteration_stencil_5points
-entry bench_9p_maps    = compute_iters single_iteration_maps_9points
-entry bench_9p_stencil = compute_iters single_iteration_stencil_9points
+module jacobi2dCommon = {
+  let bench_5p_maps    = compute_iters single_iteration_maps_5points
+  let bench_5p_stencil = compute_iters single_iteration_stencil_5points
+  let bench_9p_maps    = compute_iters single_iteration_maps_9points
+  let bench_9p_stencil = compute_iters single_iteration_stencil_9points
+}

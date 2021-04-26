@@ -1,13 +1,3 @@
--- ==
--- entry: bench_25p_maps
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
--- ==
--- entry: bench_25p_stencil
--- random input { [4096][4096]f32 }
--- random input { [8192][8192]f32 }
-
 -- gaussian weighted mean
 let gauss_25points
     ((bc, bn1, bd1, bn2, bn2d1, bd2):(f32,f32,f32,f32,f32,f32))
@@ -25,7 +15,7 @@ let single_iteration_maps_25points [Ny][Nx] fun (arr:[Ny][Nx]f32) =
   let bound y x =
     let by = i64.min (i64.max 0 y) (Ny-1)
     let bx = i64.min (i64.max 0 x) (Nx-1)
-    in arr[by,bx]
+    in #[unsafe] arr[by,bx]
   in tabulate_2d Ny Nx (\y x ->
         let n1  = bound (y-2) (x-2)
         let n2  = bound (y-2) (x-1)
@@ -82,5 +72,7 @@ let compute_iters [Ny][Nx] f (arr:[Ny][Nx]f32)
   let updater = gauss_25points weights weight_sum in
   iterate num_iterations (f updater) arr
 
-entry bench_25p_maps    = compute_iters single_iteration_maps_25points
-entry bench_25p_stencil = compute_iters single_iteration_stencil_25points
+module gaussian2dCommon = {
+  let bench_25p_maps    = compute_iters single_iteration_maps_25points
+  let bench_25p_stencil = compute_iters single_iteration_stencil_25points
+}

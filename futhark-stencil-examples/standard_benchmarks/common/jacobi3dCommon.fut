@@ -1,25 +1,6 @@
 -- code is based on
 -- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
 --
--- ==
--- entry: bench_7p_maps
--- random input { [256][256][256]f32 }
--- random input { [512][512][512]f32 }
-
--- ==
--- entry: bench_7p_stencil
--- random input { [256][256][256]f32 }
--- random input { [512][512][512]f32 }
-
--- ==
--- entry: bench_13p_maps
--- random input { [256][256][256]f32 }
--- random input { [512][512][512]f32 }
-
--- ==
--- entry: bench_13p_stencil
--- random input { [256][256][256]f32 }
--- random input { [512][512][512]f32 }
 
 let mean_7points
     (p: (f32,f32,f32,f32,f32,f32,f32))
@@ -33,7 +14,7 @@ let single_iteration_maps_7points [Nz][Ny][Nx] (arr:[Nz][Ny][Nx]f32) =
     let bz = i64.min (i64.max 0 z) (Nz-1)
     let by = i64.min (i64.max 0 y) (Ny-1)
     let bx = i64.min (i64.max 0 x) (Nx-1)
-    in arr[bz,by,bx]
+    in #[unsafe] arr[bz,by,bx]
   in tabulate_3d Nz Ny Nx (\z y x ->
         let b = bound (z-1) (y  ) (x  )
         let n = bound (z  ) (y-1) (x  )
@@ -56,7 +37,7 @@ let single_iteration_maps_13points [Nz][Ny][Nx] (arr:[Nz][Ny][Nx]f32) =
     let bz = i64.min (i64.max 0 z) (Nz-1)
     let by = i64.min (i64.max 0 y) (Ny-1)
     let bx = i64.min (i64.max 0 x) (Nx-1)
-    in arr[bz,by,bx]
+    in #[unsafe] arr[bz,by,bx]
   in tabulate_3d Nz Ny Nx (\z y x ->
         let b1 = bound (z-2) (y  ) (x  )
         let b2 = bound (z-1) (y  ) (x  )
@@ -87,7 +68,9 @@ let compute_iters [Nz][Ny][Nx] f (arr:[Nz][Ny][Nx]f32)
   : [Nz][Ny][Nx]f32 =
   iterate num_iterations f arr
 
-entry bench_7p_maps     = compute_iters single_iteration_maps_7points
-entry bench_7p_stencil  = compute_iters single_iteration_stencil_7points
-entry bench_13p_maps    = compute_iters single_iteration_maps_13points
-entry bench_13p_stencil = compute_iters single_iteration_stencil_13points
+module jacobi3dCommon = {
+  let bench_7p_maps     = compute_iters single_iteration_maps_7points
+  let bench_7p_stencil  = compute_iters single_iteration_stencil_7points
+  let bench_13p_maps    = compute_iters single_iteration_maps_13points
+  let bench_13p_stencil = compute_iters single_iteration_stencil_13points
+}

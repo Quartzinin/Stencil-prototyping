@@ -1,15 +1,5 @@
 -- code is based on
 -- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
---
--- ==
--- entry: bench_maps
--- random input { [8][512][512]f32 [8][512][512]f32 }
--- random input { [128][512][512]f32 [128][512][512]f32 }
-
--- ==
--- entry: bench_stencil
--- random input { [8][512][512]f32 [8][512][512]f32 }
--- random input { [128][512][512]f32 [128][512][512]f32 }
 
 -- constants
 let amb_temp: f32 = 80.0
@@ -35,7 +25,7 @@ let single_iteration_maps [len_z][len_y][len_x]
     let bh = i64.min (i64.max 0 h) (len_z-1)
     let br = i64.min (i64.max 0 r) (len_y-1)
     let bc = i64.min (i64.max 0 c) (len_x-1)
-    in temp[bh,br,bc]
+    in #[unsafe] temp[bh,br,bc]
   in tabulate_3d len_z len_y len_x (\h r c ->
         let C_pow = power[h,r,c]
         let B = bound (h-1) (r  ) (c  )
@@ -83,5 +73,7 @@ let compute_tran_temp [len_z][len_y][len_x]
   in iterate num_iterations single_iter temp
 
 let num_iterations: i32 = 5
-entry bench_maps    = compute_tran_temp num_iterations single_iteration_maps
-entry bench_stencil = compute_tran_temp num_iterations single_iteration_stencil
+module hotspot3dCommon = {
+  let bench_maps    = compute_tran_temp num_iterations single_iteration_maps
+  let bench_stencil = compute_tran_temp num_iterations single_iteration_stencil
+}
