@@ -176,6 +176,7 @@ void doTest_1D()
                     ,gps_x
                     ,strip_x
                     >;
+                G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block,false);
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
             }
             /*{
