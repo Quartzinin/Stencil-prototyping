@@ -130,7 +130,7 @@ void doTest_1D()
 
     {
 
-        {
+        /*{
             cout << "## Benchmark 1d global read inline ixs ##";
             Kernel1dPhysMultiDim kfun = global_read_1d_inline
                 <ix_min,ix_max,gps_x>;
@@ -150,7 +150,7 @@ void doTest_1D()
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
-        }
+        }*/
 
         {
 
@@ -178,7 +178,7 @@ void doTest_1D()
                     >;
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
             }
-            {
+            /*{
                 cout << "## Benchmark 1d global read unrolled/stripmined - inlined idxs: ";
                 printf("strip_size=[%d]f32 \n", strip_size_x);
                 Kernel1dPhysStripDim kfun = global_read_1d_inline_strip
@@ -188,7 +188,7 @@ void doTest_1D()
                     ,strip_x
                     >;
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
-            }
+            }*/
         }
         /*{
             cout << "## Benchmark 2d global read - inlined ixs - singleDim grid ##";
@@ -247,6 +247,7 @@ void doTest_1D()
 int main()
 {
 
+    /*
     constexpr int gps_x = 256;
     doTest_1D<1,gps_x,0,0,2>();
     doTest_1D<2,gps_x,0,1,2>();
@@ -260,6 +261,29 @@ int main()
     doTest_1D<15,gps_x,-7,7,2>();
     doTest_1D<17,gps_x,-8,8,2>();
     doTest_1D<25,gps_x,-12,12,2>();
+    */
+    //blocksize tests
+    doTest_1D<2,256,0,1,0>();
+    doTest_1D<3,256,-1,1,0>();
+    doTest_1D<5,256,-2,2,0>();
+    doTest_1D<7,256,-3,3,0>();
+    doTest_1D<9,256,-4,4,0>();
+    doTest_1D<11,256,-5,5,0>();
+    doTest_1D<13,256,-6,6,0>();
+    doTest_1D<15,256,-7,7,0>();
+    doTest_1D<17,256,-8,8,0>();
+    doTest_1D<25,256,-12,12,0>();
+
+    doTest_1D<2,1024,0,1,0>();
+    doTest_1D<3,1024,-1,1,0>();
+    doTest_1D<5,1024,-2,2,0>();
+    doTest_1D<7,1024,-3,3,0>();
+    doTest_1D<9,1024,-4,4,0>();
+    doTest_1D<11,1024,-5,5,0>();
+    doTest_1D<13,1024,-6,6,0>();
+    doTest_1D<15,1024,-7,7,0>();
+    doTest_1D<17,1024,-8,8,0>();
+    doTest_1D<25,1024,-12,12,0>();
     /*
     doTest_1D<19,gps_x,9,9>();
     doTest_1D<21,gps_x,10,10>();
