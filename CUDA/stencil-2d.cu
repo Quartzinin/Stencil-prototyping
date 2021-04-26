@@ -301,6 +301,27 @@ int main()
          << ", total_len = " << lens_flat << " }" << endl;
     cout << "Blockdim y,x = " << gps_y << ", " << gps_x << endl;
     
+    cout << "Blockdim y,x = " << 8 << ", " << 32 << endl;
+    doTest_2D<0,1,0,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,1,0,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,0,0>(physBlocks);
+    
+    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
+    doTest_2D<0,1,0,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,1,0,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,32,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,32,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,32,0,0>(physBlocks);
+
+
+    /*
+    //stripmine tests
     doTest_2D<0,1,0,1, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-1,1,0,1, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,0,0>(physBlocks);
@@ -378,6 +399,7 @@ int main()
     doTest_2D<-1,2,-1,2, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,2,2>(physBlocks);
+    */
     return 0;
 }
 
