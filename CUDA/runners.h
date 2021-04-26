@@ -258,7 +258,7 @@ class Globs {
             long time_acc = 0;
             for(unsigned x = 0; x < RUNS; x++){
                 startTimer();
-                call<<<65536,256, sh_size_bytes>>>(gpu_array_in, gpu_array_out, lens, grid);
+                call<<<grid_flat,block_flat, sh_size_bytes>>>(gpu_array_in, gpu_array_out, lens, grid);
                 CUDASSERT(cudaGetLastError()); // check cuda for errors
                 CUDASSERT(cudaDeviceSynchronize());
                 time_acc += endTimer();
