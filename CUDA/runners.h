@@ -140,7 +140,7 @@ T stencil_fun_cpu(const T* tmp)
 
 using Kernel1dVirtual = void (*)(const T*, T*, const long, const int, const int);
 using Kernel1dPhysMultiDim = void(*)(const T*, T*, const long);
-using Kernel1dPhysSingleDim = void(*)(const T*, T*, const long, const int);
+using Kernel1dPhysStripDim = void(*)(const T*, T*, const long);
 
 using Kernel2dVirtual = void (*)(const T*, T*, const long2, const int, const int2);
 using Kernel2dPhysMultiDim = void(*)(const T*, T*, const long2);
@@ -179,10 +179,13 @@ class Globs {
             srand(1);
             for(int i=0; i<tlen; i++){ arr_in[i] = (T)rand(); }
             CUDASSERT(cudaMalloc((void **) &gpu_array_in, alloc_sizes));
+            CUDASSERT(cudaGetLastError()); // check cuda for errors
             arr_out = &arr_in[out_start];
             gpu_array_out = gpu_array_in + out_start;
             CUDASSERT(cudaMemcpy(gpu_array_in, arr_in, mem_size, cudaMemcpyHostToDevice));
+            CUDASSERT(cudaGetLastError()); // check cuda for errors
             CUDASSERT(cudaMemset(gpu_array_out, 0, mem_size));
+            CUDASSERT(cudaGetLastError()); // check cuda for errors
             CUDASSERT(cudaDeviceSynchronize());
         }
         __host__
@@ -255,7 +258,25 @@ class Globs {
             long time_acc = 0;
             for(unsigned x = 0; x < RUNS; x++){
                 startTimer();
-                call<<<grid_flat,block_flat, sh_size_bytes>>>(gpu_array_in, gpu_array_out, lens, grid);
+                call<<<65536,256, sh_size_bytes>>>(gpu_array_in, gpu_array_out, lens, grid);
+                CUDASSERT(cudaGetLastError()); // check cuda for errors
+                CUDASSERT(cudaDeviceSynchronize());
+                time_acc += endTimer();
+            }
+            check_output(cpu_out, should_print, time_acc);
+        };
+        __host__
+        void do_run_1d_stripmine(
+                KPSD call
+                , const T* cpu_out
+                , const int grid_flat
+                , const int block_flat
+                , bool should_print=true){
+            reset_output();
+            long time_acc = 0;
+            for(unsigned x = 0; x < RUNS; x++){
+                startTimer();
+                call<<<grid_flat,block_flat>>>(gpu_array_in, gpu_array_out, lens);
                 CUDASSERT(cudaGetLastError()); // check cuda for errors
                 CUDASSERT(cudaDeviceSynchronize());
                 time_acc += endTimer();
