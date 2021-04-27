@@ -620,6 +620,7 @@ void sliding_tile_flat_smalltile_singleDim(
     constexpr int range_inc_y = range_exc_y + 1;
 
     // magic to get next power of 2
+    // source: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
     constexpr int r0 = range_inc_y-1;
     constexpr int r1 = r0 | (r0 >> 1);
     constexpr int r2 = r1 | (r1 >> 2);
@@ -722,6 +723,7 @@ void sliding_tile_smalltile_singleDim(
     constexpr int sh_used_spac_y = range.y + group_size_y;
 
     // magic to get next power of 2
+    // source: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
     constexpr int r0 = sh_used_spac_y-1;
     constexpr int r1 = r0 | (r0 >> 1);
     constexpr int r2 = r1 | (r1 >> 2);

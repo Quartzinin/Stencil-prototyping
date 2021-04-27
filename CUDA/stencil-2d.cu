@@ -13,8 +13,8 @@ using std::endl;
 #include "kernels-2d.h"
 
 static constexpr long2 lens = {
-   (1 << 14) - 1,
-   (1 << 10) - 1};
+   (1 << 13),
+   (1 << 13)};
 static constexpr int lens_flat = lens.x * lens.y;
 static constexpr long n_runs = 100;
 static Globs
@@ -162,7 +162,7 @@ void doTest_2D(const int physBlocks)
         }
         {
             cout << "## Benchmark 2d big tile - inlined idxs - cube2d load - singleDim grid ##";
-            Kernel2dPhysSingleDim kfun = big_tile_2d_inlined_cube_singleDim 
+            Kernel2dPhysSingleDim kfun = big_tile_2d_inlined_cube_singleDim
                 <amin_x,amin_y
                 ,amax_x,amax_y
                 ,group_size_x,group_size_y>;
@@ -212,7 +212,7 @@ void doTest_2D(const int physBlocks)
 
             //constexpr int2 strips = { strip_x, strip_y };
 
-            //printf("shared memory used = %d B\n", sh_total_mem_usage);
+            printf("shared memory per block: stripmine = %d B\n", sh_total_mem_usage);
             constexpr int max_shared_mem = 0xc000;
             static_assert(sh_total_mem_usage <= max_shared_mem,
                     "Current configuration requires too much shared memory\n");
@@ -246,6 +246,88 @@ void doTest_2D(const int physBlocks)
         }
         */
         }
+        {
+            constexpr int window_length_y = 64;
+            constexpr int group_size_flat = group_size_y * group_size_x;
+            constexpr int sh_x = group_size_flat;
+            constexpr int range_exc_y = amax_y - amin_y;
+            constexpr int range_exc_x = amax_x - amin_x;
+            constexpr int range_y = range_exc_y + 1;
+            // magic to get next power of 2
+            constexpr int r0 = range_y-1;
+            constexpr int r1 = r0 | (r0 >> 1);
+            constexpr int r2 = r1 | (r1 >> 2);
+            constexpr int r3 = r2 | (r2 >> 4);
+            constexpr int r4 = r3 | (r3 >> 8);
+            constexpr int r5 = r4 | (r4 >> 16);
+            constexpr int r6 = r5+1;
+            //
+
+            constexpr int sh_y = r6;
+            constexpr int working_x = sh_x - range_exc_x;
+            constexpr int sh_total = sh_x * sh_y;
+            constexpr int sh_total_mem_usage = sh_total * sizeof(T);
+            const int2 strip_grid = {
+                int(divUp(lens.x, long(working_x))),
+                int(divUp(lens.y, long(window_length_y)))};
+            const int strip_grid_flat = product(strip_grid);
+            //printf("range_y=%d, sh_y=%d\n",range_y,sh_y);
+            printf("shared memory per block: sliding = %d B\n", sh_total_mem_usage);
+
+            cout << "## Benchmark 2d sliding (small-)tile - flat - inlined idxs: ";
+            printf("strip_size=[%d][%d]f32 ", window_length_y, working_x);
+            cout << "- singleDim grid ##";
+            Kernel2dPhysSingleDim kfun = sliding_tile_flat_smalltile_singleDim
+                <amin_x,amin_y
+                ,amax_x,amax_y
+                ,group_size_flat
+                ,window_length_y
+                >;
+            G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
+        }
+        {
+            constexpr int gpx = group_size_x;
+            constexpr int gpy = group_size_y;
+            constexpr int windows_y = 64/gpy;
+            constexpr int work_y = windows_y * gpy;
+            constexpr int sh_x = gpx;
+            constexpr int range_exc_y = amax_y - amin_y;
+            constexpr int range_exc_x = amax_x - amin_x;
+            constexpr int range_y = range_exc_y + 1;
+            constexpr int sh_used_spac_y = range_y + gpy;
+            // magic to get next power of 2
+            constexpr int r0 = sh_used_spac_y-1;
+            constexpr int r1 = r0 | (r0 >> 1);
+            constexpr int r2 = r1 | (r1 >> 2);
+            constexpr int r3 = r2 | (r2 >> 4);
+            constexpr int r4 = r3 | (r3 >> 8);
+            constexpr int r5 = r4 | (r4 >> 16);
+            constexpr int r6 = r5+1;
+            //
+
+            constexpr int sh_y = r6;
+            constexpr int working_x = sh_x - range_exc_x;
+            constexpr int sh_total = sh_x * sh_y;
+            constexpr int sh_total_mem_usage = sh_total * sizeof(T);
+            const int2 strip_grid = {
+                int(divUp(lens.x, long(working_x))),
+                int(divUp(lens.y, long(work_y)))};
+            const int strip_grid_flat = product(strip_grid);
+            //printf("range_y=%d, sh_y=%d\n",range_y,sh_y);
+            printf("shared memory per block: sliding = %d B\n", sh_total_mem_usage);
+            cout << "## Benchmark 2d sliding (small-)tile - inlined idxs: ";
+            printf("strip_size=[%d][%d]f32 ", work_y, working_x);
+            cout << "- singleDim grid ##";
+            Kernel2dPhysSingleDim kfun = sliding_tile_smalltile_singleDim
+                <amin_x,amin_y
+                ,amax_x,amax_y
+                ,gpx,gpy
+                ,windows_y
+                >;
+            G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
+        }
+
+
         //GPU_RUN_INIT;
         /*
         GPU_RUN(call_kernel_2d(
@@ -300,35 +382,35 @@ int main()
     cout << "{ x_len = " << lens.x << ", y_len = " << lens.y
          << ", total_len = " << lens_flat << " }" << endl;
     cout << "Blockdim y,x = " << gps_y << ", " << gps_x << endl;
-    
+
 
     //blockdim tests
     cout << "Blockdim y,x = " << 8 << ", " << 32 << endl;
-    doTest_2D<0,1,0,1, 32,8,0,0>(physBlocks);
-    doTest_2D<-1,1,0,1, 32,8,0,0>(physBlocks);
-    doTest_2D<-1,1,-1,1, 32,8,0,0>(physBlocks);
-    doTest_2D<-1,2,-1,1, 32,8,0,0>(physBlocks);
-    doTest_2D<-1,2,-1,2, 32,8,0,0>(physBlocks);
-    doTest_2D<-2,2,-1,2, 32,8,0,0>(physBlocks);
-    doTest_2D<-2,2,-2,2, 32,8,0,0>(physBlocks);
+    doTest_2D< 0,1, 0,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,1,1>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,1,1>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,1,1>(physBlocks);
 
-    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
-    doTest_2D<0,1,0,1, 32,32,0,0>(physBlocks);
-    doTest_2D<-1,1,0,1, 32,32,0,0>(physBlocks);
-    doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
-    doTest_2D<-1,2,-1,1, 32,32,0,0>(physBlocks);
-    doTest_2D<-1,2,-1,2, 32,32,0,0>(physBlocks);
-    doTest_2D<-2,2,-1,2, 32,32,0,0>(physBlocks);
-    doTest_2D<-2,2,-2,2, 32,32,0,0>(physBlocks);
-    
-    cout << "Blockdim y,x = " << 16 << ", " << 64 << endl;
-    doTest_2D<0,1,0,1, 64,16,0,0>(physBlocks);
-    doTest_2D<-1,1,0,1, 64,16,0,0>(physBlocks);
-    doTest_2D<-1,1,-1,1, 64,16,0,0>(physBlocks);
-    doTest_2D<-1,2,-1,1, 64,16,0,0>(physBlocks);
-    doTest_2D<-1,2,-1,2, 64,16,0,0>(physBlocks);
-    doTest_2D<-2,2,-1,2, 64,16,0,0>(physBlocks);
-    doTest_2D<-2,2,-2,2, 64,16,0,0>(physBlocks);
+//    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
+//    doTest_2D< 0,1, 0,1, 32,32,1,1>(physBlocks);
+//    doTest_2D<-1,1, 0,1, 32,32,1,1>(physBlocks);
+//    doTest_2D<-1,1,-1,1, 32,32,1,1>(physBlocks);
+//    doTest_2D<-1,2,-1,1, 32,32,1,1>(physBlocks);
+//    doTest_2D<-1,2,-1,2, 32,32,1,1>(physBlocks);
+//    doTest_2D<-2,2,-1,2, 32,32,1,1>(physBlocks);
+//    doTest_2D<-2,2,-2,2, 32,32,1,1>(physBlocks);
+//
+//    cout << "Blockdim y,x = " << 16 << ", " << 64 << endl;
+//    doTest_2D< 0,1, 0,1, 64,16,1,1>(physBlocks);
+//    doTest_2D<-1,1, 0,1, 64,16,1,1>(physBlocks);
+//    doTest_2D<-1,1,-1,1, 64,16,1,1>(physBlocks);
+//    doTest_2D<-1,2,-1,1, 64,16,1,1>(physBlocks);
+//    doTest_2D<-1,2,-1,2, 64,16,1,1>(physBlocks);
+//    doTest_2D<-2,2,-1,2, 64,16,1,1>(physBlocks);
+//    doTest_2D<-2,2,-2,2, 64,16,1,1>(physBlocks);
 
 
     /*
