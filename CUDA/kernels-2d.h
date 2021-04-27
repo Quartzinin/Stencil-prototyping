@@ -601,6 +601,231 @@ void stripmine_big_tile_2d_inlined_flat_addcarry_singleDim(
 template
 < const int amin_x, const int amin_y
 , const int amax_x, const int amax_y
+, const int group_size_flat
+, const int windows_y
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void sliding_tile_flat_smalltile_singleDim(
+    const T* A,
+    T* out,
+    const long2 lens,
+    const int2 strip_grid
+    )
+{
+    extern __shared__ T tile[];
+    constexpr int sh_size_x = group_size_flat;
+    constexpr int range_exc_x = amax_x - amin_x;
+    constexpr int range_exc_y = amax_y - amin_y;
+    constexpr int range_inc_y = range_exc_y + 1;
+
+    // magic to get next power of 2
+    constexpr int r0 = range_inc_y-1;
+    constexpr int r1 = r0 | (r0 >> 1);
+    constexpr int r2 = r1 | (r1 >> 2);
+    constexpr int r3 = r2 | (r2 >> 4);
+    constexpr int r4 = r3 | (r3 >> 8);
+    constexpr int r5 = r4 | (r4 >> 16);
+    constexpr int r6 = r5+1;
+    //
+    constexpr int sh_size_y = r6;
+    constexpr int working_x = sh_size_x - range_exc_x;
+    constexpr int2 range = {
+        amax_x - amin_x + 1,
+        amax_y - amin_y + 1};
+    constexpr int total_range = range.x * range.y;
+    constexpr int tile_off_y = (sh_size_y + (amin_y % sh_size_y));
+
+    const int strip_grid_spans_y = strip_grid.x;
+
+    const int strip_id_flat = blockIdx.x;
+    const int strip_id_y = strip_id_flat / strip_grid_spans_y;
+    const int strip_id_x = strip_id_flat % strip_grid_spans_y;
+    const long strip_offset_y = strip_id_y * windows_y;
+    const long strip_offset_x = strip_id_x * working_x;
+
+    const int loc_flat = threadIdx.x;
+    const long gidx = loc_flat + strip_offset_x;
+    const long lgidx = bound(gidx + amin_x, lens.x-1);
+    const bool should_write_x = gidx < lens.x && loc_flat < working_x;
+
+    for(int y__ = 0; y__ < range_exc_y; y__++){
+        const int tidy = (y__ + tile_off_y) % sh_size_y;
+        const long gidy = bound(strip_offset_y + (y__ + amin_y), lens.y-1);
+        tile[tidy*sh_size_x+loc_flat] = A[gidy*lens.x + lgidx];
+    }
+
+    constexpr int tile_loader_y = tile_off_y + range_exc_y;
+    for(int y__ = 0; y__ < windows_y; y__++){
+        {
+            const int tidy = (y__ + tile_loader_y) % sh_size_y;
+            const long gidy = bound(strip_offset_y + (y__ + amax_y), lens.y-1);
+            tile[tidy*sh_size_x+loc_flat] = A[gidy*lens.x + lgidx];
+        }
+        __syncthreads();
+        {
+            T vals[total_range];
+            const long gidy = y__  + strip_offset_y;
+            const long gid_flat = gidy * lens.x + gidx;
+
+            const bool should_write = should_write_x && gidy < lens.y;
+            if(should_write){
+                for(int j=0; j < range.y; j++){
+                    for(int k=0; k < range.x; k++){
+                        const int ty = (tile_off_y+j+y__) % sh_size_y;
+                        const int tx = loc_flat+k;
+                        const int idx = j*range.x + k;
+                        vals[idx] = tile[ty*sh_size_x+tx];
+                    }
+                }
+
+                T sum_acc = 0;
+                for(int j=0; j < range.y; j++){
+                    for(int k=0; k < range.x; k++){
+                        const int idx = j*range.x + k;
+                        sum_acc += vals[idx];
+                    }
+                }
+                sum_acc /= (T)total_range;
+                out[gid_flat] = sum_acc;
+            }
+        }
+        __syncthreads(); // cross iteration depedency on tile
+    }
+}
+
+template
+< const int amin_x, const int amin_y
+, const int amax_x, const int amax_y
+, const int group_size_x, const int group_size_y
+, const int windows_y
+>
+__global__
+__launch_bounds__(BLOCKSIZE)
+void sliding_tile_smalltile_singleDim(
+    const T* A,
+    T* out,
+    const long2 lens,
+    const int2 strip_grid
+    )
+{
+    extern __shared__ T tile[];
+    constexpr int range_exc_x = amax_x - amin_x;
+    constexpr int range_exc_y = amax_y - amin_y;
+    constexpr int2 range = {
+        range_exc_x + 1,
+        range_exc_y + 1};
+    constexpr int total_range = range.x * range.y;
+    constexpr int group_size_flat = group_size_x * group_size_y;
+    constexpr int sh_size_x = group_size_x;
+
+    constexpr int sh_used_spac_y = range.y + group_size_y;
+
+    // magic to get next power of 2
+    constexpr int r0 = sh_used_spac_y-1;
+    constexpr int r1 = r0 | (r0 >> 1);
+    constexpr int r2 = r1 | (r1 >> 2);
+    constexpr int r3 = r2 | (r2 >> 4);
+    constexpr int r4 = r3 | (r3 >> 8);
+    constexpr int r5 = r4 | (r4 >> 16);
+    constexpr int r6 = r5+1;
+    //
+    constexpr int sh_size_y = r6;
+    constexpr int sh_size_flat = sh_size_y*sh_size_x;
+    constexpr int working_x = sh_size_x - range_exc_x;
+    constexpr int tile_off_y = (sh_size_y + (amin_y % sh_size_y));
+
+    const int strip_grid_spans_y = strip_grid.x;
+
+    const int local_flat = threadIdx.x;
+    const int local_y = local_flat / group_size_x;
+    const int local_x = local_flat % group_size_x;
+
+    const int strip_id_flat = blockIdx.x;
+    const int strip_id_y = strip_id_flat / strip_grid_spans_y;
+    const int strip_id_x = strip_id_flat % strip_grid_spans_y;
+    const long strip_offset_y = strip_id_y * (group_size_y *  windows_y);
+    const long strip_offset_x = strip_id_x * working_x;
+
+    const long gidx = local_x + strip_offset_x;
+    const long lgidx = bound(gidx + amin_x, lens.x-1);
+    const long lst_gid = (lens.y-1)*lens.x+lgidx;
+    const bool should_write_x = gidx < lens.x && local_x < working_x;
+
+    const long flat_length = lens.x * lens.y;
+    long igid = (strip_offset_y + amin_y + local_y)*lens.x+lgidx;
+    int tile_flat = ((local_y + tile_off_y) % sh_size_y)*sh_size_x+local_x;
+    constexpr int last_cap = sh_used_spac_y % group_size_y;
+    constexpr int setup_iters = divUp(sh_used_spac_y,group_size_y);
+    for(int y__ = 0; y__ < setup_iters; y__++){
+        long gix = igid;
+        if(igid < 0){
+            gix = lgidx;
+        }
+        if(igid >= flat_length){
+            gix = lst_gid;
+        }
+        if(y__ < (setup_iters-1) ||  (local_y < last_cap)){
+            tile[tile_flat] = A[gix];
+        }
+        igid += group_size_y*lens.x;
+        tile_flat += group_size_flat;
+        if(tile_flat >= sh_size_flat){ tile_flat -= sh_size_flat; }
+    }
+
+    constexpr int tile_loader_y = tile_off_y + range_exc_y;
+    tile_flat = ((local_y + tile_loader_y) % sh_size_y)*sh_size_x+local_x;
+    igid = (strip_offset_y + amax_y + local_y)*lens.x+lgidx;
+    long gid_flat = (strip_offset_y + local_y)*lens.x+gidx;
+
+    for(int y__ = 0; y__ < windows_y; y__++){
+        __syncthreads(); // cross iteration depedency on tile
+        const int y = y__ * group_size_y + local_y;
+        {
+            long gix = igid;
+            if(igid < 0){
+                gix = lgidx;
+            }
+            if(igid >= flat_length){
+                gix = lst_gid;
+            }
+            tile[tile_flat] = A[gix];
+        }
+        __syncthreads();
+        {
+            T vals[total_range];
+            const bool should_write = should_write_x && gid_flat < flat_length;
+            if(should_write){
+                for(int j=0; j < range.y; j++){
+                    for(int k=0; k < range.x; k++){
+                        const int ty = (tile_off_y+j+y) % sh_size_y;
+                        const int tx = local_x+k;
+                        const int idx = j*range.x + k;
+                        vals[idx] = tile[ty*sh_size_x+tx];
+                    }
+                }
+
+                T sum_acc = 0;
+                for(int j=0; j < range.y; j++){
+                    for(int k=0; k < range.x; k++){
+                        const int idx = j*range.x + k;
+                        sum_acc += vals[idx];
+                    }
+                }
+                sum_acc /= (T)total_range;
+                out[gid_flat] = sum_acc;
+            }
+        }
+        igid += group_size_y*lens.x;
+        gid_flat += group_size_y*lens.x;
+        tile_flat += group_size_flat;
+        if(tile_flat >= sh_size_flat){ tile_flat -= sh_size_flat; }
+    }
+}
+
+template
+< const int amin_x, const int amin_y
+, const int amax_x, const int amax_y
 , const int group_size_x,  const int group_size_y
 >
 __global__
@@ -941,7 +1166,7 @@ void big_tile_2d_inline_reduce(
     const long col_len
     )
 {
-    const long waste_x = x_axis_max - x_axis_min; //this was changed 
+    const long waste_x = x_axis_max - x_axis_min; //this was changed
     const long waste_y = y_axis_max - y_axis_min; //this was changed
     const long block_offset_x = blockIdx.x*SQ_BLOCKSIZE;
     const long block_offset_y = blockIdx.y*SQ_BLOCKSIZE;
@@ -1058,7 +1283,7 @@ void big_tile_2d_inline_reduce_flat(
     }
 }*/
 
+
+
 #endif
-
-
 
