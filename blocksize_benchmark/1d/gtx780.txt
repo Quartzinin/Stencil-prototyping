@@ -1,0 +1,101 @@
+ x_len = 16777215 }
+cpu c 1d for 1 run : 0.029 seconds
+ixs[2] = [0, 1, ... , 1]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 819 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.046 seconds
+ixs[3] = [-1, 0, 1]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 970 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.106 seconds
+ixs[5] = [-2, -1, ... , 2]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 960 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.197 seconds
+ixs[7] = [-3, -2, ... , 3]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 990 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.209 seconds
+ixs[9] = [-4, -3, ... , 4]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1044 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.192 seconds
+ixs[11] = [-5, -4, ... , 5]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1086 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.230 seconds
+ixs[13] = [-6, -5, ... , 6]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1140 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.242 seconds
+ixs[15] = [-7, -6, ... , 7]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1188 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.260 seconds
+ixs[17] = [-8, -7, ... , 8]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1264 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.626 seconds
+ixs[25] = [-12, -11, ... , 12]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[256]f32 
+ : mean 1544 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.029 seconds
+ixs[2] = [0, 1, ... , 1]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 899 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.046 seconds
+ixs[3] = [-1, 0, 1]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1113 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.100 seconds
+ixs[5] = [-2, -1, ... , 2]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1186 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.185 seconds
+ixs[7] = [-3, -2, ... , 3]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1230 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.115 seconds
+ixs[9] = [-4, -3, ... , 4]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1294 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.209 seconds
+ixs[11] = [-5, -4, ... , 5]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1363 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.219 seconds
+ixs[13] = [-6, -5, ... , 6]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1377 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.168 seconds
+ixs[15] = [-7, -6, ... , 7]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1425 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.255 seconds
+ixs[17] = [-8, -7, ... , 8]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1488 microseconds
+{ x_len = 16777215 }
+cpu c 1d for 1 run : 0.626 seconds
+ixs[25] = [-12, -11, ... , 12]
+## Benchmark 1d big tile - inlined idxs - stripmined: strip_size=[1024]f32 
+ : mean 1811 microseconds
+
