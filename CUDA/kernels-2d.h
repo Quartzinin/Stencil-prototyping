@@ -619,23 +619,15 @@ void sliding_tile_flat_smalltile_singleDim(
     constexpr int range_exc_y = amax_y - amin_y;
     constexpr int range_inc_y = range_exc_y + 1;
 
-    // magic to get next power of 2
-    // source: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-    constexpr int r0 = range_inc_y-1;
-    constexpr int r1 = r0 | (r0 >> 1);
-    constexpr int r2 = r1 | (r1 >> 2);
-    constexpr int r3 = r2 | (r2 >> 4);
-    constexpr int r4 = r3 | (r3 >> 8);
-    constexpr int r5 = r4 | (r4 >> 16);
-    constexpr int r6 = r5+1;
-    //
-    constexpr int sh_size_y = r6;
+    constexpr int sh_size_y = range_inc_y;
+    constexpr int sh_size_flat = sh_size_y * sh_size_x;
+
     constexpr int working_x = sh_size_x - range_exc_x;
     constexpr int2 range = {
         amax_x - amin_x + 1,
         amax_y - amin_y + 1};
     constexpr int total_range = range.x * range.y;
-    constexpr int tile_off_y = (sh_size_y + (amin_y % sh_size_y));
+    constexpr int tile_start_y = (sh_size_y + (amin_y % sh_size_y));
 
     const int strip_grid_spans_y = strip_grid.x;
 
@@ -645,53 +637,73 @@ void sliding_tile_flat_smalltile_singleDim(
     const long strip_offset_y = strip_id_y * windows_y;
     const long strip_offset_x = strip_id_x * working_x;
 
-    const int loc_flat = threadIdx.x;
-    const long gidx = loc_flat + strip_offset_x;
-    const long lgidx = bound(gidx + amin_x, lens.x-1);
-    const bool should_write_x = gidx < lens.x && loc_flat < working_x;
+    const int read_write_tile_x = threadIdx.x;
+    const long write_gid_x = read_write_tile_x + strip_offset_x;
+    const long read_gid_x = bound(write_gid_x + amin_x, lens.x-1);
+    const long max_y = lens.y - 1;
 
-    for(int y__ = 0; y__ < range_exc_y; y__++){
-        const int tidy = (y__ + tile_off_y) % sh_size_y;
-        const long gidy = bound(strip_offset_y + (y__ + amin_y), lens.y-1);
-        tile[tidy*sh_size_x+loc_flat] = A[gidy*lens.x + lgidx];
+    constexpr int tile_y_start = (tile_start_y * sh_size_x)%sh_size_flat;
+    int write_tile_y = tile_y_start+read_write_tile_x;
+    long write_gid_y = strip_offset_y + amin_y;
+    for(int i__ = 0; i__ < range_exc_y; i__++){
+        if(write_gid_y < 0){
+            tile[write_tile_y] = A[0*lens.x + read_gid_x];
+        }
+        else if(write_gid_y > max_y){
+            tile[write_tile_y] = A[max_y*lens.x + read_gid_x];
+        }
+        else{
+            tile[write_tile_y] = A[write_gid_y*lens.x + read_gid_x];
+        }
+        write_tile_y += sh_size_x;
+        if(write_tile_y >= sh_size_flat){ write_tile_y -= sh_size_flat; }
+        write_gid_y++;
     }
-
-    constexpr int tile_loader_y = tile_off_y + range_exc_y;
-    for(int y__ = 0; y__ < windows_y; y__++){
-        {
-            const int tidy = (y__ + tile_loader_y) % sh_size_y;
-            const long gidy = bound(strip_offset_y + (y__ + amax_y), lens.y-1);
-            tile[tidy*sh_size_x+loc_flat] = A[gidy*lens.x + lgidx];
-        }
-        __syncthreads();
-        {
-            T vals[total_range];
-            const long gidy = y__  + strip_offset_y;
-            const long gid_flat = gidy * lens.x + gidx;
-
-            const bool should_write = should_write_x && gidy < lens.y;
-            if(should_write){
-                for(int j=0; j < range.y; j++){
-                    for(int k=0; k < range.x; k++){
-                        const int ty = (tile_off_y+j+y__) % sh_size_y;
-                        const int tx = loc_flat+k;
-                        const int idx = j*range.x + k;
-                        vals[idx] = tile[ty*sh_size_x+tx];
-                    }
-                }
-
-                T sum_acc = 0;
-                for(int j=0; j < range.y; j++){
-                    for(int k=0; k < range.x; k++){
-                        const int idx = j*range.x + k;
-                        sum_acc += vals[idx];
-                    }
-                }
-                sum_acc /= (T)total_range;
-                out[gid_flat] = sum_acc;
-            }
-        }
+    long gidy = strip_offset_y;
+    int read_tile_y = tile_y_start;
+    const bool should_write_x = write_gid_x < lens.x && read_write_tile_x < working_x;
+    const int iters = int(min(long(windows_y),max_y+1-strip_offset_y));
+    for(int y__ = 0; y__ < iters; y__++){
         __syncthreads(); // cross iteration depedency on tile
+        if(write_gid_y < 0){
+            tile[write_tile_y] = A[0*lens.x + read_gid_x];
+        }
+        else if(write_gid_y > max_y){
+            tile[write_tile_y] = A[max_y*lens.x + read_gid_x];
+        }
+        else{
+            tile[write_tile_y] = A[write_gid_y*lens.x + read_gid_x];
+        }
+        __syncthreads(); // finish write to tile before we read
+        if(should_write_x){
+            T vals[total_range];
+            for(int j=0; j < range.y; j++){
+                const int y = j*sh_size_x;
+                const int ty = y + read_tile_y;
+                const int tty = ty - (ty >= sh_size_flat ? sh_size_flat : 0);
+                for(int k=0; k < range.x; k++){
+                    const int idx = j*range.x + k;
+                    vals[idx] = tile[read_write_tile_x + tty + k];
+                }
+            }
+
+            T sum_acc = 0;
+            for(int j=0; j < range.y; j++){
+                for(int k=0; k < range.x; k++){
+                    const int idx = j*range.x + k;
+                    sum_acc += vals[idx];
+                }
+            }
+            sum_acc /= (T)total_range;
+            out[gidy * lens.x + write_gid_x] = sum_acc;
+
+        }
+        gidy++;
+        write_tile_y += sh_size_x;
+        if(write_tile_y >= sh_size_flat){ write_tile_y -= sh_size_flat; }
+        write_gid_y++;
+        read_tile_y += sh_size_x;
+        if(read_tile_y >= sh_size_flat){ read_tile_y -= sh_size_flat; }
     }
 }
 

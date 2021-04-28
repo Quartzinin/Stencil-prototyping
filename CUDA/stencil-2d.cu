@@ -13,8 +13,8 @@ using std::endl;
 #include "kernels-2d.h"
 
 static constexpr long2 lens = {
-   (1 << 13),
-   (1 << 13)};
+   (1 << 12)+1,
+   (1 << 12)+1};
 static constexpr int lens_flat = lens.x * lens.y;
 static constexpr long n_runs = 100;
 static Globs
@@ -152,6 +152,7 @@ void doTest_2D(const int physBlocks)
             G.do_run_multiDim(kfun, cpu_out, multiDim_grid, multiDim_block, 1, false); // warmup as it is the first kernel
             G.do_run_multiDim(kfun, cpu_out, multiDim_grid, multiDim_block, 1);
         }
+        */
         {
             cout << "## Benchmark 2d global read - inlined ixs - singleDim grid ##";
             Kernel2dPhysSingleDim kfun = global_reads_2d_inline_singleDim
@@ -160,6 +161,7 @@ void doTest_2D(const int physBlocks)
                 ,group_size_x,group_size_y>;
             G.do_run_singleDim(kfun, cpu_out, singleDim_grid_flat, singleDim_block, singleDim_grid, 1);
         }
+        /*
         {
             cout << "## Benchmark 2d big tile - inlined idxs - cube2d load - singleDim grid ##";
             Kernel2dPhysSingleDim kfun = big_tile_2d_inlined_cube_singleDim
@@ -253,17 +255,8 @@ void doTest_2D(const int physBlocks)
             constexpr int range_exc_y = amax_y - amin_y;
             constexpr int range_exc_x = amax_x - amin_x;
             constexpr int range_y = range_exc_y + 1;
-            // magic to get next power of 2
-            constexpr int r0 = range_y-1;
-            constexpr int r1 = r0 | (r0 >> 1);
-            constexpr int r2 = r1 | (r1 >> 2);
-            constexpr int r3 = r2 | (r2 >> 4);
-            constexpr int r4 = r3 | (r3 >> 8);
-            constexpr int r5 = r4 | (r4 >> 16);
-            constexpr int r6 = r5+1;
-            //
 
-            constexpr int sh_y = r6;
+            constexpr int sh_y = range_y;
             constexpr int working_x = sh_x - range_exc_x;
             constexpr int sh_total = sh_x * sh_y;
             constexpr int sh_total_mem_usage = sh_total * sizeof(T);
@@ -285,6 +278,7 @@ void doTest_2D(const int physBlocks)
                 >;
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
         }
+        /*
         {
             constexpr int gpx = group_size_x;
             constexpr int gpy = group_size_y;
@@ -326,7 +320,7 @@ void doTest_2D(const int physBlocks)
                 >;
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
         }
-
+        */
 
         //GPU_RUN_INIT;
         /*
@@ -402,7 +396,7 @@ int main()
 //    doTest_2D<-1,2,-1,2, 32,32,1,1>(physBlocks);
 //    doTest_2D<-2,2,-1,2, 32,32,1,1>(physBlocks);
 //    doTest_2D<-2,2,-2,2, 32,32,1,1>(physBlocks);
-//
+
 //    cout << "Blockdim y,x = " << 16 << ", " << 64 << endl;
 //    doTest_2D< 0,1, 0,1, 64,16,1,1>(physBlocks);
 //    doTest_2D<-1,1, 0,1, 64,16,1,1>(physBlocks);
@@ -412,6 +406,9 @@ int main()
 //    doTest_2D<-2,2,-1,2, 64,16,1,1>(physBlocks);
 //    doTest_2D<-2,2,-2,2, 64,16,1,1>(physBlocks);
 
+    // tests for amins > 0 and (but not at same time) amaxs < 0
+    //doTest_2D<2,5,3,6, 32,8,1,1>(physBlocks);
+    //doTest_2D<-5,-2,-6,-3, 32,8,1,1>(physBlocks);
 
     /*
     //stripmine tests
