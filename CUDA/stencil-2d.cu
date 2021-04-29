@@ -248,6 +248,7 @@ void doTest_2D(const int physBlocks)
         }
         */
         }
+
         {
             constexpr int window_length_y = 64;
             constexpr int group_size_flat = group_size_y * group_size_x;
@@ -278,28 +279,17 @@ void doTest_2D(const int physBlocks)
                 >;
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
         }
-        /*
+
         {
-            constexpr int gpx = group_size_x;
-            constexpr int gpy = group_size_y;
+            constexpr int gpx = group_size_x*4;
+            constexpr int gpy = group_size_y/4;
             constexpr int windows_y = 64/gpy;
             constexpr int work_y = windows_y * gpy;
             constexpr int sh_x = gpx;
             constexpr int range_exc_y = amax_y - amin_y;
             constexpr int range_exc_x = amax_x - amin_x;
-            constexpr int range_y = range_exc_y + 1;
-            constexpr int sh_used_spac_y = range_y + gpy;
-            // magic to get next power of 2
-            constexpr int r0 = sh_used_spac_y-1;
-            constexpr int r1 = r0 | (r0 >> 1);
-            constexpr int r2 = r1 | (r1 >> 2);
-            constexpr int r3 = r2 | (r2 >> 4);
-            constexpr int r4 = r3 | (r3 >> 8);
-            constexpr int r5 = r4 | (r4 >> 16);
-            constexpr int r6 = r5+1;
-            //
+            constexpr int sh_y = range_exc_y + gpy;
 
-            constexpr int sh_y = r6;
             constexpr int working_x = sh_x - range_exc_x;
             constexpr int sh_total = sh_x * sh_y;
             constexpr int sh_total_mem_usage = sh_total * sizeof(T);
@@ -320,7 +310,7 @@ void doTest_2D(const int physBlocks)
                 >;
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
         }
-        */
+
 
         //GPU_RUN_INIT;
         /*
