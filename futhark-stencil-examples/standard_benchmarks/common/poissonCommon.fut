@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 let updater
     (C:f32
     ,(ed:(f32,f32,f32,f32,f32,f32))
@@ -7,15 +9,11 @@ let updater
   - 0.1666 * (ed.0+ed.1+ed.2+ed.3+ed.4+ed.5)
   - 0.0833 * (edd.0+edd.1+edd.2+edd.3+edd.4+edd.5+edd.6+edd.7+edd.8+edd.9+edd.10+edd.11)
 
-let single_iteration_maps [len_z][len_y][len_x]
-    (arr: [len_z][len_y][len_x]f32)
-    : [len_z][len_y][len_x]f32 =
-  let bound z y x =
-    let bz = i64.min (i64.max 0 z) (len_z-1)
-    let by = i64.min (i64.max 0 y) (len_y-1)
-    let bx = i64.min (i64.max 0 x) (len_x-1)
-    in #[unsafe] arr[bz,by,bx]
-  in tabulate_3d len_z len_y len_x (\z y x ->
+let single_iteration_maps [Nz][Ny][Nx]
+    (arr: [Nz][Ny][Nx]f32)
+    : [Nz][Ny][Nx]f32 =
+  let bound = edgeHandling.extendEdge3D arr (Nz-1) (Ny-1) (Nx-1)
+  in tabulate_3d Nz Ny Nx (\z y x ->
         let e7  = bound (z-1) (y-1) (x  )
         let e11 = bound (z-1) (y  ) (x-1)
         let e1  = bound (z-1) (y  ) (x  )
@@ -38,9 +36,9 @@ let single_iteration_maps [len_z][len_y][len_x]
         in updater (e19,(e1,e2,e3,e4,e5,e6),(e7,e8,e9,e10,e11,e12,e13,e14,e15,e16,e17,e18))
         )
 
-let single_iteration_stencil [len_z][len_y][len_x]
-    (arr: [len_z][len_y][len_x]f32)
-    : [len_z][len_y][len_x]f32 =
+let single_iteration_stencil [Nz][Ny][Nx]
+    (arr: [Nz][Ny][Nx]f32)
+    : [Nz][Ny][Nx]f32 =
   let ixs = [(-1,-1,0),(-1,0,-1),(-1,0,0),(-1,0,1),(-1,1,0)
             ,(0,-1,-1),(0,-1,0),(0,-1,1),(0,0,-1),(0,0,0),(0,0,1),(0,1,-1),(0,1,0),(0,1,1)
             ,(1,-1,0),(1,0,-1),(1,0,0),(1,0,1),(1,1,0)] in
@@ -51,9 +49,9 @@ let single_iteration_stencil [len_z][len_y][len_x]
   stencil_3d ixs f empty arr
 
 let num_iterations: i32 = 5
-let compute_iters [len_z][len_y][len_x]
-  f (arr: [len_z][len_y][len_x]f32)
-  : [len_z][len_y][len_x]f32 =
+let compute_iters [Nz][Ny][Nx]
+  f (arr: [Nz][Ny][Nx]f32)
+  : [Nz][Ny][Nx]f32 =
   iterate num_iterations f arr
 
 module poissonCommon = {

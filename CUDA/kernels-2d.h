@@ -24,6 +24,7 @@ void bigtile_flat_loader_addcarry_new(
     constexpr int blockDimFlat = group_size_x * group_size_y;
     constexpr int sh_span_y = sh_size_x;
     constexpr int iters = CEIL_DIV(sh_size_flat, blockDimFlat);
+    constexpr int last_iter = sh_size_flat % blockDimFlat;
 
     const long max_ix_x = len_x - 1;
     const long max_ix_y = len_y - 1;
@@ -42,7 +43,7 @@ void bigtile_flat_loader_addcarry_new(
         const long gy = BOUNDL((local_y + block_offset_y), max_ix_y);
 
         const long index = gy * len_x + gx;
-        if(local_flat < sh_size_flat){
+        if(i < (iters-1) || loc_flat < last_iter){
             tile[local_flat] = A[index];
         }
 
@@ -192,7 +193,7 @@ void bigtile_flat_loader_divrem(
         const long gx = BOUNDL((long(local_x) + view_offset_x), max_ix_x);
 
         const long index = gy * lens.x + gx;
-        if(local_ix < sh_size_flat){
+        if(i < (iters-1) || local_flat < sh_size_flat){
             tile[long(local_ix)] = A[index];
         }
     }
@@ -268,7 +269,7 @@ void bigtile_flat_loader_addcarry(
         const long gx = bound((long(local_x) + view_offset_x), max_ix_x);
 
         const long index = gy * lens.x + gx;
-        if(local_flat < sh_size_flat){
+        if(i < (iters-1) || local_flat < sh_size_flat){
             tile[local_flat] = A[index];
         }
 

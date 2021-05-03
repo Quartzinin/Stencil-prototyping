@@ -13,11 +13,11 @@ using std::endl;
 #include "kernels-3d.h"
 
 static constexpr long3 lens = {
-    ((1 << 8) - 3),
-    ((1 << 8) - 2),
-    ((1 << 8) - 1)};
+    ((1 << 8) + 2),
+    ((1 << 8) + 4),
+    ((1 << 8) + 8)};
 static constexpr long lens_flat = lens.x * lens.y * lens.z;
-static constexpr long n_runs = 100;
+static constexpr long n_runs = 30;
 static Globs
     <long3,int3
     ,Kernel3dVirtual
@@ -141,7 +141,7 @@ void doTest_3D(const int physBlocks)
     constexpr int sh_mem_size_flat = sh_size_flat * sizeof(T);
 
     cout << "Blockdim z,y,x = " << group_size_z << ", " << group_size_y << ", " << group_size_x << endl;
-    printf("virtual number of blocks = %d\n", virtual_grid_flat);
+    //printf("virtual number of blocks = %d\n", virtual_grid_flat);
     {
         /*{
             cout << "## Benchmark 3d global read - inlined ixs - multiDim grid ##";
@@ -345,19 +345,13 @@ void doTest_3D(const int physBlocks)
 __host__
 int main()
 {
-    int physBlocks = getPhysicalBlockCount();
 
     constexpr int gps_x = 32;
-    constexpr int gps_y = 8;
-    constexpr int gps_z = 4;
+    constexpr int gps_y = 4;
+    constexpr int gps_z = 2;
 
     constexpr int gps_flat = gps_x * gps_y * gps_z;
-    static_assert(
-            32 <= gps_flat
-        &&  gps_flat <= 1024
-        &&  (gps_flat % 32) == 0
-        , "not a valid block size"
-    );
+    int physBlocks = getPhysicalBlockCount<gps_flat>();
 
     // small test samples.
     /*

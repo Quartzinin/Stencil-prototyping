@@ -13,8 +13,8 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-static constexpr long n_runs = 100;
-static constexpr long lens = (1 << 24) - 1;
+static constexpr long n_runs = 30;
+static constexpr long lens = (1 << 24) + 2;
 
 static Globs
     <long,long
@@ -107,7 +107,6 @@ void doTest_1D()
     //CUDASSERT(cudaMemcpyToSymbol(ixs_1d, cpu_ixs, ixs_size));
 
     const long len = lens;
-    cout << "{ x_len = " << len << " }" << endl;
     T* cpu_out = (T*)malloc(len*sizeof(T));
     run_cpu_1d<D, ix_min, ix_max>(cpu_ixs,len, cpu_out);
 
@@ -123,21 +122,21 @@ void doTest_1D()
     const long small_shared_size = gps_x * sizeof(T);
 
     constexpr int singleDim_block = gps_x;
-    constexpr int singleDim_grid = CEIL_DIV(len, singleDim_block); 
+    constexpr int singleDim_grid = CEIL_DIV(len, singleDim_block);
     constexpr int smallWork = len+(ix_max - ix_min);
     constexpr int smallBlock = singleDim_block-(ix_max - ix_min);
     constexpr int smallSingleDim_grid = divUp(smallWork,smallBlock); // the flattening happens in the before the kernel call.
 
     {
 
-        /*{
+        {
             cout << "## Benchmark 1d global read inline ixs ##";
             Kernel1dPhysMultiDim kfun = global_read_1d_inline
                 <ix_min,ix_max,gps_x>;
-            //G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
+            G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
         }
-        
+        /*
         {
             cout << "## Benchmark 1d big tile inline ixs ##";
             Kernel1dPhysMultiDim kfun = big_tile_1d_inline
@@ -150,7 +149,8 @@ void doTest_1D()
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
-        }*/
+        }
+        */
 
         {
 
@@ -169,7 +169,7 @@ void doTest_1D()
 
             {
                 cout << "## Benchmark 1d big tile - inlined idxs - stripmined: ";
-                printf("strip_size=[%d]f32 \n", strip_size_x);
+                printf("strip_size=[%d]f32 ", strip_size_x);
                 Kernel1dPhysStripDim kfun = stripmine_big_tile_1d_inlined
                     <ix_min
                     ,ix_max
@@ -210,21 +210,21 @@ void doTest_1D()
                     (big_tiled_1d_const_ixs_inline<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d big tile ##",(void)0,(void)0);
         */
-        
+
         /* THIS
         GPU_RUN(call_kernel_1d(
                     (global_read_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                 ,"## Benchmark 1d global read inline ixs reduce ##",(void)0,(void)0);
 
         */
-/*          
+/*
         const int width = ix_min + ix_max + 1;
         if(width < BLOCKSIZE-20){
             GPU_RUN(call_inSharedKernel_1d(
                         (small_tile_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
                     ,"## Benchmark 1d small tile inline ixs reduce ##",(void)0,(void)0);
         }
-*/      
+*/
         /* THIS
         GPU_RUN(call_kernel_1d(
                     (big_tile_1d_inline_reduce<ixs_len,ix_min,ix_max><<<grid,block>>>(gpu_array_in, gpu_array_out, len)))
@@ -238,7 +238,7 @@ void doTest_1D()
 
         GPU_RUN_END;
         */
-    }   
+    }
 
     free(cpu_out);
     free(cpu_ixs);
@@ -249,8 +249,10 @@ int main()
 {
 
 
+    cout << "{ x_len = " << lens << " }" << endl;
     constexpr int gps_x = 256;
 
+    /*
     doTest_1D<1,gps_x,0,0,0>();
     doTest_1D<2,gps_x,0,1,0>();
     doTest_1D<3,gps_x,-1,1,0>();
@@ -276,7 +278,7 @@ int main()
     doTest_1D<15,gps_x,-7,7,1>();
     doTest_1D<17,gps_x,-8,8,1>();
     doTest_1D<25,gps_x,-12,12,1>();
-
+    */
     doTest_1D<1,gps_x,0,0,2>();
     doTest_1D<2,gps_x,0,1,2>();
     doTest_1D<3,gps_x,-1,1,2>();
@@ -289,6 +291,7 @@ int main()
     doTest_1D<15,gps_x,-7,7,2>();
     doTest_1D<17,gps_x,-8,8,2>();
     doTest_1D<25,gps_x,-12,12,2>();
+
     //blocksize tests
     /*
     doTest_1D<2,256,0,1,0>();

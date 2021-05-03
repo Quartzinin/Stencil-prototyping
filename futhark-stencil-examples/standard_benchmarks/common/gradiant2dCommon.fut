@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 let avoid_div_zero: f32 = 0.0001
 let gradiant_5point ((N,W,C,E,S): (f32,f32,f32,f32,f32)) : f32 =
     let ns = let tmp = C-N in tmp*tmp in
@@ -7,10 +9,7 @@ let gradiant_5point ((N,W,C,E,S): (f32,f32,f32,f32,f32)) : f32 =
     C + (1.0 / f32.sqrt (avoid_div_zero + ns + ws + es + ss))
 
 let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
-  let bound y x =
-    let by = i64.min (i64.max 0 y) (Ny-1)
-    let bx = i64.min (i64.max 0 x) (Nx-1)
-    in #[unsafe] arr[by,bx]
+  let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
         let N = bound (y-1) (x  )
         let W = bound (y  ) (x-1)

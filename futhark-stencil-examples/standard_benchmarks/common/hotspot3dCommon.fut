@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 -- code is based on
 -- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
 
@@ -17,16 +19,12 @@ let calculate_update
         C_pow B N W C E S T : f32 =
   cc*C + cew*W + cew*E + cns*S + cns*N + ctb*B + ctb*T + sdc*C_pow + ctb*amb_temp
 
-let single_iteration_maps [len_z][len_y][len_x]
-    (temp: [len_z][len_y][len_x]f32) (power: [len_z][len_y][len_x]f32)
+let single_iteration_maps [Nz][Ny][Nx]
+    (temp: [Nz][Ny][Nx]f32) (power: [Nz][Ny][Nx]f32)
     updater
-    : [len_z][len_y][len_x]f32 =
-  let bound h r c =
-    let bh = i64.min (i64.max 0 h) (len_z-1)
-    let br = i64.min (i64.max 0 r) (len_y-1)
-    let bc = i64.min (i64.max 0 c) (len_x-1)
-    in #[unsafe] temp[bh,br,bc]
-  in tabulate_3d len_z len_y len_x (\h r c ->
+    : [Nz][Ny][Nx]f32 =
+  let bound = edgeHandling.extendEdge3D temp (Nz-1) (Ny-1) (Nx-1)
+  in tabulate_3d Nz Ny Nx (\h r c ->
         let C_pow = power[h,r,c]
         let B = bound (h-1) (r  ) (c  )
         let N = bound (h  ) (r-1) (c  )
@@ -38,18 +36,18 @@ let single_iteration_maps [len_z][len_y][len_x]
         in updater C_pow B N W C E S T
         )
 
-let single_iteration_stencil [len_z][len_y][len_x]
-    (temp: [len_z][len_y][len_x]f32) (power: [len_z][len_y][len_x]f32)
+let single_iteration_stencil [Nz][Ny][Nx]
+    (temp: [Nz][Ny][Nx]f32) (power: [Nz][Ny][Nx]f32)
     updater
-    : [len_z][len_y][len_x]f32 =
+    : [Nz][Ny][Nx]f32 =
   let ixs = [(-1,0,0),(0,-1,0),(0,0,-1),(0,0,0),(0,0,1),(0,1,0),(1,0,0)] in
   let f pow v = updater pow v[0] v[1] v[2] v[3] v[4] v[5] v[6] in
   stencil_3d ixs f power temp
 
-let compute_chip_parameters (len_z: i64) (len_y: i64) (len_x: i64) : (f32,f32,f32,f32,f32) =
-  let grid_width  = chip_width  / f32.i64(len_x)
-  let grid_height = chip_height / f32.i64(len_y)
-  let grid_depth  = t_chip      / f32.i64(len_z)
+let compute_chip_parameters (Nz: i64) (Ny: i64) (Nx: i64) : (f32,f32,f32,f32,f32) =
+  let grid_width  = chip_width  / f32.i64(Nx)
+  let grid_height = chip_height / f32.i64(Ny)
+  let grid_depth  = t_chip      / f32.i64(Nz)
   let cap = factor_chip * spec_heat_si * t_chip * grid_width * grid_height
   let rx = grid_width / (2 * k_si * t_chip * grid_height)
   let ry = grid_height / (2 * k_si * t_chip * grid_width)
@@ -63,11 +61,11 @@ let compute_chip_parameters (len_z: i64) (len_y: i64) (len_x: i64) : (f32,f32,f3
   let cc = 1.0 - (2.0*cew + 2.0*cns + 3.0*ctb)
   in (stepDivCap, cew, cns, ctb, cc)
 
-let compute_tran_temp [len_z][len_y][len_x]
+let compute_tran_temp [Nz][Ny][Nx]
     (num_iterations: i32) f
-    (temp: [len_z][len_y][len_x]f32)
-    (power: [len_z][len_y][len_x]f32): [len_z][len_y][len_x]f32 =
-  let params = compute_chip_parameters len_z len_y len_x
+    (temp: [Nz][Ny][Nx]f32)
+    (power: [Nz][Ny][Nx]f32): [Nz][Ny][Nx]f32 =
+  let params = compute_chip_parameters Nz Ny Nx
   let update_fun = calculate_update params
   let single_iter arr = f arr power update_fun
   in iterate num_iterations single_iter temp

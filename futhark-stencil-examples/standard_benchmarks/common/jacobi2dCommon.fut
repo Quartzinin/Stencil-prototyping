@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 -- code is based on
 -- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
 
@@ -9,10 +11,7 @@ let mean_9points
     : f32 = (p.0+p.1+p.2+p.3+p.4+p.5+p.6+p.7+p.8) / 9
 
 let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
-  let bound y x =
-    let by = i64.min (i64.max 0 y) (Ny-1)
-    let bx = i64.min (i64.max 0 x) (Nx-1)
-    in #[unsafe] arr[by,bx]
+  let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
         let n = bound (y-1) (x  )
         let w = bound (y  ) (x-1)
@@ -29,10 +28,7 @@ let single_iteration_stencil_5points arr =
   stencil_2d ixs f empty arr
 
 let single_iteration_maps_9points [Ny][Nx] (arr:[Ny][Nx]f32) =
-  let bound y x =
-    let by = i64.min (i64.max 0 y) (Ny-1)
-    let bx = i64.min (i64.max 0 x) (Nx-1)
-    in #[unsafe] arr[by,bx]
+  let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
         let n1 = bound (y-2) (x  )
         let n2 = bound (y-1) (x  )
