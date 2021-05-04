@@ -93,9 +93,9 @@ template<
 __host__
 void doTest_3D(const int physBlocks)
 {
-    static_assert(amin_z <= amax_z);
-    static_assert(amin_y <= amax_y);
-    static_assert(amin_x <= amax_x);
+    static_assert(amin_z <= amax_z, "invalid setup");
+    static_assert(amin_y <= amax_y, "invalid setup");
+    static_assert(amin_x <= amax_x, "invalid setup");
     const int z_range = (amax_z + 1) - amin_z;
     const int y_range = (amax_y + 1) - amin_y;
     const int x_range = (amax_x + 1) - amin_x;
@@ -342,6 +342,26 @@ void doTest_3D(const int physBlocks)
     free(cpu_ixs);
 }
 
+template
+    <const int gx, const int gy, const int gz
+    ,const int sx, const int sy, const int sz>
+__host__
+void testStrips(const int physBlocks){
+    doTest_3D<1,2, 1,2, 1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,3, 1,2, 1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,3, 1,3, 1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,3, 1,2, 1,3, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,3, 1,3, 1,3, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,4, 1,3, 1,3, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,4, 1,4, 1,3, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,4, 1,3, 1,4, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,4, 1,4, 1,4, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,5, 1,4, 1,4, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,5, 1,5, 1,4, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,5, 1,4, 1,5, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<1,5, 1,5, 1,5, gx,gy,gz,sx,sy,sz>(physBlocks);
+}
+
 __host__
 int main()
 {
@@ -387,6 +407,7 @@ int main()
     // all axis are in use
 
     //blocksize test
+    /*
     doTest_3D<0,1,0,1,0,1, 32,8,1,0,0,0>(physBlocks);
     doTest_3D<-1,1,0,1,0,1, 32,8,1,0,0,0>(physBlocks);
     doTest_3D<-1,1,-1,1,0,1, 32,8,1,0,0,0>(physBlocks);
@@ -406,10 +427,31 @@ int main()
     doTest_3D<-1,1,0,1,0,1, 32,16,2,0,0,0>(physBlocks);
     doTest_3D<-1,1,-1,1,0,1, 32,16,2,0,0,0>(physBlocks);
     doTest_3D<-1,1,-1,1,-1,1, 32,16,2,0,0,0>(physBlocks);
-    /*doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
+    */
+    /*
+    doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-3,3,-3,3,-3,3, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-4,4,-4,4,-4,4, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-5,5,-5,5,-5,5, gps_x,gps_y,gps_z,0,0,0>(physBlocks);
     */
+
+    constexpr int gx=32;
+    constexpr int gy=4;
+    constexpr int gz=2;
+
+    testStrips<gx,gy,gz,0,0,0>(physBlocks);
+    testStrips<gx,gy,gz,1,0,0>(physBlocks);
+    testStrips<gx,gy,gz,0,1,0>(physBlocks);
+    testStrips<gx,gy,gz,0,0,1>(physBlocks);
+    testStrips<gx,gy,gz,1,0,1>(physBlocks);
+    testStrips<gx,gy,gz,1,1,0>(physBlocks);
+    testStrips<gx,gy,gz,0,1,1>(physBlocks);
+    testStrips<gx,gy,gz,1,1,1>(physBlocks);
+    testStrips<gx,gy,gz,0,1,2>(physBlocks);
+    testStrips<gx,gy,gz,1,0,2>(physBlocks);
+    testStrips<gx,gy,gz,0,2,1>(physBlocks);
+    testStrips<gx,gy,gz,1,2,0>(physBlocks);
+    testStrips<gx,gy,gz,2,1,0>(physBlocks);
+    testStrips<gx,gy,gz,2,0,1>(physBlocks);
     return 0;
 }
