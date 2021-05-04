@@ -10,3 +10,10 @@
 *.ptx
 *.cubin
 *.fatbin
+*.3D
+*.2D
+*.1D
+*.c
+*/data/*
+original.txt
+*.zip
