@@ -252,11 +252,11 @@ int main()
     cout << "{ x_len = " << lens << " }" << endl;
     constexpr int gps_x = 256;
 
-    /*
+    //stripmine test
+    /*doTest_1D<1,gps_x,0,0,0>();
     doTest_1D<1,gps_x,0,0,0>();
     doTest_1D<2,gps_x,0,1,0>();
     doTest_1D<3,gps_x,-1,1,0>();
-    doTest_1D<5,gps_x,-2,2,0>();
     doTest_1D<5,gps_x,-2,2,0>();
     doTest_1D<7,gps_x,-3,3,0>();
     doTest_1D<9,gps_x,-4,4,0>();
@@ -270,7 +270,6 @@ int main()
     doTest_1D<2,gps_x,0,1,1>();
     doTest_1D<3,gps_x,-1,1,1>();
     doTest_1D<5,gps_x,-2,2,1>();
-    doTest_1D<5,gps_x,-2,2,1>();
     doTest_1D<7,gps_x,-3,3,1>();
     doTest_1D<9,gps_x,-4,4,1>();
     doTest_1D<11,gps_x,-5,5,1>();
@@ -279,10 +278,11 @@ int main()
     doTest_1D<17,gps_x,-8,8,1>();
     doTest_1D<25,gps_x,-12,12,1>();
     */
+
+    //normal runs
     doTest_1D<1,gps_x,0,0,2>();
     doTest_1D<2,gps_x,0,1,2>();
     doTest_1D<3,gps_x,-1,1,2>();
-    doTest_1D<5,gps_x,-2,2,2>();
     doTest_1D<5,gps_x,-2,2,2>();
     doTest_1D<7,gps_x,-3,3,2>();
     doTest_1D<9,gps_x,-4,4,2>();
@@ -291,6 +291,7 @@ int main()
     doTest_1D<15,gps_x,-7,7,2>();
     doTest_1D<17,gps_x,-8,8,2>();
     doTest_1D<25,gps_x,-12,12,2>();
+
 
     //blocksize tests
     /*
@@ -316,58 +317,7 @@ int main()
     doTest_1D<17,1024,-8,8,0>();
     doTest_1D<25,1024,-12,12,0>();
     */
-    /*
-    doTest_1D<19,gps_x,9,9>();
-    doTest_1D<21,gps_x,10,10>();
-    doTest_1D<23,gps_x,11,11>();
-    doTest_1D<25,gps_x,12,12>();
-    doTest_1D<27,gps_x,13,13>();
-    doTest_1D<29,gps_x,14,14>();
-    doTest_1D<31,gps_x,15,15>();
-    doTest_1D<33,gps_x,16,16>();
-    doTest_1D<35,gps_x,17,17>();
-    doTest_1D<37,gps_x,18,18>();
-    doTest_1D<39,gps_x,19,19>();
-    doTest_1D<41,gps_x,20,20>();
-    doTest_1D<43,gps_x,21,21>();
-    doTest_1D<45,gps_x,22,22>();
-    doTest_1D<47,gps_x,23,23>();
-    doTest_1D<49,gps_x,24,24>();
-    doTest_1D<51,gps_x,25,25>();
-    doTest_1D<101,gps_x,50,50>();
-    doTest_1D<201,gps_x,100,100>();
-    doTest_1D<301,gps_x,150,150>();
-    doTest_1D<401,gps_x,200,200>();
-    doTest_1D<501,gps_x,250,250>();
-
-    doTest_1D<601,300,300>();
-    doTest_1D<701,350,350>();
-    doTest_1D<801,400,400>();
-    doTest_1D<901,450,450>();
-    doTest_1D<1001,500,500>();
-    doTest_1D<3,2,2>();
-    doTest_1D<3,3,3>();
-    doTest_1D<3,4,4>();
-    doTest_1D<3,5,5>();
-    doTest_1D<3,6,6>();
-    doTest_1D<3,7,7>();
-    doTest_1D<3,8,8>();
-    doTest_1D<3,9,9>();
-    doTest_1D<3,10,10>();
-
-    doTest_1D<3,50,50>();
-    doTest_1D<3,100,100>();
-    doTest_1D<3,200,200>();
-    doTest_1D<3,300,300>();
-    doTest_1D<3,400,400>();
-    doTest_1D<3,450,450>();
-    doTest_1D<3,500,500>();
-    doTest_1D<3,600,600>();
-    doTest_1D<3,700,700>();
-    doTest_1D<3,800,800>();
-    doTest_1D<3,900,900>();
-    doTest_1D<3,1000,1000>();
-    */
+    
     return 0;
 }
 
