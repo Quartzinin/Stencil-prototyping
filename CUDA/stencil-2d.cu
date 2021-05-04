@@ -100,10 +100,16 @@ template<
     const int amin_y, const int amax_y,
     const int amin_x, const int amax_x,
     const int group_size_x,  const int group_size_y,
-    const int strip_pow_x, const int strip_pow_y
+    const int strip_pow_x_pre, const int strip_pow_y_pre
     >
 void doTest_2D(const int physBlocks)
 {
+    constexpr int strip_x_pre = 1 << strip_pow_x_pre;
+    constexpr int strip_y = 1 << strip_pow_y_pre;
+    constexpr int fsz = sizeof(float);
+    constexpr int esz = sizeof(T);
+    constexpr int ub_strip_x = (fsz <= esz) ? (strip_x_pre/(esz/fsz)) : (strip_x_pre*(fsz/esz));
+    constexpr int strip_x = (1 <= ub_strip_x) ? ub_strip_x : 1;
     const int y_range = (amax_y - amin_y) + 1;
     const int x_range = (amax_x - amin_x) + 1;
     const int ixs_len = y_range * x_range;
@@ -198,8 +204,6 @@ void doTest_2D(const int physBlocks)
         }
         */
         {
-            constexpr int strip_x = 1 << strip_pow_x;
-            constexpr int strip_y = 1 << strip_pow_y;
 
             constexpr int strip_size_x = group_size_x*strip_x;
             constexpr int strip_size_y = group_size_y*strip_y;
@@ -216,7 +220,7 @@ void doTest_2D(const int physBlocks)
 
             //constexpr int2 strips = { strip_x, strip_y };
 
-            //printf("shared memory per block: stripmine = %d B\n", sh_total_mem_usage);
+            printf("shared memory per block: stripmine = %d B\n", sh_total_mem_usage);
             constexpr int max_shared_mem = 0xc000;
             static_assert(sh_total_mem_usage <= max_shared_mem,
                     "Current configuration requires too much shared memory\n");
@@ -366,14 +370,14 @@ int main()
 
 
     //blockdim tests
-    cout << "Blockdim y,x = " << 8 << ", " << 32 << endl;
-    doTest_2D< 0,1, 0,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,1, 0,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,2,-1,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,2,-1,2, 32,8,1,1>(physBlocks);
-    doTest_2D<-2,2,-1,2, 32,8,1,1>(physBlocks);
-    doTest_2D<-2,2,-2,2, 32,8,1,1>(physBlocks);
+    //cout << "Blockdim y,x = " << 8 << ", " << 32 << endl;
+    //doTest_2D< 0,1, 0,1, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,1, 0,1, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,2,-1,1, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,2,-1,2, 32,8,1,1>(physBlocks);
+    //doTest_2D<-2,2,-1,2, 32,8,1,1>(physBlocks);
+    //doTest_2D<-2,2,-2,2, 32,8,1,1>(physBlocks);
 
 //    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
 //    doTest_2D< 0,1, 0,1, 32,32,1,1>(physBlocks);
@@ -397,86 +401,86 @@ int main()
     //doTest_2D<2,5,3,6, 32,8,1,1>(physBlocks);
     //doTest_2D<-5,-2,-6,-3, 32,8,1,1>(physBlocks);
 
-    /*
+
     //stripmine tests
-    doTest_2D<0,1,0,1, gps_x,gps_y,0,0>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,0,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,0,0>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,0,0>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,0,1>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,0,1>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,0,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,0,1>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,0,1>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,0,1>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,0,1>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,0,1>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,0,1>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,0,2>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,0,2>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,0,2>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,0,2>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,1,0>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,1,0>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,1,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,1,0>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,1,0>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,1,0>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,1,0>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,1,0>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,1,0>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,2,0>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,2,0>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,2,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,2,0>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,2,0>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,2,0>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,2,0>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,2,0>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,2,0>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,0,3>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,0,3>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,0,3>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,0,3>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,0,3>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,0,3>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,0,3>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,0,3>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,0,3>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,3,0>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,3,0>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,3,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,3,0>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,3,0>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,3,0>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,3,0>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,3,0>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,3,0>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,1,1>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,1,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,1,2>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,1,2>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,1,2>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,1,2>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,1,2>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,1,2>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,1,2>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,1,2>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,1,2>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,2,1>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,2,1>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,2,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,2,1>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,2,1>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,2,1>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,2,1>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,2,1>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,2,1>(physBlocks);
-    doTest_2D<0,1,0,1, gps_x,gps_y,2,2>(physBlocks);
-    doTest_2D<-1,1,0,1, gps_x,gps_y,2,2>(physBlocks);
+    doTest_2D< 0,1, 0,1, gps_x,gps_y,2,2>(physBlocks);
+    doTest_2D<-1,1, 0,1, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-1,1,-1,1, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-1,2,-1,1, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-1,2,-1,2, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-2,2,-1,2, gps_x,gps_y,2,2>(physBlocks);
     doTest_2D<-2,2,-2,2, gps_x,gps_y,2,2>(physBlocks);
-    */
+
     return 0;
 }
 
