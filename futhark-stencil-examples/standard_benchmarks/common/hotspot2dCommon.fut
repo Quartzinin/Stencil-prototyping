@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 -- code and comments based on
 -- https://github.com/diku-dk/futhark-benchmarks/blob/master/rodinia/hotspot/hotspot.fut
 
@@ -25,15 +27,12 @@ let calculate_update (step, cap, rx, ry, rz) C_pow N W C E S : f32 =
         ) / rz
   in C + delta
 
-let single_iteration_maps [len_y][len_x]
-    (temp: [len_y][len_x]f32) (power: [len_y][len_x]f32)
+let single_iteration_maps [Ny][Nx]
+    (temp: [Ny][Nx]f32) (power: [Ny][Nx]f32)
     updater
-    : [len_y][len_x]f32 =
-  let bound r c =
-    let br = i64.min (i64.max 0 r) (len_y-1)
-    let bc = i64.min (i64.max 0 c) (len_x-1)
-    in #[unsafe] temp[br,bc]
-  in tabulate_2d len_y len_x (\r c ->
+    : [Ny][Nx]f32 =
+  let bound = edgeHandling.extendEdge2D temp (Ny-1) (Nx-1)
+  in tabulate_2d Ny Nx (\r c ->
         let C_pow = power[r,c]
         let N = bound (r-1) (c  )
         let W = bound (r  ) (c-1)
@@ -43,17 +42,17 @@ let single_iteration_maps [len_y][len_x]
         in updater C_pow N W C E S
         )
 
-let single_iteration_stencil [len_y][len_x]
-    (temp: [len_y][len_x]f32) (power: [len_y][len_x]f32)
+let single_iteration_stencil [Ny][Nx]
+    (temp: [Ny][Nx]f32) (power: [Ny][Nx]f32)
     updater
-    : [len_y][len_x]f32 =
+    : [Ny][Nx]f32 =
   let ixs = [(-1,0),(0,-1),(0,0),(0,1),(1,0)] in
   let f pow v = updater pow v[0] v[1] v[2] v[3] v[4] in
   stencil_2d ixs f power temp
 
-let compute_chip_parameters (len_y : i64) (len_x: i64) : (f32,f32,f32,f32,f32) =
-  let grid_height = chip_height / f32.i64(len_y)
-  let grid_width = chip_width / f32.i64(len_x)
+let compute_chip_parameters (Ny : i64) (Nx: i64) : (f32,f32,f32,f32,f32) =
+  let grid_height = chip_height / f32.i64(Ny)
+  let grid_width = chip_width / f32.i64(Nx)
   let cap = factor_chip * spec_heat_si * t_chip * grid_width * grid_height
   let rx = grid_width / (2 * k_si * t_chip * grid_height)
   let ry = grid_height / (2 * k_si * t_chip * grid_width)
@@ -62,9 +61,9 @@ let compute_chip_parameters (len_y : i64) (len_x: i64) : (f32,f32,f32,f32,f32) =
   let step = precision / max_slope
   in (cap, rx, ry, rz, step)
 
-let compute_tran_temp [len_y][len_x]
-    (num_iterations: i32) f (temp: [len_y][len_x]f32) (power: [len_y][len_x]f32): [len_y][len_x]f32 =
-  let params = compute_chip_parameters len_y len_x
+let compute_tran_temp [Ny][Nx]
+    (num_iterations: i32) f (temp: [Ny][Nx]f32) (power: [Ny][Nx]f32): [Ny][Nx]f32 =
+  let params = compute_chip_parameters Ny Nx
   let update_fun = calculate_update params
   let single_iter arr = f arr power update_fun
   in iterate num_iterations single_iter temp

@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 -- code is based on
 -- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
 --
@@ -10,11 +12,7 @@ let mean_13points
     : f32 = (p.0+p.1+p.2+p.3+p.4+p.5+p.6+p.7+p.8+p.9+p.10+p.11+p.12) / 13
 
 let single_iteration_maps_7points [Nz][Ny][Nx] (arr:[Nz][Ny][Nx]f32) =
-  let bound z y x =
-    let bz = i64.min (i64.max 0 z) (Nz-1)
-    let by = i64.min (i64.max 0 y) (Ny-1)
-    let bx = i64.min (i64.max 0 x) (Nx-1)
-    in #[unsafe] arr[bz,by,bx]
+  let bound = edgeHandling.extendEdge3D arr (Nz-1) (Ny-1) (Nx-1)
   in tabulate_3d Nz Ny Nx (\z y x ->
         let b = bound (z-1) (y  ) (x  )
         let n = bound (z  ) (y-1) (x  )
@@ -33,11 +31,7 @@ let single_iteration_stencil_7points arr =
   stencil_3d ixs f empty arr
 
 let single_iteration_maps_13points [Nz][Ny][Nx] (arr:[Nz][Ny][Nx]f32) =
-  let bound z y x =
-    let bz = i64.min (i64.max 0 z) (Nz-1)
-    let by = i64.min (i64.max 0 y) (Ny-1)
-    let bx = i64.min (i64.max 0 x) (Nx-1)
-    in #[unsafe] arr[bz,by,bx]
+  let bound = edgeHandling.extendEdge3D arr (Nz-1) (Ny-1) (Nx-1)
   in tabulate_3d Nz Ny Nx (\z y x ->
         let b1 = bound (z-2) (y  ) (x  )
         let b2 = bound (z-1) (y  ) (x  )

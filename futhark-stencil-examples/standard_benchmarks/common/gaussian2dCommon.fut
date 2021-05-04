@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 -- gaussian weighted mean
 let gauss_25points
     ((bc, bn1, bd1, bn2, bn2d1, bd2):(f32,f32,f32,f32,f32,f32))
@@ -12,10 +14,7 @@ let gauss_25points
     ) / weight_sum
 
 let single_iteration_maps_25points [Ny][Nx] fun (arr:[Ny][Nx]f32) =
-  let bound y x =
-    let by = i64.min (i64.max 0 y) (Ny-1)
-    let bx = i64.min (i64.max 0 x) (Nx-1)
-    in #[unsafe] arr[by,bx]
+  let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
         let n1  = bound (y-2) (x-2)
         let n2  = bound (y-2) (x-1)

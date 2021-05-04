@@ -1,0 +1,109 @@
+Compiling ./gaussian2d_map_nests.fut...
+Compiling ./gaussian2d_stencil.fut...
+Compiling ./gradiant2d_map_nests.fut...
+Compiling ./gradiant2d_stencil.fut...
+Compiling ./heat3d_map_nests.fut...
+Compiling ./heat3d_stencil.fut...
+Compiling ./hotspot2d_map_nests.fut...
+Compiling ./hotspot2d_stencil.fut...
+Compiling ./hotspot3d_map_nests.fut...
+Compiling ./hotspot3d_stencil.fut...
+Compiling ./jacobi2d5p_map_nests.fut...
+Compiling ./jacobi2d5p_stencil.fut...
+Compiling ./jacobi2d9p_map_nests.fut...
+Compiling ./jacobi2d9p_stencil.fut...
+Compiling ./jacobi3d13p_map_nests.fut...
+Compiling ./jacobi3d13p_stencil.fut...
+Compiling ./jacobi3d7p_map_nests.fut...
+Compiling ./jacobi3d7p_stencil.fut...
+Compiling ./poission_map_nests.fut...
+Compiling ./poission_stencil.fut...
+Compiling ./srad_nest_maps.fut...
+Compiling ./srad_stencil.fut...
+Reporting average runtime of 30 runs for each dataset.
+[1m
+./gaussian2d_map_nests.fut:
+[0m[4096][4096]f32:      42467μs (RSD: 0.065; min:  -3%; max: +18%)
+[8192][8192]f32:     159868μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./gaussian2d_stencil.fut:
+[0m[4096][4096]f32:      14282μs (RSD: 0.067; min:  -9%; max:  +9%)
+[8192][8192]f32:      51171μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./gradiant2d_map_nests.fut:
+[0m[4096][4096]f32:       3482μs (RSD: 0.005; min:  -0%; max:  +3%)
+[8192][8192]f32:      13882μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./gradiant2d_stencil.fut:
+[0m[4096][4096]f32:       1883μs (RSD: 0.003; min:  -0%; max:  +1%)
+[8192][8192]f32:       7491μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./heat3d_map_nests.fut:
+[0m[256][256][256]f32:      30812μs (RSD: 0.000; min:  -0%; max:  +0%)
+[512][512][512]f32:     246369μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./heat3d_stencil.fut:
+[0m[256][256][256]f32:      24101μs (RSD: 0.033; min:  -2%; max: +10%)
+[512][512][512]f32:     189470μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot2d_map_nests.fut:
+[0m[4096][4096]f32 [4096][4096]f32:      20819μs (RSD: 0.001; min:  -0%; max:  +0%)
+[8192][8192]f32 [8192][8192]f32:      83194μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot2d_stencil.fut:
+[0m[4096][4096]f32 [4096][4096]f32:      12967μs (RSD: 0.020; min:  -2%; max:  +3%)
+[8192][8192]f32 [8192][8192]f32:      53439μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot3d_map_nests.fut:
+[0m[8][512][512]f32 [8][512][512]f32:           3934μs (RSD: 0.001; min:  -0%; max:  +0%)
+[128][512][512]f32 [128][512][512]f32:      62580μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./hotspot3d_stencil.fut:
+[0m[8][512][512]f32 [8][512][512]f32:           2966μs (RSD: 0.001; min:  -0%; max:  +0%)
+[128][512][512]f32 [128][512][512]f32:      47075μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi2d5p_map_nests.fut:
+[0m[4096][4096]f32:      18231μs (RSD: 0.000; min:  -0%; max:  +0%)
+[8192][8192]f32:      72860μs (RSD: 0.001; min:  -0%; max:  +0%)
+[1m
+./jacobi2d5p_stencil.fut:
+[0m[4096][4096]f32:      11345μs (RSD: 0.041; min:  -4%; max:  +5%)
+[8192][8192]f32:      40645μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi2d9p_map_nests.fut:
+[0m[4096][4096]f32:      24926μs (RSD: 0.001; min:  -0%; max:  +0%)
+[8192][8192]f32:      99626μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi2d9p_stencil.fut:
+[0m[4096][4096]f32:      11112μs (RSD: 0.002; min:  -0%; max:  +1%)
+[8192][8192]f32:      44383μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d13p_map_nests.fut:
+[0m[256][256][256]f32:      41875μs (RSD: 0.001; min:  -0%; max:  +0%)
+[512][512][512]f32:     334738μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d13p_stencil.fut:
+[0m[256][256][256]f32:      43301μs (RSD: 0.020; min:  -1%; max: +11%)
+[512][512][512]f32:     342269μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d7p_map_nests.fut:
+[0m[256][256][256]f32:      30630μs (RSD: 0.023; min:  -1%; max: +11%)
+[512][512][512]f32:     242679μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./jacobi3d7p_stencil.fut:
+[0m[256][256][256]f32:      23224μs (RSD: 0.000; min:  -0%; max:  +0%)
+[512][512][512]f32:     185385μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./poission_map_nests.fut:
+[0m[256][256][256]f32:      37303μs (RSD: 0.040; min:  -2%; max: +10%)
+[512][512][512]f32:     292417μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./poission_stencil.fut:
+[0m[256][256][256]f32:      24657μs (RSD: 0.000; min:  -0%; max:  +0%)
+[512][512][512]f32:     196840μs (RSD: 0.000; min:  -0%; max:  +0%)
+[1m
+./srad_nest_maps.fut:
+[0m[2048][2048]u8:      23474μs (RSD: 0.008; min:  -0%; max:  +3%)
+[1m
+./srad_stencil.fut:
+[0m[2048][2048]u8:      15572μs (RSD: 0.001; min:  -0%; max:  +0%)

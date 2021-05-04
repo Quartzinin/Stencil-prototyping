@@ -1,3 +1,5 @@
+import "./edgeHandling"
+
 -- code and comments based on
 -- https://github.com/diku-dk/futhark-benchmarks/blob/master/rodinia/srad/srad.fut
 --
@@ -34,14 +36,11 @@ let stencil_body_fun2
   let d = cN*dN_k + cS*dS_k + cW*dW_k + cE*dE_k
   in pC + 0.25 * lambda * d
 
-let update_fun_maps [len_y][len_x]
-    (std_dev: f32) (lambda: f32) (image: [len_y][len_x]f32)
-    : [len_y][len_x]f32 =
-  let bound arr r c =
-    let br = i64.min (i64.max 0 r) (len_y-1)
-    let bc = i64.min (i64.max 0 c) (len_x-1)
-    in #[unsafe] arr[br,bc]
-  let tmp_image = tabulate_2d len_y len_x (\r c->
+let update_fun_maps [Ny][Nx]
+    (std_dev: f32) (lambda: f32) (image: [Ny][Nx]f32)
+    : [Ny][Nx]f32 =
+  let bound arr = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
+  let tmp_image = tabulate_2d Ny Nx (\r c->
         let N = bound image (r-1) (c  )
         let W = bound image (r  ) (c-1)
         let C = bound image (r  ) (c  )
@@ -51,7 +50,7 @@ let update_fun_maps [len_y][len_x]
         in stencil_body_fun1 std_dev (N, W, C, E, S)
       )
   let zip_image_tmp = map2 zip tmp_image image
-  let image = tabulate_2d len_y len_x (\r c ->
+  let image = tabulate_2d Ny Nx (\r c ->
         let N = bound zip_image_tmp (r-1) (c  )
         let W = bound zip_image_tmp (r  ) (c-1)
         let C = bound zip_image_tmp (r  ) (c  )
@@ -62,9 +61,9 @@ let update_fun_maps [len_y][len_x]
       )
   in image
 
-let update_fun_stencil [len_y][len_x]
-    (std_dev: f32) (lambda: f32) (image: [len_y][len_x]f32)
-    : [len_y][len_x]f32 =
+let update_fun_stencil [Ny][Nx]
+    (std_dev: f32) (lambda: f32) (image: [Ny][Nx]f32)
+    : [Ny][Nx]f32 =
   let ixs = [(-1,0),(0,-1),(0,0),(0,1),(1,0)] in
   let fun1 _ vars = stencil_body_fun1 std_dev (vars[0], vars[1], vars[2], vars[3], vars[4]) in
   let fun2 _ vars = stencil_body_fun2 lambda  (vars[0], vars[1], vars[2], vars[3], vars[4]) in
@@ -73,8 +72,8 @@ let update_fun_stencil [len_y][len_x]
     |> flip (map2 zip) image
     |> stencil_2d ixs fun2 empty
 
-let do_srad [len_y][len_x] (niter: i32) (lambda: f32) f (image: [len_y][len_x]u8): [len_y][len_x]f32 =
-  let flat_length_f32: f32 = f32.i64 (len_y * len_x)
+let do_srad [Ny][Nx] (niter: i32) (lambda: f32) f (image: [Ny][Nx]u8): [Ny][Nx]f32 =
+  let flat_length_f32: f32 = f32.i64 (Ny * Nx)
   let image = map (map (f32.u8 >-> (/ 255.0) >-> f32.exp)) image
   let update_fun image =
     let sum = f32.sum (flatten image)

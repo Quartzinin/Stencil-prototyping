@@ -308,6 +308,7 @@ class Globs {
         };
 };
 
+template<const int blocksize_flat>
 int getPhysicalBlockCount(void){
     cudaDeviceProp dprop;
     // assume that device 0 exists and that it is the desired one.
@@ -317,26 +318,26 @@ int getPhysicalBlockCount(void){
     printf("Device properties:\n");
     printf("\tmaxThreadsPerSM = %d\n", maxThreadsPerSM);
     printf("\tSM_count = %d\n", SM_count);
-    printf("\tmaxThreads = %d\n", SM_count * maxThreadsPerSM);
+    printf("\tmaxThreads per SM = %d\n", SM_count * maxThreadsPerSM);
 
     int smpb = dprop.sharedMemPerBlock;
     int smpsm = dprop.sharedMemPerMultiprocessor;
     printf("\tmaximum amount of shared memory per block = %d B\n", smpb);
     printf("\tmaximum amount of shared memory per SM = %d B\n", smpsm);
     printf("\n");
-    printf("Chosen options:\n");
-    printf("\tBlocksize = %d\n", BLOCKSIZE);
-    int runningBlocksPerSM = maxThreadsPerSM / BLOCKSIZE;
-    printf("\trunningBlocksPerSM = %d\n", runningBlocksPerSM);
+    //printf("Chosen options:\n");
+    //printf("\tBlocksize = %d\n", BLOCKSIZE);
+    int runningBlocksPerSM = maxThreadsPerSM / blocksize_flat;
+    //printf("\trunningBlocksPerSM = %d\n", runningBlocksPerSM);
     int runningBlocksTotal = runningBlocksPerSM * SM_count;
-    printf("\trunningBlocksTotal = %d\n", runningBlocksTotal);
-    int runningThreadsTotal = runningBlocksTotal * BLOCKSIZE;
-    printf("\trunningThreadsTotal = %d\n", runningThreadsTotal);
-    int avail_sh_mem = min(smpb, (smpsm/runningBlocksPerSM));
-    printf("\tavailable shared memory per block = %d\n", avail_sh_mem);
+    //printf("\trunningBlocksTotal = %d\n", runningBlocksTotal);
+    //int runningThreadsTotal = runningBlocksTotal * BLOCKSIZE;
+    //printf("\trunningThreadsTotal = %d\n", runningThreadsTotal);
+    //int avail_sh_mem = min(smpb, (smpsm/runningBlocksPerSM));
+    //printf("\tavailable shared memory per block = %d\n", avail_sh_mem);
 
-    printf("\n");
-    printf("\n");
+    //printf("\n");
+    //printf("\n");
 
     return runningBlocksTotal;
 }
