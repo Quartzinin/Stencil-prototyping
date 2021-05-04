@@ -251,10 +251,10 @@ int main()
 
     constexpr int gps_x = 256;
 
-    doTest_1D<1,gps_x,0,0,0>();
+    //stripmine test
+    /*doTest_1D<1,gps_x,0,0,0>();
     doTest_1D<2,gps_x,0,1,0>();
     doTest_1D<3,gps_x,-1,1,0>();
-    doTest_1D<5,gps_x,-2,2,0>();
     doTest_1D<5,gps_x,-2,2,0>();
     doTest_1D<7,gps_x,-3,3,0>();
     doTest_1D<9,gps_x,-4,4,0>();
@@ -268,7 +268,6 @@ int main()
     doTest_1D<2,gps_x,0,1,1>();
     doTest_1D<3,gps_x,-1,1,1>();
     doTest_1D<5,gps_x,-2,2,1>();
-    doTest_1D<5,gps_x,-2,2,1>();
     doTest_1D<7,gps_x,-3,3,1>();
     doTest_1D<9,gps_x,-4,4,1>();
     doTest_1D<11,gps_x,-5,5,1>();
@@ -281,7 +280,6 @@ int main()
     doTest_1D<2,gps_x,0,1,2>();
     doTest_1D<3,gps_x,-1,1,2>();
     doTest_1D<5,gps_x,-2,2,2>();
-    doTest_1D<5,gps_x,-2,2,2>();
     doTest_1D<7,gps_x,-3,3,2>();
     doTest_1D<9,gps_x,-4,4,2>();
     doTest_1D<11,gps_x,-5,5,2>();
@@ -289,6 +287,8 @@ int main()
     doTest_1D<15,gps_x,-7,7,2>();
     doTest_1D<17,gps_x,-8,8,2>();
     doTest_1D<25,gps_x,-12,12,2>();
+    */
+
     //blocksize tests
     /*
     doTest_1D<2,256,0,1,0>();

@@ -13,8 +13,8 @@ using std::endl;
 #include "kernels-2d.h"
 
 static constexpr long2 lens = {
-   (1 << 13),
-   (1 << 13)};
+   (1 << 14),
+   (1 << 10)};
 static constexpr int lens_flat = lens.x * lens.y;
 static constexpr long n_runs = 100;
 static Globs
