@@ -318,7 +318,7 @@ int getPhysicalBlockCount(void){
     printf("Device properties:\n");
     printf("\tmaxThreadsPerSM = %d\n", maxThreadsPerSM);
     printf("\tSM_count = %d\n", SM_count);
-    printf("\tmaxThreads per SM = %d\n", SM_count * maxThreadsPerSM);
+    printf("\tmaxThreads in total = %d\n", SM_count * maxThreadsPerSM);
 
     int smpb = dprop.sharedMemPerBlock;
     int smpsm = dprop.sharedMemPerMultiprocessor;

@@ -4,9 +4,43 @@
 #include <cuda_runtime.h>
 #include "constants.h"
 
+//#define Jacobi3D
 /*******************************************************************************
  * Helper functions
  */
+template<
+    const int amin_x, const int amin_y, const int amin_z,
+    const int amax_x, const int amax_y, const int amax_z>
+__device__ __host__
+__forceinline__
+T stencil_fun_3d(const T arr[]){
+    constexpr int3 range = {
+        amax_x - amin_x + 1,
+        amax_y - amin_y + 1,
+        amax_z - amin_z + 1};
+    constexpr int total_range = range.x * range.y * range.z;
+
+    T sum_acc = 0;
+    for(int i=0; i < range.z; i++){
+        for(int j=0; j < range.y; j++){
+            for(int k=0; k < range.x; k++){
+#ifdef Jacobi3D
+                constexpr int zc = range.z / 2;
+                constexpr int yc = range.y / 2;
+                constexpr int xc = range.x / 2;
+                const bool zn = i == zc;
+                const bool yn = j == yc;
+                const bool xn = k == xc;
+                if((zn && yn) || (zn && xn) || (yn && xn))
+#endif
+                    sum_acc += arr[i*range.y*range.x + j*range.x + k];
+            }
+        }
+    }
+    sum_acc /= (T)total_range;
+    return sum_acc;
+}
+
 template<
     const int amin_x, const int amin_y, const int amin_z,
     const int amax_x, const int amax_y, const int amax_z>
@@ -29,20 +63,20 @@ void read_write_from_global(
     const long max_idx_y = lens_y - 1L;
     const long max_idx_x = lens_x - 1L;
 
-    T sum_acc = 0;
-    for(int i=amin_z; i <= amax_z; i++){
-        for(int j=amin_y; j <= amax_y; j++){
-            for(int k=amin_x; k <= amax_x; k++){
-                const long z = BOUNDL(gid_z + i, max_idx_z);
-                const long y = BOUNDL(gid_y + j, max_idx_y);
-                const long x = BOUNDL(gid_x + k, max_idx_x);
+    T vals[total_range];
+    for(int i=0; i < range.z; i++){
+        for(int j=0; j < range.y; j++){
+            for(int k=0; k < range.x; k++){
+                const long z = bound(gid_z + (i + amin_z), max_idx_z);
+                const long y = bound(gid_y + (j + amin_y), max_idx_y);
+                const long x = bound(gid_x + (k + amin_x), max_idx_x);
                 const long index = (z*lens_y + y)*lens_x + x;
-                sum_acc += A[index];
+                const int flat_idx = (i*range.y + j)*range.x + k;
+                vals[flat_idx] = A[index];
             }
         }
     }
-    sum_acc /= (T)total_range;
-    out[gindex] = sum_acc;
+    out[gindex] = stencil_fun_3d<amin_x, amin_y, amin_z, amax_x, amax_y, amax_z>(vals);
 }
 
 template<
@@ -85,19 +119,7 @@ void write_from_shared_flat(
                 }
             }
         }
-
-        T sum_acc = 0;
-        for(int i=0; i < range.z; i++){
-            for(int j=0; j < range.y; j++){
-                for(int k=0; k < range.x; k++){
-                    const int flat_idx = i*range.y*range.x + j*range.x + k;
-                    sum_acc += vals[flat_idx];
-                }
-            }
-        }
-
-        sum_acc /= (T)total_range;
-        out[gid_flat] = sum_acc;
+        out[gid_flat] = stencil_fun_3d<amin_x, amin_y, amin_z, amax_x, amax_y, amax_z>(vals);
     }
 }
 
@@ -339,10 +361,6 @@ void bigtile_flat_loader_transactionAligned(
         if(tnx_id_y >= loader_cap_y){
             tnx_id_y -= loader_cap_y;
             tnx_id_z += 1;
-        }
-
-        if(tnx_id_z >= sh_size_z){
-            break;
         }
     }
 }
@@ -610,9 +628,9 @@ void global_reads_3d_inlined_singleDim_lensSpan(
     const T* A,
     T* out,
     const long3 lens,
-    const int3 place_holder)
+    const int3 place)
 {
-    const long3 lens_spans = { 1, lens.x, lens.x*lens.y };
+    const long3 lens_spans = { 1L, long(place.y), long(place.z) };
 
     constexpr long blockdim_flat = group_size_x * group_size_y * group_size_z;
 
@@ -623,8 +641,7 @@ void global_reads_3d_inlined_singleDim_lensSpan(
     const long gidy = gid_ / lens_spans.y;
     const long gidx = gid_ % lens_spans.y;
 
-    if (gidx < lens.x && gidy < lens.y && gidz < lens.z)
-    {
+    if (gidx < lens.x && gidy < lens.y && gidz < lens.z){
         read_write_from_global
             <amin_x,amin_y,amin_z
             ,amax_x,amax_y,amax_z>
