@@ -13,11 +13,12 @@ let mean_9points
 let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
   let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
-        let n = bound (y-1) (x  )
-        let w = bound (y  ) (x-1)
-        let c = bound (y  ) (x  )
-        let e = bound (y  ) (x+1)
-        let s = bound (y+1) (x  )
+        let rbound = bound y x
+        let n = rbound (-1) ( 0)
+        let w = rbound ( 0) (-1)
+        let c = rbound ( 0) ( 0)
+        let e = rbound ( 0) ( 1)
+        let s = rbound ( 1) ( 0)
         in mean_5points (n,w,c,e,s)
         )
 
@@ -30,15 +31,16 @@ let single_iteration_stencil_5points arr =
 let single_iteration_maps_9points [Ny][Nx] (arr:[Ny][Nx]f32) =
   let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
-        let n1 = bound (y-2) (x  )
-        let n2 = bound (y-1) (x  )
-        let w1 = bound (y  ) (x-2)
-        let w2 = bound (y  ) (x-1)
-        let c  = bound (y  ) (x  )
-        let e1 = bound (y  ) (x+1)
-        let e2 = bound (y  ) (x+2)
-        let s1 = bound (y+1) (x  )
-        let s2 = bound (y+2) (x  )
+        let rbound = bound y x
+        let n1 = rbound (-2) ( 0)
+        let n2 = rbound (-1) ( 0)
+        let w1 = rbound ( 0) (-2)
+        let w2 = rbound ( 0) (-1)
+        let c  = rbound ( 0) ( 0)
+        let e1 = rbound ( 0) ( 1)
+        let e2 = rbound ( 0) ( 2)
+        let s1 = rbound ( 1) ( 0)
+        let s2 = rbound ( 2) ( 0)
         in mean_9points (n1,n2,w1,w2,c,e1,e2,s1,s2)
         )
 

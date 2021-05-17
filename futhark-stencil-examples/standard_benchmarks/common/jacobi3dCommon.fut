@@ -14,14 +14,15 @@ let mean_13points
 let single_iteration_maps_7points [Nz][Ny][Nx] (arr:[Nz][Ny][Nx]f32) =
   let bound = edgeHandling.extendEdge3D arr (Nz-1) (Ny-1) (Nx-1)
   in tabulate_3d Nz Ny Nx (\z y x ->
-        let b = bound (z-1) (y  ) (x  )
-        let n = bound (z  ) (y-1) (x  )
-        let w = bound (z  ) (y  ) (x-1)
-        let c = bound (z  ) (y  ) (x  )
-        let e = bound (z  ) (y  ) (x+1)
-        let s = bound (z  ) (y+1) (x  )
-        let t = bound (z+1) (y  ) (x  )
-        in mean_7points (b,n,w,c,e,s,t)
+        let rbound = bound z y x
+        let B = rbound (-1) ( 0) ( 0)
+        let N = rbound ( 0) (-1) ( 0)
+        let W = rbound ( 0) ( 0) (-1)
+        let C = rbound ( 0) ( 0) ( 0)
+        let E = rbound ( 0) ( 0) ( 1)
+        let S = rbound ( 0) ( 1) ( 0)
+        let T = rbound ( 1) ( 0) ( 0)
+        in mean_7points (B,N,W,C,E,S,T)
         )
 
 let single_iteration_stencil_7points arr =
@@ -33,19 +34,20 @@ let single_iteration_stencil_7points arr =
 let single_iteration_maps_13points [Nz][Ny][Nx] (arr:[Nz][Ny][Nx]f32) =
   let bound = edgeHandling.extendEdge3D arr (Nz-1) (Ny-1) (Nx-1)
   in tabulate_3d Nz Ny Nx (\z y x ->
-        let b1 = bound (z-2) (y  ) (x  )
-        let b2 = bound (z-1) (y  ) (x  )
-        let n1 = bound (z  ) (y-2) (x  )
-        let n2 = bound (z  ) (y-1) (x  )
-        let w1 = bound (z  ) (y  ) (x-2)
-        let w2 = bound (z  ) (y  ) (x-1)
-        let c  = bound (z  ) (y  ) (x  )
-        let e1 = bound (z  ) (y  ) (x+1)
-        let e2 = bound (z  ) (y  ) (x+2)
-        let s1 = bound (z  ) (y+1) (x  )
-        let s2 = bound (z  ) (y+2) (x  )
-        let t1 = bound (z+1) (y  ) (x  )
-        let t2 = bound (z+2) (y  ) (x  )
+        let rbound = bound z y x
+        let b1 = rbound (-2) ( 0) ( 0)
+        let b2 = rbound (-1) ( 0) ( 0)
+        let n1 = rbound ( 0) (-2) ( 0)
+        let n2 = rbound ( 0) (-1) ( 0)
+        let w1 = rbound ( 0) ( 0) (-2)
+        let w2 = rbound ( 0) ( 0) (-1)
+        let c  = rbound ( 0) ( 0) ( 0)
+        let e1 = rbound ( 0) ( 0) ( 1)
+        let e2 = rbound ( 0) ( 0) ( 2)
+        let s1 = rbound ( 0) ( 1) ( 0)
+        let s2 = rbound ( 0) ( 2) ( 0)
+        let t1 = rbound ( 1) ( 0) ( 0)
+        let t2 = rbound ( 2) ( 0) ( 0)
         in mean_13points (b1,b2,n1,n2,w1,w2,c,e1,e2,s1,s2,t1,t2)
         )
 

@@ -11,13 +11,14 @@ let single_iteration_maps [Nz][Ny][Nx]
     : [Nz][Ny][Nx]f32 =
   let bound = edgeHandling.extendEdge3D arr (Nz-1) (Ny-1) (Nx-1)
   in tabulate_3d Nz Ny Nx (\z y x ->
-        let B = bound (z-1) (y  ) (x  )
-        let N = bound (z  ) (y-1) (x  )
-        let W = bound (z  ) (y  ) (x-1)
-        let C = bound (z  ) (y  ) (x  )
-        let E = bound (z  ) (y  ) (x+1)
-        let S = bound (z  ) (y+1) (x  )
-        let T = bound (z+1) (y  ) (x  )
+        let rbound = bound z y x
+        let B = rbound (-1) ( 0) ( 0)
+        let N = rbound ( 0) (-1) ( 0)
+        let W = rbound ( 0) ( 0) (-1)
+        let C = rbound ( 0) ( 0) ( 0)
+        let E = rbound ( 0) ( 0) ( 1)
+        let S = rbound ( 0) ( 1) ( 0)
+        let T = rbound ( 1) ( 0) ( 0)
         in updater B N W C E S T
         )
 
