@@ -1,17 +1,45 @@
 import "./edgeHandling"
 
--- gaussian weighted mean
-let gauss_25points
-    ((bc, bn1, bd1, bn2, bn2d1, bd2):(f32,f32,f32,f32,f32,f32))
-    (weight_sum: f32)
+let sigma:f32 = 1.5
+let gaussian_2d x y = f32.e**(-((x**2 + y**2)/(2*sigma**2))) * (1/(2*f32.pi*sigma**2))
+-- weights are based on absolute distances to centerpoint
+let raw_weights = ( gaussian_2d 0 0, gaussian_2d 1 0, gaussian_2d 1 1
+                  , gaussian_2d 0 2, gaussian_2d 1 2, gaussian_2d 2 2)
+-- number of instances of each weight times the weight.
+let weight_sum =
+        4*raw_weights.5
+      + 8*raw_weights.4
+      + 4*raw_weights.3
+      + 4*raw_weights.2
+      + 4*raw_weights.1
+      + 1*raw_weights.0
+-- normalizied weights.
+let nrmw =
+    ( raw_weights.0 / weight_sum
+    , raw_weights.1 / weight_sum
+    , raw_weights.2 / weight_sum
+    , raw_weights.3 / weight_sum
+    , raw_weights.4 / weight_sum
+    , raw_weights.5 / weight_sum
+    )
+
+-- gaussian weighted mean / blur
+let gauss_blur
     (p: (f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32))
     : f32
-    =(p.0 *bd2   + p.1 *bn2d1 + p.2 *bn2 + p.3 *bn2d1 + p.4 *bd2
-    + p.5 *bn2d1 + p.6 *bd1   + p.7 *bn1 + p.8 *bd1   + p.9 *bn2d1
-    + p.11*bn2   + p.12*bn1   + p.13*bc  + p.14*bn1   + p.15*bn2
-    + p.15*bn2d1 + p.16*bd1   + p.17*bn1 + p.18*bd1   + p.19*bn2d1
-    + p.20*bd2   + p.21*bn2d1 + p.22*bn2 + p.23*bn2d1 + p.24*bd2
-    ) / weight_sum
+--    = p.0 *nrmw.5 + p.1 *nrmw.4 + p.2 *nrmw.3 + p.3 *nrmw.4 + p.4 *nrmw.5
+--    + p.5 *nrmw.4 + p.6 *nrmw.2 + p.7 *nrmw.1 + p.8 *nrmw.2 + p.9 *nrmw.4
+--    + p.11*nrmw.3 + p.12*nrmw.1 + p.13*nrmw.0 + p.14*nrmw.1 + p.15*nrmw.3
+--    + p.15*nrmw.4 + p.16*nrmw.2 + p.17*nrmw.1 + p.18*nrmw.2 + p.19*nrmw.2
+--    + p.20*nrmw.5 + p.21*nrmw.4 + p.22*nrmw.3 + p.23*nrmw.4 + p.24*nrmw.1
+-- using distribution of multiplication over addition.
+    = nrmw.0 * (p.13)
+    + nrmw.1 * (p.7+p.12+p.14+p.17)
+    + nrmw.2 * (p.6+p.8+p.16+p.18)
+    + nrmw.3 * (p.2+p.11+p.15+p.22)
+    + nrmw.4 * (p.1+p.3+p.5+p.9+p.15+p.19+p.21+p.23)
+    + nrmw.5 * (p.0+p.4+p.20+p.24)
+
 
 let single_iteration_maps_25points [Ny][Nx] fun (arr:[Ny][Nx]f32) =
   let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
@@ -60,17 +88,8 @@ let single_iteration_stencil_25points fun arr =
   stencil_2d ixs f empty arr
 
 let num_iterations: i32 = 5
-let sigma:f32 = 1.5
 
-let compute_iters [Ny][Nx] f (arr:[Ny][Nx]f32)
-  : [Ny][Nx]f32 =
-  -- computer of weights
-  let cws (x,y) = f32.e**(-((x**2 + y**2)/(2*sigma**2))) * (1/(2*f32.pi*sigma**2))
-  -- weights
-  let weights = (cws (0,0), cws (1,0), cws (1,1), cws (0,2), cws (2,2), cws (2,2)) in
-  let weight_sum = 4*weights.5 + 8*weights.4 + 4*weights.3 + 4*weights.2 + 4*weights.1 + 1*weights.0 in
-  let updater = gauss_25points weights weight_sum in
-  iterate num_iterations (f updater) arr
+let compute_iters f arr = iterate num_iterations (f gauss_blur) arr
 
 module gaussian2dCommon = {
   let bench_25p_maps    = compute_iters single_iteration_maps_25points

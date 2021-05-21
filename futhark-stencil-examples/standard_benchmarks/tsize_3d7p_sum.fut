@@ -27,14 +27,6 @@ let stencil p inp =
   let f c v = stencil_fun p v[0] v[1] v[2] c v[4] v[5] v[6] in
   stencil_3d ixs f inp inp
 
--- highlights a bug.
--- let stencil2d p inp = stencil_2d [(-1,0),(1,0)] (\c v -> p (p c v[0]) v[1]) inp inp
--- 1==
--- entry: main_stencil2d_i8
--- compiled random input { [255][255]i8 } auto output
---entry main_stencil2d_i8 = stencil2d (i8.+)
-
-
 -- ==
 -- entry: main_stencil_i8
 -- compiled random input { [255][255][255]i8 } auto output
