@@ -1,3 +1,4 @@
+default: meansCUDA meansOpenCL
 
 sources=gaussian2d_map_nests.fut\
   gaussian2d_stencil.fut\
@@ -49,8 +50,15 @@ datasets:
 %.exeopencl: %.fut
 	futhark opencl -o $@ $<
 
-benchmarkCuda: $(cudas) datasets
-	mkdir -p runtimesCUDA
+meansCUDA: runtimesCUDA
+	mkdir meansCUDA
+	for g in `ls runtimesCUDA | grep ".txt$$"`; do echo "./runtimesCUDA/$${g} ./meansCUDA/$${g}" | python3 ./domeans.py ; done ;
+meansOpenCL: runtimesOpenCL
+	mkdir meansOpenCL
+	for g in `ls runtimesOpenCL | grep ".txt$$"`; do echo "./runtimesOpenCL/$${g} ./meansOpenCL/$${g}" | python3 ./domeans.py ; done ;
+
+runtimesCUDA: $(cudas) datasets
+	mkdir runtimesCUDA
 	for g in ${srad_sizes}; do \
 	    cat ./datasets/$${g}xu8.bin | ./srad_nest_maps.execuda -b -r ${runs} -t ./runtimesCUDA/srad_map_nests_$${g}xu8.txt > /dev/null; \
 	    cat ./datasets/$${g}xu8.bin | ./srad_stencil.execuda -b -r ${runs} -t ./runtimesCUDA/srad_stencil_$${g}xu8.txt > /dev/null; \
@@ -75,8 +83,8 @@ benchmarkCuda: $(cudas) datasets
 	    break; \
 	done;
 
-benchmarkOpenCL: $(opencls) datasets
-	mkdir -p runtimesOpenCL
+runtimesOpenCL: $(opencls) datasets
+	mkdir runtimesOpenCL
 	for g in ${srad_sizes}; do \
 	    cat ./datasets/$${g}xu8.bin | ./srad_nest_maps.exeopencl -b -r ${runs} -t ./runtimesOpenCL/srad_map_nests_$${g}xu8.txt > /dev/null; \
 	    cat ./datasets/$${g}xu8.bin | ./srad_stencil.exeopencl -b -r ${runs} -t ./runtimesOpenCL/srad_stencil_$${g}xu8.txt > /dev/null; \
@@ -100,6 +108,7 @@ benchmarkOpenCL: $(opencls) datasets
 	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.exeopencl --entry-point main_nest_maps_f64 -b -r ${runs} -t ./runtimesOpenCL/tsize_stencil_$${g}xf64.txt > /dev/null; \
 	    break; \
 	done;
+
 
 clean:
 	rm -f *.c *.exe *.bin *.execuda *.exeopencl
