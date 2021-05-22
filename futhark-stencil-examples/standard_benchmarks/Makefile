@@ -33,6 +33,8 @@ sizes3d=255x255x255 511x511x511
 srad_sizes=2047x2047 4095x4095
 
 runs=50
+blocksize=256
+exeoptions=--default-group-size ${blocksize} -b -r ${runs}
 
 datasets:
 	mkdir datasets
@@ -50,65 +52,41 @@ datasets:
 %.exeopencl: %.fut
 	futhark opencl -o $@ $<
 
-meansCUDA: runtimesCUDA
+meansCUDA: cuda.runtimes
 	mkdir meansCUDA
-	for g in `ls runtimesCUDA | grep ".txt$$"`; do echo "./runtimesCUDA/$${g} ./meansCUDA/$${g}" | python3 ./domeans.py ; done ;
-meansOpenCL: runtimesOpenCL
+	for g in `ls cuda.runtimes | grep ".txt$$"`; do echo "./cuda.runtimes/$${g} ./meansCUDA/$${g}" | python3 ./domeans.py ; done ;
+meansOpenCL: opencl.runtimes
 	mkdir meansOpenCL
-	for g in `ls runtimesOpenCL | grep ".txt$$"`; do echo "./runtimesOpenCL/$${g} ./meansOpenCL/$${g}" | python3 ./domeans.py ; done ;
+	for g in `ls opencl.runtimes | grep ".txt$$"`; do echo "./opencl.runtimes/$${g} ./meansOpenCL/$${g}" | python3 ./domeans.py ; done ;
 
-runtimesCUDA: $(cudas) datasets
-	mkdir runtimesCUDA
+compileAll: $(cudas) $(opencls)
+
+%.runtimes: datasets compileAll
+	mkdir $@
 	for g in ${srad_sizes}; do \
-	    cat ./datasets/$${g}xu8.bin | ./srad_nest_maps.execuda -b -r ${runs} -t ./runtimesCUDA/srad_map_nests_$${g}xu8.txt > /dev/null; \
-	    cat ./datasets/$${g}xu8.bin | ./srad_stencil.execuda -b -r ${runs} -t ./runtimesCUDA/srad_stencil_$${g}xu8.txt > /dev/null; \
+	    cat ./datasets/$${g}xu8.bin | ./srad_nest_maps.exe$* ${exeoptions} -t ./$@/srad_map_nests_$${g}xu8.txt > /dev/null; \
+	    cat ./datasets/$${g}xu8.bin | ./srad_stencil.exe$*   ${exeoptions} -t ./$@/srad_stencil_$${g}xu8.txt > /dev/null; \
 	done;
 	for f in ${bases2d}; do \
 	    for g in ${sizes2d}; do \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_map_nests.execuda -b -r ${runs} -t ./runtimesCUDA/$${f}_map_nests_$${g}xf32.txt > /dev/null; \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_stencil.execuda -b -r ${runs} -t ./runtimesCUDA/$${f}_stencil_$${g}xf32.txt > /dev/null; \
+	        cat ./datasets/$${g}xf32.bin | ./$${f}_map_nests.exe$* ${exeoptions} -t ./$@/$${f}_map_nests_$${g}xf32.txt > /dev/null; \
+	        cat ./datasets/$${g}xf32.bin | ./$${f}_stencil.exe$*   ${exeoptions} -t ./$@/$${f}_stencil_$${g}xf32.txt > /dev/null; \
 	    done; \
 	done;
 	for f in ${bases3d}; do \
 	    for g in ${sizes3d}; do \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_map_nests.execuda -b -r ${runs} -t ./runtimesCUDA/$${f}_map_nests_$${g}xf32.txt > /dev/null; \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_stencil.execuda -b -r ${runs} -t ./runtimesCUDA/$${f}_stencil_$${g}xf32.txt > /dev/null; \
+	        cat ./datasets/$${g}xf32.bin | ./$${f}_map_nests.exe$* ${exeoptions} -t ./$@/$${f}_map_nests_$${g}xf32.txt > /dev/null; \
+	        cat ./datasets/$${g}xf32.bin | ./$${f}_stencil.exe$*   ${exeoptions} -t ./$@/$${f}_stencil_$${g}xf32.txt > /dev/null; \
 	    done; \
 	done;
 	for g in ${sizes3d}; do \
-	    cat ./datasets/$${g}xi8.bin | ./tsize_3d7p_sum.execuda --entry-point main_nest_maps_i8 -b -r ${runs} -t ./runtimesCUDA/tsize_map_nests_$${g}xi8.txt > /dev/null; \
-	    cat ./datasets/$${g}xi8.bin | ./tsize_3d7p_sum.execuda --entry-point main_nest_maps_i8 -b -r ${runs} -t ./runtimesCUDA/tsize_stencil_$${g}xi8.txt > /dev/null; \
-	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.execuda --entry-point main_nest_maps_f64 -b -r ${runs} -t ./runtimesCUDA/tsize_map_nests_$${g}xf64.txt > /dev/null; \
-	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.execuda --entry-point main_nest_maps_f64 -b -r ${runs} -t ./runtimesCUDA/tsize_stencil_$${g}xf64.txt > /dev/null; \
+	    cat ./datasets/$${g}xi8.bin  | ./tsize_3d7p_sum.exe$* --entry-point main_nest_maps_i8 ${exeoptions}  -t ./$@/tsize_map_nests_$${g}xi8.txt > /dev/null; \
+	    cat ./datasets/$${g}xi8.bin  | ./tsize_3d7p_sum.exe$* --entry-point main_stencil_i8 ${exeoptions}    -t ./$@/tsize_stencil_$${g}xi8.txt > /dev/null; \
+	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.exe$* --entry-point main_nest_maps_f64 ${exeoptions} -t ./$@/tsize_map_nests_$${g}xf64.txt > /dev/null; \
+	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.exe$* --entry-point main_stencil_f64 ${exeoptions}   -t ./$@/tsize_stencil_$${g}xf64.txt > /dev/null; \
 	    break; \
 	done;
-
-runtimesOpenCL: $(opencls) datasets
-	mkdir runtimesOpenCL
-	for g in ${srad_sizes}; do \
-	    cat ./datasets/$${g}xu8.bin | ./srad_nest_maps.exeopencl -b -r ${runs} -t ./runtimesOpenCL/srad_map_nests_$${g}xu8.txt > /dev/null; \
-	    cat ./datasets/$${g}xu8.bin | ./srad_stencil.exeopencl -b -r ${runs} -t ./runtimesOpenCL/srad_stencil_$${g}xu8.txt > /dev/null; \
-	done;
-	for f in ${bases2d}; do \
-	    for g in ${sizes2d}; do \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_map_nests.exeopencl -b -r ${runs} -t ./runtimesOpenCL/$${f}_map_nests_$${g}xf32.txt > /dev/null; \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_stencil.exeopencl -b -r ${runs} -t ./runtimesOpenCL/$${f}_stencil_$${g}xf32.txt > /dev/null; \
-	    done; \
-	done;
-	for f in ${bases3d}; do \
-	    for g in ${sizes3d}; do \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_map_nests.exeopencl -b -r ${runs} -t ./runtimesOpenCL/$${f}_map_nests_$${g}xf32.txt > /dev/null; \
-	        cat ./datasets/$${g}xf32.bin | ./$${f}_stencil.exeopencl -b -r ${runs} -t ./runtimesOpenCL/$${f}_stencil_$${g}xf32.txt > /dev/null; \
-	    done; \
-	done;
-	for g in ${sizes3d}; do \
-	    cat ./datasets/$${g}xi8.bin | ./tsize_3d7p_sum.exeopencl --entry-point main_nest_maps_i8 -b -r ${runs} -t ./runtimesOpenCL/tsize_map_nests_$${g}xi8.txt > /dev/null; \
-	    cat ./datasets/$${g}xi8.bin | ./tsize_3d7p_sum.exeopencl --entry-point main_nest_maps_i8 -b -r ${runs} -t ./runtimesOpenCL/tsize_stencil_$${g}xi8.txt > /dev/null; \
-	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.exeopencl --entry-point main_nest_maps_f64 -b -r ${runs} -t ./runtimesOpenCL/tsize_map_nests_$${g}xf64.txt > /dev/null; \
-	    cat ./datasets/$${g}xf64.bin | ./tsize_3d7p_sum.exeopencl --entry-point main_nest_maps_f64 -b -r ${runs} -t ./runtimesOpenCL/tsize_stencil_$${g}xf64.txt > /dev/null; \
-	    break; \
-	done;
-
 
 clean:
 	rm -f *.c *.exe *.bin *.execuda *.exeopencl
+	rm -fr cuda.runtimes opencl.runtimes datasets
