@@ -36,6 +36,9 @@ runs=50
 blocksize=256
 exeoptions=--default-group-size ${blocksize} -b -r ${runs}
 
+meansFolderCUDA=meansCUDA_${blocksize}_
+meansFolderOpencl=meansOpenCL_${blocksize}_
+
 datasets:
 	mkdir datasets
 	futhark dataset -s 1337 -b -g '[2047][2047]u8' > datasets/2047x2047xu8.bin
@@ -53,11 +56,11 @@ datasets:
 	futhark opencl -o $@ $<
 
 meansCUDA: cuda.runtimes
-	mkdir meansCUDA
-	for g in `ls cuda.runtimes | grep ".txt$$"`; do echo "./cuda.runtimes/$${g} ./meansCUDA/$${g}" | python3 ./domeans.py ; done ;
+	mkdir ${meansFolderCUDA}
+	for g in `ls cuda.runtimes | grep ".txt$$"`; do echo "./cuda.runtimes/$${g} ./${meansFolderCUDA}/$${g}" | python3 ./domeans.py ; done ;
 meansOpenCL: opencl.runtimes
-	mkdir meansOpenCL
-	for g in `ls opencl.runtimes | grep ".txt$$"`; do echo "./opencl.runtimes/$${g} ./meansOpenCL/$${g}" | python3 ./domeans.py ; done ;
+	mkdir ${meansFolderOpencl}
+	for g in `ls opencl.runtimes | grep ".txt$$"`; do echo "./opencl.runtimes/$${g} ./${meansFolderOpencl}/$${g}" | python3 ./domeans.py ; done ;
 
 compileAll: $(cudas) $(opencls)
 
