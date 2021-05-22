@@ -16,7 +16,7 @@ static constexpr long2 lens = {
    (1 << 12)+2,
    (1 << 12)+4};
 static constexpr int lens_flat = lens.x * lens.y;
-static constexpr long n_runs = 100;
+static constexpr long n_runs = 1;
 static Globs
     <long2,int2
     ,Kernel2dVirtual
@@ -379,14 +379,18 @@ int main()
     */
 
     //testing reuse
-    doTest_2D<-1,1,0,1, gps_x,gps_y,0,2>(physBlocks);
+    /*doTest_2D<-1,1,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-1,2,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-2,2,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-2,3,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-3,3,0,1, gps_x,gps_y,0,2>(physBlocks);
-    doTest_2D<-3,4,0,1, gps_x,gps_y,0,2>(physBlocks);
-    doTest_2D<-4,4,0,1, gps_x,gps_y,0,2>(physBlocks);
-    doTest_2D<-4,5,0,1, gps_x,gps_y,0,2>(physBlocks);
+    doTest_2D<-3,4,0,1, gps_x,gps_y,0,2>(physBlocks);*/
+    doTest_2D<-1,1,-1,1, 32,4,3,3>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,1,-1,1, 32,8,2,2>(physBlocks);
+    //doTest_2D<-1,1,-1,1, 32,16,0,0>(physBlocks);
+    //doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
+    /*doTest_2D<-4,5,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-5,5,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-5,6,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-6,6,0,1, gps_x,gps_y,0,2>(physBlocks);
@@ -395,12 +399,11 @@ int main()
     doTest_2D<-2,2,0,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-2,3,0,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-3,3,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-3,4,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-4,4,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-4,5,0,1, gps_x,gps_y,1,1>(physBlocks);
+    doTest_2D<-3,4,0,1, gps_x,gps_y,1,1>(physBlocks);*/
+    /*doTest_2D<-4,5,0,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-5,5,0,1, gps_x,gps_y,1,1>(physBlocks);
     doTest_2D<-5,6,0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-6,6,0,1, gps_x,gps_y,1,1>(physBlocks);
+    doTest_2D<-6,6,0,1, gps_x,gps_y,1,1>(physBlocks);*/
 //    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
 //    doTest_2D< 0,1, 0,1, 32,32,1,1>(physBlocks);
 //    doTest_2D<-1,1, 0,1, 32,32,1,1>(physBlocks);
