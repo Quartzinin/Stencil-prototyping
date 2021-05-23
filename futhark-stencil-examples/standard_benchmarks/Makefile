@@ -1,4 +1,4 @@
-default: meansCUDA meansOpenCL
+default: meansCUDA
 
 sources=gaussian2d_map_nests.fut\
   gaussian2d_stencil.fut\
