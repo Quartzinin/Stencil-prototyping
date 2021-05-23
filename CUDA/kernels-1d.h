@@ -5,8 +5,23 @@
 #include "constants.h"
 
 /*
- * inlined indices using a provided associative and commutative operator with a neutral element.
+ * inlined indices.
  */
+template<
+    const int amin_x,
+    const int amax_x>
+__device__ __host__
+__forceinline__
+T stencil_fun_1d(const T arr[]){
+    constexpr int range = amax_x - amin_x + 1;
+
+    T sum_acc = 0;
+    for(int k=0; k < range; k++){
+        sum_acc += arr[k];
+    }
+    sum_acc /= (T)range;
+    return sum_acc;
+}
 
 template<int amin_x, int sh_size_flat, int group_size>
 __device__
@@ -27,7 +42,7 @@ void bigtile_flat_loader(
         const long gx = long(local_x) + block_offset + long(amin_x);
         if (local_x < sh_size_flat)
         {
-            tile[local_x] = A[BOUNDL(gx, max_ix)];
+            tile[local_x] = A[bound<(amin_x<0),long>(gx, max_ix)];
         }
     }
 }
@@ -57,13 +72,7 @@ void write_from_shared_flat(
             const int x = locals + k;
             vals[k] = tile[long(x)];
         }
-
-        T sum_acc = 0;
-        for(int k=0; k < range; k++){
-            sum_acc += vals[k];
-        }
-        sum_acc /= (T)range;
-        out[gid_x] = sum_acc;
+        out[gid_x] = stencil_fun_1d<amin_x,amax_x>(vals);
     }
 }
 
@@ -84,15 +93,10 @@ void global_read_1d_inline(
     if (should_write)
     {
         for (int i = 0; i < range; ++i){
-            const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
+            const long loc_x = bound<(ix_min<0),long>(gid + long(i + ix_min), max_ix);
             vals[i] = A[loc_x];
         }
-
-        T sum_acc = 0;
-        for (int i = 0; i < range; ++i){
-            sum_acc += vals[i];
-        } 
-        out[gid] = sum_acc/(T)range;
+        out[gid] = stencil_fun_1d<ix_min,ix_max>(vals);
     }
 }
 
@@ -108,7 +112,7 @@ void global_read_1d_inline_strip(
     const long max_ix = nx - 1;
     const int range = (ix_max - ix_min) + 1;
     const int strip_length = group_size*strip_x;
-    const long start_gid_offset = long(blockIdx.x)*long(strip_length) + long(threadIdx.x); 
+    const long start_gid_offset = long(blockIdx.x)*long(strip_length) + long(threadIdx.x);
     for (int x__ = 0; x__ < strip_x; ++x__)
     {
         T vals[range];
@@ -117,15 +121,10 @@ void global_read_1d_inline_strip(
         if (should_write)
         {
             for (int i = 0; i < range; ++i){
-                const long loc_x = BOUNDL(gid + long(i + ix_min), max_ix);
+                const long loc_x = bound<(ix_min<0),long>(gid + long(i + ix_min), max_ix);
                 vals[i] = A[loc_x];
             }
-
-            T sum_acc = 0;
-            for (int i = 0; i < range; ++i){
-                sum_acc += vals[i];
-            } 
-            out[gid] = sum_acc/(T)range;
+            out[gid] = stencil_fun_1d<ix_min,ix_max>(vals);
         }
     }
 }
@@ -145,23 +144,16 @@ void small_tile_1d_inline(
     const long max_ix = nx - 1;
     const int range = wasted + 1;
     extern __shared__ T tile[];
-    tile[long(threadIdx.x)] = A[BOUNDL(gid, max_ix)];
+    tile[long(threadIdx.x)] = A[bound<(ix_min<0),long>(gid, max_ix)];
     __syncthreads();
     T vals[range];
     if ((0 <= gid && gid < nx) && (-ix_min <= threadIdx.x && threadIdx.x < group_size-ix_max))
     {
-        T sum_acc = 0;
-
         for (int i = 0; i < range; ++i){
             const int loc_x = threadIdx.x + i + ix_min;
             vals[i] = tile[long(loc_x)];
         }
-
-        for (int i = 0; i < range; ++i){
-            sum_acc += vals[i];
-        } 
-
-        out[gid] = sum_acc/(T)range;
+        out[gid] = stencil_fun_1d<ix_min,ix_max>(vals);
     }
 }
 
@@ -227,7 +219,7 @@ void stripmine_big_tile_1d_inlined(
          , lens
          , loc_flat
          , block_offset_x);
-    
+
     // the tile has to be fully done being loaded before we start reading
     __syncthreads();
     for(int k__ = 0; k__ < strip_x; k__++){

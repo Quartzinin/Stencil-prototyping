@@ -1,0 +1,547 @@
+Device properties:
+	maxThreadsPerSM = 1024
+	SM_count = 68
+	maxThreads per SM = 69632
+	maximum amount of shared memory per block = 49152 B
+	maximum amount of shared memory per SM = 65536 B
+
+{ x_len = 4098, y_len = 4100, total_len = 16801800 }
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 556 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 559 microseconds
+shared memory per block: stripmine = 2376 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 559 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 597 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.205 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1275 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1275 microseconds
+shared memory per block: stripmine = 2640 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1276 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 1320 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.372 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1349 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1350 microseconds
+shared memory per block: stripmine = 2720 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1350 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1407 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.665 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1329 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1330 microseconds
+shared memory per block: stripmine = 2992 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1331 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1390 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.807 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 3080 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1372 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.115 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 2789 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2383 microseconds
+shared memory per block: stripmine = 3360 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2343 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2327 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.385 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3382 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2413 microseconds
+shared memory per block: stripmine = 3456 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2346 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 512 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 4488 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 512 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 532 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.206 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+shared memory per block: stripmine = 4752 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 887 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 981 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.372 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1624 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1600 microseconds
+shared memory per block: stripmine = 4896 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1598 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1251 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.653 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1435 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1436 microseconds
+shared memory per block: stripmine = 5168 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1342 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1387 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.807 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 5320 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.108 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1938 microseconds
+shared memory per block: stripmine = 5600 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1939 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2045 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.400 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3349 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 3140 microseconds
+shared memory per block: stripmine = 5760 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2320 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 8712 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 535 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.206 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+shared memory per block: stripmine = 8976 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 889 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 918 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.372 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1612 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1613 microseconds
+shared memory per block: stripmine = 9248 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1223 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1249 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.664 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1446 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1448 microseconds
+shared memory per block: stripmine = 9520 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1455 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1501 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.806 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 9800 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1295 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.114 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1937 microseconds
+shared memory per block: stripmine = 10080 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1942 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2046 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.392 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3327 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2525 microseconds
+shared memory per block: stripmine = 10368 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2330 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 2376 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.218 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 885 microseconds
+shared memory per block: stripmine = 2640 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 1058 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.373 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1626 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1608 microseconds
+shared memory per block: stripmine = 2720 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1598 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1656 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.655 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1497 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1497 microseconds
+shared memory per block: stripmine = 2992 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1497 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1392 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.827 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 3080 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1372 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.121 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1938 microseconds
+shared memory per block: stripmine = 3360 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1937 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2045 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.382 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3231 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2670 microseconds
+shared memory per block: stripmine = 3456 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2313 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 526 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 4680 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 530 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.206 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+shared memory per block: stripmine = 5200 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 998 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.373 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1611 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1628 microseconds
+shared memory per block: stripmine = 5280 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1141 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1181 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.660 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1360 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1362 microseconds
+shared memory per block: stripmine = 5808 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1362 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1413 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.810 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1855 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1859 microseconds
+shared memory per block: stripmine = 5896 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1465 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1534 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.107 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 2371 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2816 microseconds
+shared memory per block: stripmine = 6432 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1945 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2045 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.378 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3326 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2606 microseconds
+shared memory per block: stripmine = 6528 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][64]f32 - flat load (add/carry) - singleDim grid ## : mean 2323 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 17160 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 557 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 532 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.205 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 885 microseconds
+shared memory per block: stripmine = 17424 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 894 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 1060 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.378 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1612 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1597 microseconds
+shared memory per block: stripmine = 17952 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1606 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1655 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.664 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1382 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1384 microseconds
+shared memory per block: stripmine = 18224 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1390 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1392 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.807 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 18760 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1301 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1372 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.107 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1937 microseconds
+shared memory per block: stripmine = 19040 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1951 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2045 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.375 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3056 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2813 microseconds
+shared memory per block: stripmine = 19584 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[64][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2328 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 9288 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 532 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.205 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+shared memory per block: stripmine = 10320 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 889 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 918 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.370 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1596 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1597 microseconds
+shared memory per block: stripmine = 10400 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 1173 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1205 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.654 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1393 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1391 microseconds
+shared memory per block: stripmine = 11440 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 1393 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1389 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.808 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 11528 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 1295 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.106 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1937 microseconds
+shared memory per block: stripmine = 12576 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 2101 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2175 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.376 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3386 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2417 microseconds
+shared memory per block: stripmine = 12672 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[8][128]f32 - flat load (add/carry) - singleDim grid ## : mean 2372 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 4488 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 512 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.205 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 885 microseconds
+shared memory per block: stripmine = 4752 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 1119 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.372 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1596 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1568 microseconds
+shared memory per block: stripmine = 4896 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1500 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1467 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.653 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1666 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1669 microseconds
+shared memory per block: stripmine = 5168 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1616 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1607 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.807 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 5320 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.106 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 2786 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2378 microseconds
+shared memory per block: stripmine = 5600 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1942 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2045 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.392 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3348 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 3116 microseconds
+shared memory per block: stripmine = 5760 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2321 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 8712 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 535 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.202 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 885 microseconds
+shared memory per block: stripmine = 8976 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 889 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 918 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.376 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1573 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1613 microseconds
+shared memory per block: stripmine = 9248 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1372 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1395 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.654 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1508 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1510 microseconds
+shared memory per block: stripmine = 9520 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1517 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1390 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.808 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 9800 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 1295 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.108 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1937 microseconds
+shared memory per block: stripmine = 10080 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2025 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2129 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.381 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3389 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2432 microseconds
+shared memory per block: stripmine = 10368 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][32]f32 - flat load (add/carry) - singleDim grid ## : mean 2329 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.097 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 8840 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 532 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 532 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.205 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 886 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+shared memory per block: stripmine = 9360 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 889 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 1148 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.372 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1596 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1563 microseconds
+shared memory per block: stripmine = 9504 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1478 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1497 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.654 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1699 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1702 microseconds
+shared memory per block: stripmine = 10032 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1634 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1617 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.807 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 10184 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1296 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.108 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 2786 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2352 microseconds
+shared memory per block: stripmine = 10720 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1945 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2045 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.376 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3354 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 3262 microseconds
+shared memory per block: stripmine = 10880 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[16][64]f32 - flat load (add/carry) - singleDim grid ## : mean 2324 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2442 microseconds
+const int ixs[4]: y= 0...1, x= 0...1
+cpu c 2d for 1 run : 0.101 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 511 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 511 microseconds
+shared memory per block: stripmine = 17160 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 547 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 531 microseconds
+const int ixs[6]: y= -1...1, x= 0...1
+cpu c 2d for 1 run : 0.206 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 885 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 886 microseconds
+shared memory per block: stripmine = 17680 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 894 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][127]f32 - singleDim grid ## : mean 918 microseconds
+const int ixs[9]: y= -1...1, x= -1...1
+cpu c 2d for 1 run : 0.372 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1555 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1615 microseconds
+shared memory per block: stripmine = 17952 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1567 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1566 microseconds
+const int ixs[12]: y= -1...2, x= -1...1
+cpu c 2d for 1 run : 0.653 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1534 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1536 microseconds
+shared memory per block: stripmine = 18480 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1546 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][126]f32 - singleDim grid ## : mean 1389 microseconds
+const int ixs[16]: y= -1...2, x= -1...2
+cpu c 2d for 1 run : 0.806 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1290 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1292 microseconds
+shared memory per block: stripmine = 18760 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 1304 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 1371 microseconds
+const int ixs[20]: y= -2...2, x= -1...2
+cpu c 2d for 1 run : 1.106 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 1936 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 1937 microseconds
+shared memory per block: stripmine = 19296 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 2019 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][125]f32 - singleDim grid ## : mean 2113 microseconds
+const int ixs[25]: y= -2...2, x= -2...2
+cpu c 2d for 1 run : 1.379 seconds
+## Benchmark 2d global read - inlined ixs - singleDim grid ## : mean 3416 microseconds
+## Benchmark 2d big tile - inlined idxs - flat load (add/carry) - singleDim grid ## : mean 2450 microseconds
+shared memory per block: stripmine = 19584 B
+## Benchmark 2d big tile - inlined idxs - stripmined: strip_size=[32][64]f32 - flat load (add/carry) - singleDim grid ## : mean 2348 microseconds
+## Benchmark 2d sliding (small-)tile - inlined idxs: strip_size=[64][124]f32 - singleDim grid ## : mean 2461 microseconds

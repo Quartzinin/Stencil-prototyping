@@ -110,7 +110,6 @@ template<int D>
 inline __host__
 T stencil_fun_cpu(const T* tmp)
 {
-#if 1
     T acc = 0;
     #pragma unroll
     for (int j = 0; j < D; ++j)
@@ -118,23 +117,6 @@ T stencil_fun_cpu(const T* tmp)
         acc += tmp[j];
     }
     acc /= (T(D));
-#else
-    T acc = 0;
-    #pragma unroll
-    for (int j = 0; j < D; ++j)
-    {
-        const T v = tmp[j];
-        acc -= v;
-        acc /= v;
-    }
-    #pragma unroll
-    for (int j = 0; j < D; ++j)
-    {
-        const T v = tmp[j];
-        acc -= v;
-        acc /= v;
-    }
-#endif
     return acc;
 }
 
@@ -318,12 +300,19 @@ int getPhysicalBlockCount(void){
     printf("Device properties:\n");
     printf("\tmaxThreadsPerSM = %d\n", maxThreadsPerSM);
     printf("\tSM_count = %d\n", SM_count);
-    printf("\tmaxThreads per SM = %d\n", SM_count * maxThreadsPerSM);
+    printf("\tmaxThreads in total = %d\n", SM_count * maxThreadsPerSM);
 
     int smpb = dprop.sharedMemPerBlock;
     int smpsm = dprop.sharedMemPerMultiprocessor;
     printf("\tmaximum amount of shared memory per block = %d B\n", smpb);
     printf("\tmaximum amount of shared memory per SM = %d B\n", smpsm);
+    int sh_mem_thread_cap = smpsm / maxThreadsPerSM;
+    int sh_mem_256 = sh_mem_thread_cap * 256;
+    int sh_mem_1024 = sh_mem_thread_cap * 1024;
+    printf("\tso if occupancy is to be unrestricted by shared memory usage then\n");
+    printf("\t  each tread may not use more than %d B of shared memory\n" ,sh_mem_thread_cap);
+    printf("\t  so  for blocksize=256  this is %d B per block\n" ,sh_mem_256);
+    printf("\t  and for blocksize=1024 this is %d B per block\n" ,sh_mem_1024);
     printf("\n");
     //printf("Chosen options:\n");
     //printf("\tBlocksize = %d\n", BLOCKSIZE);

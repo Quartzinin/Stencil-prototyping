@@ -25,42 +25,51 @@ static Globs
     ,Kernel3dPhysSingleDim
     > G(lens, lens_flat, n_runs);
 
-template<int D>
+template<
+    const int amin_x, const int amin_y, const int amin_z,
+    const int amax_x, const int amax_y, const int amax_z>
 __host__
 void stencil_3d_cpu(
     const T* start,
-    const int3* idxs,
     T* out)
 {
+    constexpr int3 range = {
+        amax_x - amin_x + 1,
+        amax_y - amin_y + 1,
+        amax_z - amin_z + 1};
+    constexpr int total_range = range.x * range.y * range.z;
+
     const int max_x_idx = lens.x - 1;
     const int max_y_idx = lens.y - 1;
     const int max_z_idx = lens.z - 1;
-    for (int i = 0; i < lens.z; ++i)
-    {
-        for (int j = 0; j < lens.y; ++j)
-        {
-            for (int k = 0; k < lens.x; ++k)
-            {
-                T arr[D];
-                for (int p = 0; p < D; ++p)
-                {
-                    int z = BOUND(i + idxs[p].z, max_z_idx);
-                    int y = BOUND(j + idxs[p].y, max_y_idx);
-                    int x = BOUND(k + idxs[p].x, max_x_idx);
-                    int index = (z * lens.y + y) * lens.x + x;
-                    arr[p] = start[index];
+    for (int gidz = 0; gidz < lens.z; ++gidz){
+        for (int gidy = 0; gidy < lens.y; ++gidy){
+            for (int gidx = 0; gidx < lens.x; ++gidx){
+                T arr[total_range];
+                for(int i=0; i < range.z; i++){
+                    for(int j=0; j < range.y; j++){
+                        for(int k=0; k < range.x; k++){
+                            const long z = bound<(amin_z<0),long>(gidz + (i + amin_z), max_z_idx);
+                            const long y = bound<(amin_y<0),long>(gidy + (j + amin_y), max_y_idx);
+                            const long x = bound<(amin_x<0),long>(gidx + (k + amin_x), max_x_idx);
+                            const long index = (z*lens.y + y)*lens.x + x;
+                            const int flat_idx = (i*range.y + j)*range.x + k;
+                            arr[flat_idx] = start[index];
+                        }
+                    }
                 }
-
-                T lambda_res = stencil_fun_cpu<D>(arr);
-                out[(i*lens.y + j)*lens.x + k] = lambda_res;
+                T lambda_res = stencil_fun_3d<amin_x, amin_y, amin_z, amax_x, amax_y, amax_z>(arr);
+                out[(gidz*lens.y + gidy)*lens.x + gidx] = lambda_res;
             }
         }
     }
 }
 
-template<int D>
+template<
+    const int amin_x, const int amin_y, const int amin_z,
+    const int amax_x, const int amax_y, const int amax_z>
 __host__
-void run_cpu_3d(const int3* idxs, T* cpu_out)
+void run_cpu_3d(T* cpu_out)
 {
     T* cpu_in = (T*)malloc(lens_flat*sizeof(T));
     srand(1);
@@ -72,7 +81,7 @@ void run_cpu_3d(const int3* idxs, T* cpu_out)
     struct timeval t_startpar, t_endpar, t_diffpar;
     gettimeofday(&t_startpar, NULL);
     {
-        stencil_3d_cpu<D>(cpu_in,idxs,cpu_out);
+        stencil_3d_cpu<amin_x, amin_y, amin_z, amax_x, amax_y, amax_z>(cpu_in,cpu_out);
     }
     gettimeofday(&t_endpar, NULL);
     timeval_subtract(&t_diffpar, &t_endpar, &t_startpar);
@@ -93,45 +102,34 @@ template<
 __host__
 void doTest_3D(const int physBlocks)
 {
-    static_assert(amin_z <= amax_z);
-    static_assert(amin_y <= amax_y);
-    static_assert(amin_x <= amax_x);
+    static_assert(amin_z <= amax_z, "invalid setup");
+    static_assert(amin_y <= amax_y, "invalid setup");
+    static_assert(amin_x <= amax_x, "invalid setup");
     const int z_range = (amax_z + 1) - amin_z;
     const int y_range = (amax_y + 1) - amin_y;
     const int x_range = (amax_x + 1) - amin_x;
 
-    const int ixs_len = z_range  * y_range * x_range;
-    const int ixs_size = ixs_len*sizeof(int3);
-    int3* cpu_ixs = (int3*)malloc(ixs_size);
-
-    {
-        int q = 0;
-        for(int i=0; i < z_range; i++){
-            for(int j=0; j < y_range; j++){
-                for(int k=0; k < x_range; k++){
-                    cpu_ixs[q++] = make_int3(k+amin_x, j+amin_y, i+amin_z);
-                }
-            }
-        }
-    }
+#ifdef Jacobi3D
+    const int ixs_len = z_range + y_range + x_range - 2;
+#else
+    const int ixs_len = z_range * y_range * x_range;
+#endif
     cout << "ixs[" << ixs_len << "] = (zr,yr,xr) = (" << amin_z << "..." << amax_z << ", " << amin_y << "..." << amax_y << ", " << amin_x << "..." << amax_x << ")\n";
 
     constexpr long len = lens_flat;
 
     T* cpu_out = (T*)malloc(len*sizeof(T));
-    run_cpu_3d<ixs_len>(cpu_ixs, cpu_out);
+    run_cpu_3d<amin_x, amin_y, amin_z, amax_x, amax_y, amax_z>(cpu_out);
 
     constexpr int blockDim_flat = group_size_x * group_size_y * group_size_z;
     constexpr int3 virtual_grid = {
-        CEIL_DIV(lens.x, group_size_x),
-        CEIL_DIV(lens.y, group_size_y),
-        CEIL_DIV(lens.z, group_size_z)};
+        divUp((int)lens.x, group_size_x),
+        divUp((int)lens.y, group_size_y),
+        divUp((int)lens.z, group_size_z)};
     constexpr dim3 block_3d(group_size_x,group_size_y,group_size_z);
     constexpr dim3 block_3d_flat(group_size_x*group_size_y*group_size_z,1,1);
     constexpr dim3 grid_3d(virtual_grid.x, virtual_grid.y, virtual_grid.z);
     constexpr int virtual_grid_flat = virtual_grid.x * virtual_grid.y * virtual_grid.z;
-    constexpr int lens_grid = CEIL_DIV(lens_flat, blockDim_flat);
-    constexpr int3 lens_spans = { 0, 0, 0 }; // void
     constexpr int3 virtual_grid_spans = { 1, virtual_grid.x, virtual_grid.x * virtual_grid.y };
 
     constexpr int sh_size_x = group_size_x + amax_x - amin_x;
@@ -143,7 +141,7 @@ void doTest_3D(const int physBlocks)
     cout << "Blockdim z,y,x = " << group_size_z << ", " << group_size_y << ", " << group_size_x << endl;
     //printf("virtual number of blocks = %d\n", virtual_grid_flat);
     {
-        /*{
+        {
             cout << "## Benchmark 3d global read - inlined ixs - multiDim grid ##";
             Kernel3dPhysMultiDim kfun = global_reads_3d_inlined
                 <amin_x,amin_y,amin_z
@@ -155,14 +153,6 @@ void doTest_3D(const int physBlocks)
             G.do_run_multiDim(kfun, cpu_out, grid_3d, block_3d, 1);
         }
         {
-            cout << "## Benchmark 3d global read - inlined ixs - multiDim grid - WET. ##";
-            Kernel3dPhysMultiDim kfun = global_reads_3d_inlined_WET
-                <amin_x,amin_y,amin_z
-                ,amax_x,amax_y,amax_z
-                ,group_size_x,group_size_y,group_size_z>;
-            G.do_run_multiDim(kfun, cpu_out, grid_3d, block_3d, 1);
-        }
-        {
             cout << "## Benchmark 3d global read - inlined ixs - singleDim grid - grid span ##";
             Kernel3dPhysSingleDim kfun = global_reads_3d_inlined_singleDim_gridSpan
                 <amin_x,amin_y,amin_z
@@ -170,7 +160,10 @@ void doTest_3D(const int physBlocks)
                 ,group_size_x,group_size_y,group_size_z>;
             G.do_run_singleDim(kfun, cpu_out, virtual_grid_flat, blockDim_flat, virtual_grid_spans, 1);
         }
+
         {
+            constexpr long lens_grid = divUp(lens_flat, long(blockDim_flat));
+            constexpr int3 lens_spans = { 1, int(lens.x), int(lens.x*lens.y) };
             cout << "## Benchmark 3d global read - inlined ixs - singleDim grid - lens span ##";
             Kernel3dPhysSingleDim kfun = global_reads_3d_inlined_singleDim_lensSpan
                 <amin_x,amin_y,amin_z
@@ -178,6 +171,7 @@ void doTest_3D(const int physBlocks)
                 ,group_size_x,group_size_y,group_size_z>;
             G.do_run_singleDim(kfun, cpu_out, lens_grid, blockDim_flat, lens_spans, 1);
         }
+
         {
             cout << "## Benchmark 3d global read - inlined idxs - virtual (add/carry) - singleDim grid ##";
             Kernel3dVirtual kfun = virtual_addcarry_global_read_3d_inlined_grid_span_singleDim
@@ -194,6 +188,7 @@ void doTest_3D(const int physBlocks)
                 ,group_size_x,group_size_y,group_size_z>;
             G.do_run_multiDim(kfun, cpu_out, grid_3d, block_3d, sh_mem_size_flat);
         }
+
         {
             cout << "## Benchmark 3d big tile - inlined idxs - transaction aligned loads - multiDim grid ##";
             Kernel3dPhysMultiDim kfun = big_tile_3d_inlined_trx_align
@@ -202,6 +197,7 @@ void doTest_3D(const int physBlocks)
                 ,group_size_x,group_size_y,group_size_z>;
             G.do_run_multiDim(kfun, cpu_out, grid_3d, block_3d, sh_mem_size_flat);
         }
+        /*
         {
             cout << "## Benchmark 3d big tile - inlined idxs - forced coalesced flat load (div/rem) - multiDim grid ##";
             Kernel3dPhysMultiDim kfun = big_tile_3d_inlined_flat_forced_coalesced
@@ -210,6 +206,7 @@ void doTest_3D(const int physBlocks)
                 ,group_size_x,group_size_y,group_size_z>;
             G.do_run_multiDim(kfun, cpu_out, grid_3d, block_3d, sh_mem_size_flat);
         }
+        */
         {
             cout << "## Benchmark 3d big tile - inlined idxs - cube reshape (div/rem) - multiDim grid ##";
             Kernel3dPhysMultiDim kfun = big_tile_3d_inlined_cube_reshape
@@ -273,7 +270,7 @@ void doTest_3D(const int physBlocks)
                 ,amax_x,amax_y,amax_z
                 ,group_size_x,group_size_y,group_size_z>;
             G.do_run_virtual(kfun, cpu_out, physBlocks, block_3d_flat, virtual_grid, sh_mem_size_flat);
-        }*/
+        }
 
         constexpr int strip_x = 1 << strip_pow_x;
         constexpr int strip_y = 1 << strip_pow_y;
@@ -312,7 +309,7 @@ void doTest_3D(const int physBlocks)
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, blockDim_flat, strip_grid, strip_sh_total_mem_usage,false);
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, blockDim_flat, strip_grid, strip_sh_total_mem_usage);
         }
-        /*{
+        {
             cout << "## Benchmark 3d big tile - inlined idxs - stripmined: ";
             printf("strip_size=[%d][%d][%d]f32 ", strip_size_z, strip_size_y, strip_size_x);
             cout << "- cube loader - singleDim grid ##";
@@ -323,8 +320,8 @@ void doTest_3D(const int physBlocks)
                 ,strip_x,strip_y,strip_z
                 >;
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, blockDim_flat, strip_grid, strip_sh_total_mem_usage);
-        }*/
-        /*{
+        }
+        {
             cout << "## Benchmark 3d big tile - inlined idxs - stripmined: ";
             printf("strip_size=[%d][%d][%d]f32 ", strip_size_z, strip_size_y, strip_size_x);
             cout << "- virtual (add/carry) - flat load (add/carry) - singleDim grid ##";
@@ -335,11 +332,37 @@ void doTest_3D(const int physBlocks)
                 ,strip_x,strip_y,strip_z
                 >;
             G.do_run_virtual(kfun, cpu_out, physBlocks, block_3d_flat, strip_grid, strip_sh_total_mem_usage);
-        }*/
+        }
     }
 
     free(cpu_out);
-    free(cpu_ixs);
+
+    (void)block_3d;
+    (void)block_3d_flat;
+    (void)grid_3d;
+    (void)virtual_grid_spans;
+    (void)virtual_grid_flat;
+    (void)sh_mem_size_flat;
+}
+
+template
+    <const int gx, const int gy, const int gz
+    ,const int sx, const int sy, const int sz>
+__host__
+void testStrips(const int physBlocks){
+    //doTest_3D<-1,0, -1,0, -1,0, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,1, -1,0, -1,0, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,1, -1,1, -1,0, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,1, -1,0, -1,1, gx,gy,gz,sx,sy,sz>(physBlocks);
+    doTest_3D<-1,1, -1,1, -1,1, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,2, -1,1, -1,1, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,2, -1,2, -1,1, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,2, -1,1, -1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,2, -1,2, -1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,3, -1,2, -1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,3, -1,3, -1,2, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,3, -1,2, -1,3, gx,gy,gz,sx,sy,sz>(physBlocks);
+    //doTest_3D<-1,3, -1,3, -1,3, gx,gy,gz,sx,sy,sz>(physBlocks);
 }
 
 __host__
@@ -352,6 +375,11 @@ int main()
 
     constexpr int gps_flat = gps_x * gps_y * gps_z;
     int physBlocks = getPhysicalBlockCount<gps_flat>();
+#ifdef Jacobi3D
+    cout << "running Jacobi 3D" << endl;
+#else
+    cout << "running Dense stencil with mean" << endl;
+#endif
 
     // small test samples.
     /*
@@ -387,6 +415,7 @@ int main()
     // all axis are in use
 
     //blocksize test
+    /*
     doTest_3D<0,1,0,1,0,1, 32,8,1,0,0,0>(physBlocks);
     doTest_3D<-1,1,0,1,0,1, 32,8,1,0,0,0>(physBlocks);
     doTest_3D<-1,1,-1,1,0,1, 32,8,1,0,0,0>(physBlocks);
@@ -406,10 +435,31 @@ int main()
     doTest_3D<-1,1,0,1,0,1, 32,16,2,0,0,0>(physBlocks);
     doTest_3D<-1,1,-1,1,0,1, 32,16,2,0,0,0>(physBlocks);
     doTest_3D<-1,1,-1,1,-1,1, 32,16,2,0,0,0>(physBlocks);
-    /*doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
+    */
+    /*
+    doTest_3D<-2,2,-2,2,-2,2, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-3,3,-3,3,-3,3, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-4,4,-4,4,-4,4, gps_x,gps_y,gps_z,0,0,1>(physBlocks);
     doTest_3D<-5,5,-5,5,-5,5, gps_x,gps_y,gps_z,0,0,0>(physBlocks);
     */
+
+    constexpr int gx=32;
+    constexpr int gy=4;
+    constexpr int gz=2;
+
+    //testStrips<gx,gy,gz,0,0,0>(physBlocks);
+    //testStrips<gx,gy,gz,1,0,0>(physBlocks);
+    //testStrips<gx,gy,gz,0,1,0>(physBlocks);
+    //testStrips<gx,gy,gz,0,0,1>(physBlocks);
+    //testStrips<gx,gy,gz,1,0,1>(physBlocks);
+    //testStrips<gx,gy,gz,1,1,0>(physBlocks);
+    //testStrips<gx,gy,gz,0,1,1>(physBlocks);
+    //testStrips<gx,gy,gz,1,1,1>(physBlocks);
+    testStrips<gx,gy,gz,0,1,2>(physBlocks);
+    //testStrips<gx,gy,gz,1,0,2>(physBlocks);
+    //testStrips<gx,gy,gz,0,2,1>(physBlocks);
+    //testStrips<gx,gy,gz,1,2,0>(physBlocks);
+    //testStrips<gx,gy,gz,2,1,0>(physBlocks);
+    //testStrips<gx,gy,gz,2,0,1>(physBlocks);
     return 0;
 }

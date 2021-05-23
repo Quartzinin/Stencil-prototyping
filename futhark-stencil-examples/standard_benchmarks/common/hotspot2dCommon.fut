@@ -32,13 +32,14 @@ let single_iteration_maps [Ny][Nx]
     updater
     : [Ny][Nx]f32 =
   let bound = edgeHandling.extendEdge2D temp (Ny-1) (Nx-1)
-  in tabulate_2d Ny Nx (\r c ->
-        let C_pow = power[r,c]
-        let N = bound (r-1) (c  )
-        let W = bound (r  ) (c-1)
-        let C = bound (r  ) (c  )
-        let E = bound (r  ) (c+1)
-        let S = bound (r+1) (c  )
+  in tabulate_2d Ny Nx (\y x ->
+        let C_pow = power[y,x]
+        let rbound = bound y x
+        let N = rbound (-1) ( 0)
+        let W = rbound ( 0) (-1)
+        let C = rbound ( 0) ( 0)
+        let E = rbound ( 0) ( 1)
+        let S = rbound ( 1) ( 0)
         in updater C_pow N W C E S
         )
 

@@ -24,15 +24,16 @@ let single_iteration_maps [Nz][Ny][Nx]
     updater
     : [Nz][Ny][Nx]f32 =
   let bound = edgeHandling.extendEdge3D temp (Nz-1) (Ny-1) (Nx-1)
-  in tabulate_3d Nz Ny Nx (\h r c ->
-        let C_pow = power[h,r,c]
-        let B = bound (h-1) (r  ) (c  )
-        let N = bound (h  ) (r-1) (c  )
-        let W = bound (h  ) (r  ) (c-1)
-        let C = bound (h  ) (r  ) (c  )
-        let E = bound (h  ) (r  ) (c+1)
-        let S = bound (h  ) (r+1) (c  )
-        let T = bound (h+1) (r  ) (c  )
+  in tabulate_3d Nz Ny Nx (\z y x ->
+        let C_pow = power[z,y,x]
+        let rbound = bound z y x
+        let B = rbound (-1) ( 0) ( 0)
+        let N = rbound ( 0) (-1) ( 0)
+        let W = rbound ( 0) ( 0) (-1)
+        let C = rbound ( 0) ( 0) ( 0)
+        let E = rbound ( 0) ( 0) ( 1)
+        let S = rbound ( 0) ( 1) ( 0)
+        let T = rbound ( 1) ( 0) ( 0)
         in updater C_pow B N W C E S T
         )
 

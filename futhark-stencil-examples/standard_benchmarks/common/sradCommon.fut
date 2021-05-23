@@ -40,22 +40,24 @@ let update_fun_maps [Ny][Nx]
     (std_dev: f32) (lambda: f32) (image: [Ny][Nx]f32)
     : [Ny][Nx]f32 =
   let bound arr = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
-  let tmp_image = tabulate_2d Ny Nx (\r c->
-        let N = bound image (r-1) (c  )
-        let W = bound image (r  ) (c-1)
-        let C = bound image (r  ) (c  )
-        let E = bound image (r  ) (c+1)
-        let S = bound image (r+1) (c  )
+  let tmp_image = tabulate_2d Ny Nx (\r c ->
+        let rbound = bound image r c
+        let N = rbound (-1) ( 0)
+        let W = rbound ( 0) (-1)
+        let C = rbound ( 0) ( 0)
+        let E = rbound ( 0) ( 1)
+        let S = rbound ( 1) ( 0)
 
         in stencil_body_fun1 std_dev (N, W, C, E, S)
       )
   let zip_image_tmp = map2 zip tmp_image image
   let image = tabulate_2d Ny Nx (\r c ->
-        let N = bound zip_image_tmp (r-1) (c  )
-        let W = bound zip_image_tmp (r  ) (c-1)
-        let C = bound zip_image_tmp (r  ) (c  )
-        let E = bound zip_image_tmp (r  ) (c+1)
-        let S = bound zip_image_tmp (r+1) (c  )
+        let rbound = bound zip_image_tmp r c
+        let N = rbound (-1) ( 0)
+        let W = rbound ( 0) (-1)
+        let C = rbound ( 0) ( 0)
+        let E = rbound ( 0) ( 1)
+        let S = rbound ( 1) ( 0)
 
         in stencil_body_fun2 lambda (N, W, C, E, S)
       )

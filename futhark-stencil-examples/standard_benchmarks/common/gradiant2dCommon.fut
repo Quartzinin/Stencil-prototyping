@@ -11,11 +11,12 @@ let gradiant_5point ((N,W,C,E,S): (f32,f32,f32,f32,f32)) : f32 =
 let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
   let bound = edgeHandling.extendEdge2D arr (Ny-1) (Nx-1)
   in tabulate_2d Ny Nx (\y x ->
-        let N = bound (y-1) (x  )
-        let W = bound (y  ) (x-1)
-        let C = bound (y  ) (x  )
-        let E = bound (y  ) (x+1)
-        let S = bound (y+1) (x  )
+        let rbound = bound y x
+        let N = rbound (-1) ( 0)
+        let W = rbound ( 0) (-1)
+        let C = rbound ( 0) ( 0)
+        let E = rbound ( 0) ( 1)
+        let S = rbound ( 1) ( 0)
         in gradiant_5point (N,W,C,E,S)
         )
 
