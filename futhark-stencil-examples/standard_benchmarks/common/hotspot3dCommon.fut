@@ -1,3 +1,4 @@
+-- This code computes heat diffusion of something of that sort.
 import "./edgeHandling"
 
 -- code is based on

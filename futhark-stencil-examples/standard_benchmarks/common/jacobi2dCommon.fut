@@ -1,7 +1,10 @@
+-- A jacobi stencil is a weighted mean of the neighbours in a specific pattern.
 import "./edgeHandling"
 
 -- code is based on
--- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure7/workflow1/reference/hotspot3D/hotspotKernel.cl
+-- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure8/workflow2/j2d9pt/small/j2d9pt.c
+-- However we chose to use uniform weights (aka. taking the mean)
+-- , as opposed to the implementation in the reference code.
 
 let mean_5points
     (p: (f32,f32,f32,f32,f32))

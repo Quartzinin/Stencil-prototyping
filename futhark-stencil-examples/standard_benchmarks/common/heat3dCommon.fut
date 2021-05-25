@@ -1,4 +1,8 @@
+-- This computes a heat function of some kind.
 import "./edgeHandling"
+
+-- This code is based on a reference implementation found in:
+-- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure8/workflow1/heat3d/small/heat3d.c
 
 let updater B N W C E S T : f32
   = 0.125*(T - 2.0 * C + B)

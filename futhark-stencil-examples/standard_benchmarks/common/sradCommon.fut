@@ -1,8 +1,9 @@
+-- The computes the SRAD-v2 kernel from the Rodinia benchmarks.
 import "./edgeHandling"
 
--- code and comments based on
+-- code based on
 -- https://github.com/diku-dk/futhark-benchmarks/blob/master/rodinia/srad/srad.fut
---
+
 let stencil_body_fun1
     (std_dev: f32)
     ((N, W, C, E, S): (f32,f32,f32,f32,f32))

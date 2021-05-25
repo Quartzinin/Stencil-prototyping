@@ -1,4 +1,9 @@
+-- Computes the mean of the finite difference appoximation
+-- of all forwards and backwards derivatives.
 import "./edgeHandling"
+
+-- This code is based on a reference implementation found in:
+-- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure8/workflow1/grad2d/small/grad2d.c
 
 let avoid_div_zero: f32 = 0.0001
 let gradiant_5point ((N,W,C,E,S): (f32,f32,f32,f32,f32)) : f32 =
@@ -20,6 +25,7 @@ let single_iteration_maps_5points [Ny][Nx] (arr:[Ny][Nx]f32) =
         in gradiant_5point (N,W,C,E,S)
         )
 
+-- There is actually only 1 iteration.
 let single_iteration_stencil_5points arr =
   let ixs = [(-1, 0),( 0,-1),( 0, 0),( 0, 1),( 1, 0)] in
   let f _ v = gradiant_5point (v[0] ,v[1] ,v[2] ,v[3] ,v[4]) in

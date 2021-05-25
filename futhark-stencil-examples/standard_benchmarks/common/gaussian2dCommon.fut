@@ -1,10 +1,16 @@
+-- Gaussian 2d blur using a hardcoded sigma.
 import "./edgeHandling"
 
+
 let sigma:f32 = 1.5
-let gaussian_2d x y = f32.e**(-((x**2 + y**2)/(2*sigma**2))) * (1/(2*f32.pi*sigma**2))
+let gaussian_2d x y =
+        f32.e**(-((x**2 + y**2)/(2*sigma**2)))
+      * (1/(2*f32.pi*sigma**2))
+
 -- weights are based on absolute distances to centerpoint
 let raw_weights = ( gaussian_2d 0 0, gaussian_2d 1 0, gaussian_2d 1 1
                   , gaussian_2d 0 2, gaussian_2d 1 2, gaussian_2d 2 2)
+
 -- number of instances of each weight times the weight.
 let weight_sum =
         4*raw_weights.5
@@ -13,6 +19,7 @@ let weight_sum =
       + 4*raw_weights.2
       + 4*raw_weights.1
       + 1*raw_weights.0
+
 -- normalizied weights.
 let nrmw =
     ( raw_weights.0 / weight_sum

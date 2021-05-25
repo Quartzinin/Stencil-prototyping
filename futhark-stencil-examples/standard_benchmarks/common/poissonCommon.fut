@@ -1,6 +1,20 @@
+-- This computes a Poisson-blur, which is a weighted mean of the neighbourhood
+-- , and where the weights are based on the values of a multivariate poisson
+-- distribution
 import "./edgeHandling"
 
--- hardcoded as we only need 3 values
+-- The code is somewhat based on:
+-- https://gitlab.com/larisa.stoltzfus/liftstencil-cgo2018-artifact/-/blob/master/benchmarks/figure8/workflow1/poisson3d/small/poisson3d.c
+-- However it is unclear what the original code actually does
+-- , as it has a number of hardcoded constants
+-- , as well as the name simply being 'Poisson'.
+-- Therefore it was guessed that it was derived from the Poisson distribution
+-- , and is a weighted mean of the probability mass function on the distance
+-- neighbours.
+-- The 19 neighbours used (including the center point) were kept.
+-- The lambda value for the poisson distributions was chosen somewhat arbitrarily.
+
+-- The factorial is hardcoded as we only need 3 values
 let factorial (x:i32): i32 =
     if      x == 1 then 1
     else if x == 2 then 2

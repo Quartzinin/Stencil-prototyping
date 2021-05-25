@@ -1,6 +1,7 @@
+-- This computes a heat diffusion or something of that sort.
 import "./edgeHandling"
 
--- code and comments based on
+-- code is based on
 -- https://github.com/diku-dk/futhark-benchmarks/blob/master/rodinia/hotspot/hotspot.fut
 
 -- constants
