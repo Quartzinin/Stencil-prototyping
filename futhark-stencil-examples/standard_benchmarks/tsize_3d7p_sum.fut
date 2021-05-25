@@ -1,3 +1,6 @@
+-- This benchmark is not any official benchmark, and is simply to test how
+-- the performance is when running on data-types that are not f32.
+-- This is a 3D Stencil that sums up the elements of the neighbourhood.
 import "./common/edgeHandling"
 
 let stencil_fun 'a
