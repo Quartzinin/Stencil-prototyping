@@ -17,7 +17,7 @@ static constexpr long2 lens = {
    (1 << 12)+4};
 static constexpr int lens_flat = lens.x * lens.y;
 
-static constexpr long n_runs = 30;
+static constexpr long n_runs = 100;
 
 static Globs
     <long2,int2
@@ -131,7 +131,7 @@ void doTest_2D(const int physBlocks)
 
     {
 
-        {
+        /*{
             cout << "## Benchmark 2d global read - inlined ixs - multiDim grid ##";
             Kernel2dPhysMultiDim kfun = global_reads_2d_inline_multiDim
                 <amin_x,amin_y
@@ -182,7 +182,7 @@ void doTest_2D(const int physBlocks)
                 ,amax_x,amax_y
                 ,group_size_x,group_size_y>;
             G.do_run_virtual(kfun, cpu_out, physBlocks, singleDim_block, singleDim_grid, std_sh_size_bytes);
-        }
+        }*/
         {
 
             constexpr int strip_size_x = group_size_x*strip_x;
@@ -200,27 +200,27 @@ void doTest_2D(const int physBlocks)
 
             //constexpr int2 strips = { strip_x, strip_y };
 
-            //printf("shared memory per block: stripmine = %d B\n", sh_total_mem_usage);
+            printf("shared memory per block: stripmine = %d B\n", sh_total_mem_usage);
             constexpr int max_shared_mem = 0xc000;
-            static_assert(sh_total_mem_usage <= max_shared_mem,
-                    "Current configuration requires too much shared memory\n");
+            //static_assert(sh_total_mem_usage <= max_shared_mem,
+            //      "Current configuration requires too much shared memory\n");
 
             {
-            cout << "## Benchmark 2d big tile - inlined idxs - stripmined: ";
-            printf("strip_size=[%d][%d]f32 ", strip_size_y, strip_size_x);
-            cout << "- flat load (add/carry) - singleDim grid ##";
-            Kernel2dPhysSingleDim kfun = stripmine_big_tile_2d_inlined_flat_addcarry_singleDim
-                <amin_x,amin_y
-                ,amax_x,amax_y
-                ,group_size_x,group_size_y
-                ,strip_x,strip_y
-                >;
-            G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage,false);
-            G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
+                cout << "## Benchmark 2d big tile - inlined idxs - stripmined: ";
+                printf("strip_size=[%d][%d]f32 ", strip_size_y, strip_size_x);
+                cout << "- flat load (add/carry) - singleDim grid ##";
+                Kernel2dPhysSingleDim kfun = stripmine_big_tile_2d_inlined_flat_addcarry_singleDim
+                    <amin_x,amin_y
+                    ,amax_x,amax_y
+                    ,group_size_x,group_size_y
+                    ,strip_x,strip_y
+                    >;
+                G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage,false);
+                G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
             }
 
 
-            {
+            /*{
             cout << "## Benchmark 2d virtual (add/carry) - stripmined big tile, ";
             printf("strip_size=[%d][%d]f32 ", strip_size_y, strip_size_x);
             cout << "- inlined idxs - flat load (add/carry) - singleDim grid ##";
@@ -233,11 +233,12 @@ void doTest_2D(const int physBlocks)
             G.do_run_virtual(kfun, cpu_out, physBlocks, singleDim_block, singleDim_grid, sh_total_mem_usage
                     //, strips
                     );
-            }
+            }*/
 
         }
 
-        {
+        
+        /*{
             constexpr int window_length_y = 64;
             constexpr int group_size_flat = group_size_y * group_size_x;
             constexpr int sh_x = group_size_flat;
@@ -299,7 +300,7 @@ void doTest_2D(const int physBlocks)
                 ,windows_y
                 >;
             G.do_run_singleDim(kfun, cpu_out, strip_grid_flat, singleDim_block, strip_grid, sh_total_mem_usage);
-        }
+        }*/
 
 
         //GPU_RUN_INIT;
@@ -359,16 +360,45 @@ int main()
 
 
     //blockdim tests
-    /*
+    
+
+
+    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
+    doTest_2D< 0,1, 0,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,32,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,32,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,32,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,32,0,0>(physBlocks);
+
+    cout << "Blockdim y,x = " << 16 << ", " << 32 << endl;
+    doTest_2D< 0,1, 0,1, 32,16,0,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,16,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,16,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,16,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,16,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,16,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,16,0,0>(physBlocks);
+
     cout << "Blockdim y,x = " << 8 << ", " << 32 << endl;
-    doTest_2D< 0,1, 0,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,1, 0,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,2,-1,1, 32,8,1,1>(physBlocks);
-    doTest_2D<-1,2,-1,2, 32,8,1,1>(physBlocks);
-    doTest_2D<-2,2,-1,2, 32,8,1,1>(physBlocks);
-    doTest_2D<-2,2,-2,2, 32,8,1,1>(physBlocks);
-    */
+    doTest_2D< 0,1, 0,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,0,0>(physBlocks);
+
+    cout << "Blockdim y,x = " << 4 << ", " << 32 << endl;
+    doTest_2D< 0,1, 0,1, 32,4,0,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,4,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,4,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,4,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,4,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,4,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,4,0,0>(physBlocks);
+    
 
     //testing reuse
 
@@ -378,8 +408,8 @@ int main()
     doTest_2D<-2,3,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-3,3,0,1, gps_x,gps_y,0,2>(physBlocks);
     doTest_2D<-3,4,0,1, gps_x,gps_y,0,2>(physBlocks);*/
-    doTest_2D<-1,1,-1,1, 32,4,3,3>(physBlocks);
-    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,1,-1,1, 32,4,3,3>(physBlocks);
+    //doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
     //doTest_2D<-1,1,-1,1, 32,8,2,2>(physBlocks);
     //doTest_2D<-1,1,-1,1, 32,16,0,0>(physBlocks);
     //doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
@@ -496,7 +526,31 @@ int main()
 //    doTest_2D<-2,2,-2,2, gps_x,gps_y,3,0>(physBlocks);
 //    doTest_2D< 0,1, 0,1, gps_x,gps_y,1,1>(physBlocks);
 //    doTest_2D<-1,1, 0,1, gps_x,gps_y,1,1>(physBlocks);
-    doTest_2D<-1,1,-1,1, gps_x,gps_y,1,1>(physBlocks);
+      //inst_fp_32, inst_integer, inst_bit_convert, inst_control, inst_compute_ld_st, inst_misc
+
+    //Stripmine
+      //doTest_2D<-1,0,-1,0, 32,8,0,0>(physBlocks);
+    //doTest_2D<-1,0,-1,0, 32,8,0,0>(physBlocks);
+    //doTest_2D<-1,0,-1,0, 32,8,1,0>(physBlocks);
+    //doTest_2D<-1,0,-1,0, 32,8,1,1>(physBlocks);
+    //doTest_2D<-1,0,-1,0, 32,8,2,2>(physBlocks);
+    //doTest_2D<-1,0,-1,0, 32,8,3,3>(physBlocks);
+      //doTest_2D<-1,0,-1,1, 32,8,3,3>(physBlocks);
+      //doTest_2D<-1,1,-1,1, 32,8,0,0>(physBlocks);
+
+    //Blocksize testing
+      //doTest_2D<-1,0,-1,0, 32,8,0,0>(physBlocks);
+      //doTest_2D<-1,0,-1,1, 32,8,0,0>(physBlocks);
+      //doTest_2D<-1,1,-1,1, 32,8,0,0>(physBlocks);
+      
+      //doTest_2D<-1,0,-1,0, 32,16,0,0>(physBlocks);
+      //doTest_2D<-1,0,-1,1, 32,16,0,0>(physBlocks);
+      //doTest_2D<-1,1,-1,1, 32,16,0,0>(physBlocks);
+
+      //doTest_2D<-1,0,-1,0, 32,32,0,0>(physBlocks);
+      //doTest_2D<-1,0,-1,1, 32,32,0,0>(physBlocks);
+      //doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
+
 //    doTest_2D<-1,2,-1,1, gps_x,gps_y,1,1>(physBlocks);
 //    doTest_2D<-1,2,-1,2, gps_x,gps_y,1,1>(physBlocks);
 //    doTest_2D<-2,2,-1,2, gps_x,gps_y,1,1>(physBlocks);

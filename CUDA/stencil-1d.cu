@@ -13,7 +13,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-static constexpr long n_runs = 1;
+static constexpr long n_runs = 100;
 static constexpr long lens = (1 << 24) + 2;
 
 static Globs
@@ -90,7 +90,7 @@ void doTest_1D()
 
     {
 
-        {
+        /*{
 
             cout << "## Benchmark 1d global read inline ixs ##";
             Kernel1dPhysMultiDim kfun = global_read_1d_inline
@@ -98,8 +98,8 @@ void doTest_1D()
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1, false); // warmup as it is the first kernel
             G.do_run_multiDim(kfun, cpu_out, singleDim_grid, singleDim_block, 1);
 
-        }
-        
+        }*/
+        /*
 
 
         {
@@ -114,7 +114,7 @@ void doTest_1D()
             Kernel1dPhysMultiDim kfun = small_tile_1d_inline
                 <ix_min,ix_max,gps_x>;
             G.do_run_multiDim(kfun, cpu_out, smallSingleDim_grid, singleDim_block, small_shared_size);
-        }
+        }*/
 
 
         {
@@ -144,7 +144,7 @@ void doTest_1D()
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block,false);
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
             }
-            {
+            /*{
                 cout << "## Benchmark 1d global read unrolled/stripmined - inlined idxs: ";
                 printf("strip_size=[%d]f32 \n", strip_size_x);
                 Kernel1dPhysStripDim kfun = global_read_1d_inline_strip
@@ -154,7 +154,7 @@ void doTest_1D()
                     ,strip_x
                     >;
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
-            }
+            }*/
         }
     }
 
@@ -193,8 +193,33 @@ int main()
     doTest_1D<13,gps_x,-6,6,1>();
     doTest_1D<15,gps_x,-7,7,1>();
     doTest_1D<17,gps_x,-8,8,1>();
-    doTest_1D<25,gps_x,-12,12,1>();
+    doTest_1D<25,gps_x,-12,12,1>(); 
+
     */
+    //doTest_1D<1,128,0,0,0>();
+    //doTest_1D<3,128,-1,1,0>();
+    //doTest_1D<9,128,-4,4,0>();
+    //doTest_1D<21,128,-10,10,0>();
+
+
+    //doTest_1D<1,256,0,0,0>();
+    //doTest_1D<3,256,-1,1,0>();
+    //doTest_1D<9,256,-4,4,0>();
+    //doTest_1D<9,128,-4,4,0>();
+    //doTest_1D<5,256,-2,2,0>();
+    //doTest_1D<9,512,-4,4,0>();
+    //doTest_1D<9,1024,-4,4,0>();
+    //doTest_1D<21,256,-10,10,0>();
+
+    //doTest_1D<1,512,0,0,0>();
+    //doTest_1D<3,512,-1,1,0>();
+    //doTest_1D<9,512,-4,4,0>();
+    //doTest_1D<21,512,-10,10,0>();
+
+    //doTest_1D<1,1024,0,0,0>();
+    //doTest_1D<3,1024,-1,1,0>();
+    //doTest_1D<9,1024,-4,4,0>();
+    //doTest_1D<21,1024,-10,10,0>();
 
     //normal runs
     //doTest_1D<1,gps_x,0,0,2>();
@@ -205,13 +230,23 @@ int main()
     //doTest_1D<9,gps_x,-4,4,2>();
     //doTest_1D<11,gps_x,-5,5,2>();
     //doTest_1D<13,gps_x,-6,6,2>();
-    doTest_1D<15,gps_x,-7,7,2>();
     //doTest_1D<17,gps_x,-8,8,2>();
     //doTest_1D<25,gps_x,-12,12,2>();
 
 
     //blocksize tests
-    /*
+    
+    doTest_1D<2,128,0,1,0>();
+    doTest_1D<3,128,-1,1,0>();
+    doTest_1D<5,128,-2,2,0>();
+    doTest_1D<7,128,-3,3,0>();
+    doTest_1D<9,128,-4,4,0>();
+    doTest_1D<11,128,-5,5,0>();
+    doTest_1D<13,128,-6,6,0>();
+    doTest_1D<15,128,-7,7,0>();
+    doTest_1D<17,128,-8,8,0>();
+    doTest_1D<25,128,-12,12,0>();
+
     doTest_1D<2,256,0,1,0>();
     doTest_1D<3,256,-1,1,0>();
     doTest_1D<5,256,-2,2,0>();
@@ -223,6 +258,17 @@ int main()
     doTest_1D<17,256,-8,8,0>();
     doTest_1D<25,256,-12,12,0>();
 
+    doTest_1D<2,512,0,1,0>();
+    doTest_1D<3,512,-1,1,0>();
+    doTest_1D<5,512,-2,2,0>();
+    doTest_1D<7,512,-3,3,0>();
+    doTest_1D<9,512,-4,4,0>();
+    doTest_1D<11,512,-5,5,0>();
+    doTest_1D<13,512,-6,6,0>();
+    doTest_1D<15,512,-7,7,0>();
+    doTest_1D<17,512,-8,8,0>();
+    doTest_1D<25,512,-12,12,0>();
+    
     doTest_1D<2,1024,0,1,0>();
     doTest_1D<3,1024,-1,1,0>();
     doTest_1D<5,1024,-2,2,0>();
@@ -233,7 +279,7 @@ int main()
     doTest_1D<15,1024,-7,7,0>();
     doTest_1D<17,1024,-8,8,0>();
     doTest_1D<25,1024,-12,12,0>();
-    */
+    
 
     return 0;
 }
