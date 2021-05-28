@@ -363,7 +363,7 @@ int main()
     
 
 
-    cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
+    /*cout << "Blockdim y,x = " << 32 << ", " << 32 << endl;
     doTest_2D< 0,1, 0,1, 32,32,0,0>(physBlocks);
     doTest_2D<-1,1, 0,1, 32,32,0,0>(physBlocks);
     doTest_2D<-1,1,-1,1, 32,32,0,0>(physBlocks);
@@ -398,7 +398,7 @@ int main()
     doTest_2D<-1,2,-1,2, 32,4,0,0>(physBlocks);
     doTest_2D<-2,2,-1,2, 32,4,0,0>(physBlocks);
     doTest_2D<-2,2,-2,2, 32,4,0,0>(physBlocks);
-    
+    */
 
     //testing reuse
 
@@ -472,7 +472,86 @@ int main()
     // tests for amins > 0 and (but not at same time) amaxs < 0
     //doTest_2D<2,5,3,6, 32,8,1,1>(physBlocks);
     //doTest_2D<-5,-2,-6,-3, 32,8,1,1>(physBlocks);
+    //stripmine tests
+    doTest_2D< 0,1, 0,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,0,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,0,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,0,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,0,0>(physBlocks);
 
+    doTest_2D< 0,1, 0,1, 32,8,0,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,0,1>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,0,1>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,0,1>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,0,1>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,0,1>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,0,1>(physBlocks);
+
+    doTest_2D< 0,1, 0,1, 32,8,0,2>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,0,2>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,0,2>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,0,2>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,0,2>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,0,2>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,0,2>(physBlocks);
+
+    doTest_2D< 0,1, 0,1, 32,8,1,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,1,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,1,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,1,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,1,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,1,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,1,0>(physBlocks);
+
+    doTest_2D< 0,1, 0,1, 32,8,2,0>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,2,0>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,2,0>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,2,0>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,2,0>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,2,0>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,2,0>(physBlocks);
+
+    doTest_2D< 0,1, 0,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,1,1>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,1,1>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,1,1>(physBlocks); 
+
+    doTest_2D< 0,1, 0,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,1,1>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,1,1>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,1,1>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,1,1>(physBlocks); 
+
+    doTest_2D< 0,1, 0,1, 32,8,1,2>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,1,2>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,1,2>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,1,2>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,1,2>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,1,2>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,1,2>(physBlocks);
+
+    doTest_2D< 0,1, 0,1, 32,8,2,1>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,2,1>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,2,1>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,2,1>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,2,1>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,2,1>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,2,1>(physBlocks);
+
+    doTest_2D< 0,1, 0,1, 32,8,2,2>(physBlocks);
+    doTest_2D<-1,1, 0,1, 32,8,2,2>(physBlocks);
+    doTest_2D<-1,1,-1,1, 32,8,2,2>(physBlocks);
+    doTest_2D<-1,2,-1,1, 32,8,2,2>(physBlocks);
+    doTest_2D<-1,2,-1,2, 32,8,2,2>(physBlocks);
+    doTest_2D<-2,2,-1,2, 32,8,2,2>(physBlocks);
+    doTest_2D<-2,2,-2,2, 32,8,2,2>(physBlocks);
 
     //stripmine tests
     //doTest_2D< 0,1, 0,1, gps_x,gps_y,0,0>(physBlocks);
