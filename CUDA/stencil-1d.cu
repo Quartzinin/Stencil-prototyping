@@ -13,7 +13,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-static constexpr long n_runs = 100;
+static constexpr long n_runs = 1000;
 static constexpr long lens = (1 << 24) + 2;
 
 static Globs
@@ -144,7 +144,7 @@ void doTest_1D()
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block,false);
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
             }
-            /*{
+            {
                 cout << "## Benchmark 1d global read unrolled/stripmined - inlined idxs: ";
                 printf("strip_size=[%d]f32 \n", strip_size_x);
                 Kernel1dPhysStripDim kfun = global_read_1d_inline_strip
@@ -154,7 +154,7 @@ void doTest_1D()
                     ,strip_x
                     >;
                 G.do_run_1d_stripmine(kfun, cpu_out, strip_grid_flat, singleDim_block);
-            }*/
+            }
         }
     }
 
